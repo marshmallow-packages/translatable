@@ -6,6 +6,8 @@
 [![Code Coverage](https://img.shields.io/badge/coverage-100%25-success)](https://github.com/marshmallow-packages/translatable)
 [![Licence](https://img.shields.io/github/license/marshmallow-packages/translatable)](https://github.com/marshmallow-packages/translatable)
 
+Add translation to your Nova Resources. The translations will be stored in a `translatables` table and not in a JSON format in your existing tables as many packages out there do.
+
 <img src="https://raw.githubusercontent.com/marshmallow-packages/translatable/main/resources/screenshots/translatable.png"/>
 
 ## Installation
