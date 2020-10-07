@@ -1,6 +1,6 @@
 {
     "name": "marshmallow/translatable",
-    "description": "---",
+    "description": "Add translation to your Nova Resources. The translations will be stored in a translatables table and not in a JSON format in your existing tables as many packages out there do.",
     "license": "MIT",
     "type": "library",
     "homepage": "https://marshmallow.dev",
