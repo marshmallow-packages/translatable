@@ -2,16 +2,15 @@
 
 namespace Marshmallow\Translatable\Traits;
 
-use Request;
+use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
 use Marshmallow\Translatable\Models\Language;
+use Marshmallow\Translatable\Fields\LanguageToggler;
 use Marshmallow\Translatable\Models\Translatable as TranslatableModel;
 
 trait Translatable
 {
-	// public $translatable = [];
-
-	// public $not_translatable = [];
+	public $translatable = null;
 
 	protected $protected_columns = [
 		'id',
@@ -33,18 +32,19 @@ trait Translatable
 	    });
 
         static::updating(function (Model $resource) {
+
         	/**
         	 * If the current translatable locale is different
         	 * from the original, then we are creating or updating
         	 * translations.
         	 */
-        	if (Request::translatableLocale() !== config('app.locale')) {
+        	if ($resource->weAreTranslating()) {
 
         		/**
         		 * Create the translations.
         		 */
         		$resource->setTranslation(
-        			Request::translatableLocale(),
+        			Request::getTranslatableLocale(),
         			$resource->getDirty()
         		);
 
@@ -61,7 +61,19 @@ trait Translatable
 	        /**
 	         * Delete the existing translations.
 	         */
+	        $resource->translatable()->delete();
 	    });
+
+    }
+
+    public function weAreTranslating()
+    {
+    	return (Request::getTranslatableLocale() !== config('app.locale'));
+    }
+
+    public function weAreNotTranslating()
+    {
+    	return (!$this->weAreTranslating());
     }
 
     public function resetToOriginal(): self
@@ -107,7 +119,7 @@ trait Translatable
 	 */
 	public function getAttributeValue($key)
     {
-        if (!$this->isTranslatableAttribute($key)) {
+        if ($this->weAreNotTranslating() || !$this->isTranslatableAttribute($key)) {
             return parent::getAttributeValue($key);
         }
         return $this->getTranslation($key, $this->getLocale());
@@ -120,14 +132,19 @@ trait Translatable
      * original language. We do this so we never return an empty
      * string (unless the value in the database is empty of course).
      */
-	public function getTranslation($source_field, $language): ? string
+	public function getTranslation($source_field, $language)
 	{
 		$language = $this->getLanguageByTranslationParameter($language);
 		if ($translation = $this->getExistingTranslation($source_field, $language)) {
-			return $translation->translated_value;
+			$translation =  $translation->translated_value;
+
+			/**
+			 * Make sure we apply casts and mutators.
+			 */
+			return $this->transformModelValue($source_field, $translation);
 		}
 
-		return $this->getAttributes()[$source_field];
+		return parent::getAttributeValue($source_field);
 	}
 
 
@@ -168,22 +185,40 @@ trait Translatable
         return in_array($key, $this->getTranslatableAttributes());
     }
 
+    public function ignoreFromTranslations(): array
+    {
+    	return [];
+    }
+
+    /**
+     * This is a traits used on Elequent models and on
+     * Nova resources. We check here which one we have.
+     */
+    public function getIgnoreFromTranslations()
+    {
+    	if (class_exists(\App\Nova\Resource::class) && $this instanceof \App\Nova\Resource) {
+    		$resource = new $this::$model;
+    		return $resource->ignoreFromTranslations();
+    	}
+
+    	return $this->ignoreFromTranslations();
+    }
+
     /**
      * Build an array with all the columns for this model that are translatable.
      */
     public function getTranslatableAttributes(): array
     {
     	$translatable_columns = array_keys($this->getAttributes());
-
     	if (isset($this->translatable) && is_array($this->translatable)) {
     		$translatable_columns = $this->translatable;
     	}
-    	if (isset($this->not_translatable) && is_array($this->not_translatable)) {
-    		foreach ($this->not_translatable as $ignore_column) {
-    			$key = array_search($ignore_column, $translatable_columns);
-    			unset($translatable_columns[$key]);
-    		}
-    	}
+
+		foreach ($this->getIgnoreFromTranslations() as $ignore_column) {
+			$key = array_search($ignore_column, $translatable_columns);
+			unset($translatable_columns[$key]);
+		}
+
     	if (isset($this->protected_columns) && is_array($this->protected_columns)) {
     		foreach ($this->protected_columns as $protected_column) {
     			$key = array_search($protected_column, $translatable_columns);
@@ -199,7 +234,7 @@ trait Translatable
      * $page->setTranslation('nl', 'name', 'Artikelen');
      *
      * $page->setTranslation('nl', [
-     * 	'name' => 'Artikelen',
+     *     'name' => 'Artikelen',
      * ]);
      */
     protected function convertTranslationInputToArray($source_field, $translated_value = null): array
@@ -214,10 +249,50 @@ trait Translatable
 	}
 
 	/**
+     * Get the fields displayed by the resource.
+     *
+     * @param \Illuminate\Http\Request $request Request
+     *
+     * @return array
+     */
+    public function fields(Request $request)
+    {
+    	if ($this->weAreNotTranslating() || ($request->has('editMode') && $request->editMode == 'create')) {
+    		return $this->addTranslationTogglerField(
+    			$this->translatableFields($request),
+    			$request
+    		);
+    	}
+
+    	$fields = $this->translatableFields($request);
+    	foreach ($fields as $key => $field) {
+    		if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
+    			unset($fields[$key]);
+    		}
+    	}
+
+    	return $this->addTranslationTogglerField(
+    		$fields,
+    		$request
+    	);
+    }
+
+    protected function addTranslationTogglerField(array $fields, Request $request)
+    {
+    	return array_merge([
+    		LanguageToggler::make(__('Select language')),
+    	], $fields);
+    }
+
+	/**
 	 * Get the current locale
 	 */
 	public function getLocale(): string
     {
+    	if (request()->getTranslatableLocale()) {
+    		return request()->getTranslatableLocale();
+    	}
+
         return config('app.locale');
     }
 }

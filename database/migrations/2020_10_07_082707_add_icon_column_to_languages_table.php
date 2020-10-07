@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddHenkToBarry extends Migration
+class AddIconColumnToLanguagesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddHenkToBarry extends Migration
      */
     public function up()
     {
-        Schema::table('barry', function (Blueprint $table) {
-            //
+        Schema::table('languages', function (Blueprint $table) {
+            $table->string('icon')->after('language')->default(null)->nullable();
         });
     }
 
@@ -25,8 +25,8 @@ class AddHenkToBarry extends Migration
      */
     public function down()
     {
-        Schema::table('barry', function (Blueprint $table) {
-            //
+        Schema::table('languages', function (Blueprint $table) {
+            $table->dropColumn('icon');
         });
     }
 }

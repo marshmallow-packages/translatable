@@ -1,6 +1,6 @@
 <?php
 
-namespace Marshmallow\Translatable\Traits;
+namespace Marshmallow\Translatable;
 
 class Translatable
 {
