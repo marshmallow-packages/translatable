@@ -1,4 +1,4 @@
-![alt text](https://cdn.marshmallow-office.com/media/images/logo/marshmallow.transparent.red.png "marshmallow.")
+![alt text](https://marshmallow.dev/cdn/media/logo-red-237x46.png "marshmallow.")
 
 # Nova Translatable
 [![Version](https://img.shields.io/packagist/v/marshmallow/translatable)](https://github.com/marshmallow-packages/translatable)
