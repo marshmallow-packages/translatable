@@ -18,7 +18,7 @@ class CreateLanguagesTable extends Migration
     		$table->increments('id');
             $table->string('name')->nullable();
             $table->string('language');
-            $table->string('icon')->after('language')->default(null)->nullable();
+            $table->string('icon')->default(null)->nullable();
             $table->timestamps();
     	});
 
