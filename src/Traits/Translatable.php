@@ -5,7 +5,6 @@ namespace Marshmallow\Translatable\Traits;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
 use Marshmallow\Translatable\Models\Language;
-use Marshmallow\Translatable\Fields\LanguageToggler;
 use Marshmallow\Translatable\Models\Translatable as TranslatableModel;
 
 trait Translatable
@@ -275,13 +274,6 @@ trait Translatable
     		$fields,
     		$request
     	);
-    }
-
-    protected function addTranslationTogglerField(array $fields, Request $request)
-    {
-    	return array_merge([
-    		LanguageToggler::make(__('Select language')),
-    	], $fields);
     }
 
     /**
