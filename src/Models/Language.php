@@ -7,6 +7,8 @@ use Marshmallow\Translatable\Models\Translation;
 
 class Language extends Model
 {
+	protected $guarded = [];
+
 	public static function boot()
     {
     	parent::boot();
