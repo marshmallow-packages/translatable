@@ -37,7 +37,7 @@ If you discover any security related issues, please email stef@marshmallow.dev i
 ## Credits
 
 - [All Contributors](../../contributors)
-https://github.com/joedixon/laravel-translation
+- [joedixon](https://github.com/joedixon/laravel-translation)
 
 ## License
 
