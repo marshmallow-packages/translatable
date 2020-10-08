@@ -31,7 +31,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Marshmallow\\Translatable\\ServiceProvider"
+                "Marshmallow\\Translatable\\ServiceProvider",
+                "Marshmallow\\Translatable\\TranslationServiceProvider"
             ],
             "aliases": {
                 "Translatable": "Marshmallow\\Translatable\\Facades\\Translatable"
