@@ -4,32 +4,20 @@ namespace Marshmallow\Translatable;
 
 use Request;
 use Laravel\Nova\Nova;
-use Marshmallow\Seoable\Seo;
 use Laravel\Nova\Events\ServingNova;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Translation\Translator;
 use Illuminate\Support\Facades\Session;
 use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Scanner\Scanner;
-use Marshmallow\Translatable\Http\Middleware\Authorize;
 use Marshmallow\Translatable\Scanner\TranslationManager;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
-use Marshmallow\Translatable\Scanner\ContractDatabaseLoader;
-use Marshmallow\Translatable\Scanner\InterfaceDatabaseLoader;
-// use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-use Illuminate\Translation\TranslationServiceProvider as BaseServiceProvider;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
 use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
 use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
 
 class ServiceProvider extends BaseServiceProvider
 {
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
     public function boot()
     {
     	Request::macro('setTranslatableLocale', function(Language $language) {
@@ -62,12 +50,21 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/translatable.php', 'translatable');
+    	$this->mergeConfiguration();
 
-        $this->registerDatabaseTranslator();
         $this->registerCommands();
-        $this->registerContainerBindings();
 
+        $this->registerContainerBindings();
+    }
+
+    /**
+     * Merge package configuration.
+     *
+     * @return void
+     */
+    private function mergeConfiguration()
+    {
+        $this->mergeConfigFrom(__DIR__ . '/../config/translatable.php', 'translatable');
     }
 
     /**
@@ -100,30 +97,6 @@ class ServiceProvider extends BaseServiceProvider
 
         $this->app->singleton(Translation::class, function ($app) {
             return (new TranslationManager($app, $app['config']['translatable'], $app->make(Scanner::class)))->resolve();
-        });
-    }
-
-    protected function registerDatabaseTranslator()
-    {
-        $this->registerDatabaseLoader();
-
-        $this->app->singleton('translator', function ($app) {
-            $loader = $app['translation.loader'];
-            // When registering the translator component, we'll need to set the default
-            // locale as well as the fallback locale. So, we'll grab the application
-            // configuration so we can easily get both of these values from there.
-            $locale = $app['config']['app.locale'];
-            $trans = new Translator($loader, $locale);
-            $trans->setFallback($app['config']['app.fallback_locale']);
-
-            return $trans;
-        });
-    }
-
-    protected function registerDatabaseLoader()
-    {
-        $this->app->singleton('translation.loader', function ($app) {
-            return new ContractDatabaseLoader($this->app->make(Translation::class));
         });
     }
 }
