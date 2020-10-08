@@ -284,11 +284,57 @@ trait Translatable
     	], $fields);
     }
 
+    /**
+     * LEGACY FROM MULTI-LANGUAGE PACKAGE
+     */
+    public function localeRoute(Language $language = null)
+	{
+		return URL::buildFromArray(
+			$this->getRouteParts($language)
+		);
+	}
+
+	protected function getRouteParts(Language $language = null)
+	{
+		return array_filter([
+			$this->getLocale($language),
+			$this->routePrefix(),
+			$this->getModelUrl($language),
+		]);
+	}
+
+	protected function getModelUrlField()
+	{
+		return $this->getRouteKeyName();
+	}
+
+	protected function getModelUrl(Language $language = null)
+	{
+		$url_column = $this->getModelUrlField();
+		if ($language) {
+			return $this->getTranslation($url_column, $language->code);
+		}
+
+		return $this->{$url_column};
+	}
+
+	protected function routePrefix()
+	{
+		return '';
+	}
+    /**
+     * LEGACY FROM MULTI-LANGUAGE PACKAGE
+     */
+
 	/**
 	 * Get the current locale
 	 */
-	public function getLocale(): string
+	public function getLocale(Language $language = null): string
     {
+    	if ($language) {
+			return $language->language;
+		}
+
     	if (request()->getTranslatableLocale()) {
     		return request()->getTranslatableLocale();
     	}

@@ -1,8 +1,43 @@
 <?php
 
 return [
+
+	/*
+    |--------------------------------------------------------------------------
+    | Language flag icons
+    |--------------------------------------------------------------------------
+    |
+    | Update the ratios for the flag uploader here.
+    |
+    */
 	'flagicon' => [
 		'height' => 40,
 		'width' => 40,
-	]
+	],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Translation methods
+    |--------------------------------------------------------------------------
+    |
+    | Update this array to tell the package which methods it should look for
+    | when finding missing translations.
+    |
+    */
+    'translation_methods' => ['trans', '__'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scan paths
+    |--------------------------------------------------------------------------
+    |
+    | Update this array to tell the package which directories to scan when
+    | looking for missing translations.
+    |
+    */
+    'scan_paths' => [
+    	app_path(),
+    	resource_path(),
+    	base_path('vendor/marshmallow')
+    ],
 ];

@@ -5,14 +5,17 @@ namespace Marshmallow\Translatable\Nova;
 use App\Nova\Resource;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Number;
-use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
+use Marshmallow\LiveUpdate\TextLiveUpdate;
+use Marshmallow\Translatable\Nova\Language;
 use Marshmallow\AdvancedImage\AdvancedImage;
 use Marshmallow\Translatable\Nova\Translation;
-use Marshmallow\Translatable\Models\Language as LanguageModel;
+use Marshmallow\Translatable\Nova\Filters\LanguageFilter;
+use Marshmallow\Translatable\Nova\Filters\NoTranslationAvailableFilter;
 
-class Language extends Resource
+class Translation extends Resource
 {
 	public static $group = 'Translation';
     /**
@@ -20,14 +23,14 @@ class Language extends Resource
      *
      * @var string
      */
-    public static $model = 'Marshmallow\Translatable\Models\Language';
+    public static $model = 'Marshmallow\Translatable\Models\Translation';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'name';
+    public static $title = 'value';
 
     /**
      * The columns that should be searched.
@@ -35,7 +38,7 @@ class Language extends Resource
      * @var array
      */
     public static $search = [
-        'name', 'language',
+        'key', 'value',
     ];
 
     /**
@@ -48,35 +51,29 @@ class Language extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make(__('Name'), 'name')
+
+        	BelongsTo::make(__('Language'), 'language', Language::class),
+
+            Text::make(__('Group'), 'group')
+            	->sortable()
+            	->rules([
+            		'required'
+            	])
+            	->default('single'),
+
+            Text::make(__('Key'), 'key')
             	->sortable()
             	->rules([
             		'required'
             	]),
 
-            Text::make(__('ISO'), 'language')
+            TextLiveUpdate::make(__('Value'), 'value')->onlyOnIndex(),
+
+            Textarea::make(__('Value'), 'value')
             	->sortable()
             	->rules([
             		'required',
-            		'min:2',
-            		'max:2'
             	]),
-
-            AdvancedImage::make(__('Icon'), 'icon')
-            			->croppable(
-            				config('translatable.flagicon.height')/config('translatable.flagicon.width')
-            			)->resize(
-            				config('translatable.flagicon.height'),
-            				config('translatable.flagicon.width')
-            			),
-
-            Number::make(__('Translations'))
-            	->onlyOnIndex()
-            	->resolveUsing(function ($collection, LanguageModel $language, $param) {
-            		return $language->translations->count();
-            	}),
-
-            HasMany::make(__('Translations'), 'translations', Translation::class),
         ];
     }
 
@@ -99,7 +96,10 @@ class Language extends Resource
      */
     public function filters(Request $request)
     {
-        return [];
+        return [
+        	new LanguageFilter,
+        	new NoTranslationAvailableFilter,
+        ];
     }
 
     /**

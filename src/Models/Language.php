@@ -3,9 +3,22 @@
 namespace Marshmallow\Translatable\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Marshmallow\Translatable\Models\Translation;
 
 class Language extends Model
 {
+	public static function boot()
+    {
+    	parent::boot();
+
+    	static::deleting(function (Model $language) {
+	        /**
+	         * Delete the existing seoable information.
+	         */
+	        $language->translations()->delete();
+	    });
+    }
+
 	public function getIcon()
 	{
 		if (!$this->icon) {
@@ -71,5 +84,10 @@ class Language extends Model
 		return $this->getBase64StringFromImage(
 			$this->getPrepackedImagePath('UNKNOWN')
 		);
+	}
+
+	public function translations()
+	{
+		return $this->hasMany(Translation::class);
 	}
 }

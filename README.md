@@ -37,7 +37,8 @@ If you discover any security related issues, please email stef@marshmallow.dev i
 ## Credits
 
 - [All Contributors](../../contributors)
+https://github.com/joedixon/laravel-translation
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE) for more information.
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
