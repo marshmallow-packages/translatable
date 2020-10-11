@@ -270,7 +270,7 @@ class File extends Translation implements DriverInterface
 
     protected function undotArray(array $dotNotationArray)
     {
-    	$array = [];
+        $array = [];
         foreach ($dotNotationArray as $key => $value) {
             // if there is a space after the dot, this could legitimately be
             // a single key and not nested.

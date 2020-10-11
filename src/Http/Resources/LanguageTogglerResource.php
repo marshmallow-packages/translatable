@@ -14,14 +14,14 @@ class LanguageTogglerResource extends JsonResource
      */
     public function toArray($request)
     {
-    	return [
-    		'name' => $this->name,
-    		'language' => $this->language,
-    		'icon' => $this->getIcon(),
-    		'currently_selected' => $this->currentlySelected(),
-    		'is_default' => $this->isDefault(),
-    		'is_clickable' => $this->isClickable(),
-    		'toggle_path' => $this->setTranslatableLocaleRoute(),
-    	];
+        return [
+            'name' => $this->name,
+            'language' => $this->language,
+            'icon' => $this->getIcon(),
+            'currently_selected' => $this->currentlySelected(),
+            'is_default' => $this->isDefault(),
+            'is_clickable' => $this->isClickable(),
+            'toggle_path' => $this->setTranslatableLocaleRoute(),
+        ];
     }
 }

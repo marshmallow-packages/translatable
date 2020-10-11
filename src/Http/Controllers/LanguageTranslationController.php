@@ -2,13 +2,13 @@
 
 namespace Marshmallow\Translatable\Http\Controllers;
 
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller;
-use Marshmallow\Translatable\Scanner\Drivers\Translation;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Marshmallow\Translatable\Http\Requests\TranslationRequest;
+use Marshmallow\Translatable\Scanner\Drivers\Translation;
 
 class LanguageTranslationController extends Controller
 {
@@ -46,7 +46,7 @@ class LanguageTranslationController extends Controller
             'source_language' => config('app.locale'),
             'groups' => $groups,
             'languages' => $languages,
-            'translations' => new Paginator(array_slice($this->formatTranslations($translations, $language), $offset * $perPage), $perPage, $currentPage)
+            'translations' => new Paginator(array_slice($this->formatTranslations($translations, $language), $offset * $perPage), $perPage, $currentPage),
         ]);
     }
 
@@ -89,11 +89,12 @@ class LanguageTranslationController extends Controller
                             'type' => $type,
                             'group' => $group,
                             'key' => $key,
-                            'translations' => $translation
+                            'translations' => $translation,
                         ];
                 }
             }
         }
+
         return $formattedTranslations;
     }
 }

@@ -4,7 +4,6 @@ namespace Marshmallow\Translatable\Nova\Filters;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Filters\Filter;
-use Marshmallow\Translatable\Models\Language;
 
 class NoTranslationAvailableFilter extends Filter
 {
@@ -27,19 +26,21 @@ class NoTranslationAvailableFilter extends Filter
      */
     public function apply(Request $request, $query, $value)
     {
-    	switch ($value) {
-    		case 'translated':
-    			$query->whereNotNull('value')
-    				  ->where('value', '!=', '');
-    			break;
+        switch ($value) {
+            case 'translated':
+                $query->whereNotNull('value')
+                      ->where('value', '!=', '');
 
-    		case 'not-translated':
-    			$query->where(function ($query){
-    				$query->whereNull('value')
-    				  	  ->orWhere('value', '');
-    			});
-    			break;
-    	}
+                break;
+
+            case 'not-translated':
+                $query->where(function ($query) {
+                    $query->whereNull('value')
+                          ->orWhere('value', '');
+                });
+
+                break;
+        }
 
         return $query;
     }
@@ -53,8 +54,8 @@ class NoTranslationAvailableFilter extends Filter
     public function options(Request $request)
     {
         return [
-        	__('Translatated') => 'translated',
-        	__('Not translatated') => 'not-translated',
+            __('Translatated') => 'translated',
+            __('Not translatated') => 'not-translated',
         ];
     }
 }

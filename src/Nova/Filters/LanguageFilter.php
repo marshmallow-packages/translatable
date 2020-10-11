@@ -25,9 +25,10 @@ class LanguageFilter extends Filter
      */
     public function apply(Request $request, $query, $value)
     {
-    	if ($value) {
-    		$query->where('language_id', $value);
-    	}
+        if ($value) {
+            $query->where('language_id', $value);
+        }
+
         return $query;
     }
 

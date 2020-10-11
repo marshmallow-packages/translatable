@@ -3,11 +3,10 @@
 namespace Marshmallow\Translatable\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Marshmallow\Translatable\Models\Language;
 
 class Translation extends Model
 {
-	protected $guarded = [];
+    protected $guarded = [];
 
     public function language()
     {

@@ -30,7 +30,7 @@ class Translation
      */
     public function arrayDiffAssocRecursive($arrayOne, $arrayTwo)
     {
-    	$difference = [];
+        $difference = [];
         foreach ($arrayOne as $key => $value) {
             if (is_array($value) || $value instanceof Collection) {
                 if (! isset($arrayTwo[$key])) {

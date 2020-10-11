@@ -5,7 +5,6 @@ namespace Marshmallow\Translatable\Scanner\Console\Commands;
 use Illuminate\Support\Facades\DB;
 use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Models\Translation;
-use Marshmallow\Translatable\Scanner\Console\Commands\BaseCommand;
 
 class SynchroniseMissingTranslationKeys extends BaseCommand
 {
@@ -33,6 +32,7 @@ class SynchroniseMissingTranslationKeys extends BaseCommand
         try {
             $this->translation->saveMissingTranslations();
             $this->createTranslationsForAllLanguages();
+
             return $this->info('✅ Saving missing translations found in your code to the database');
         } catch (\Exception $e) {
             return $this->error($e->getMessage());
@@ -45,29 +45,30 @@ class SynchroniseMissingTranslationKeys extends BaseCommand
      */
     protected function createTranslationsForAllLanguages()
     {
-    	$languages = Language::get();
-    	$translations = Translation
-    							::select('*', DB::raw('count(*) as total'))
-    							->groupBy(['key', 'group'])
-    							->get()
-    							;
+        $languages = Language::get();
+        $translations = Translation
+                                ::select('*', DB::raw('count(*) as total'))
+                                ->groupBy(['key', 'group'])
+                                ->get()
+                                ;
 
-    	foreach ($translations as $translation) {
-    		if ($languages->count() == $translation->total) {
-    			continue;
-    		}
-    		foreach ($languages as $language) {
-    			$language
-		            ->translations()
-		            ->updateOrCreate([
-		                'group' => $translation->group,
-		                'key' => $translation->key,
-		            ], [
-		                'key' => $translation->key,
-		                'value' => '',
-		            ]);
-    		}
-    	}
-    	return 0;
+        foreach ($translations as $translation) {
+            if ($languages->count() == $translation->total) {
+                continue;
+            }
+            foreach ($languages as $language) {
+                $language
+                    ->translations()
+                    ->updateOrCreate([
+                        'group' => $translation->group,
+                        'key' => $translation->key,
+                    ], [
+                        'key' => $translation->key,
+                        'value' => '',
+                    ]);
+            }
+        }
+
+        return 0;
     }
 }

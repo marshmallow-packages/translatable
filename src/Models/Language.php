@@ -3,93 +3,93 @@
 namespace Marshmallow\Translatable\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Marshmallow\Translatable\Models\Translation;
 
 class Language extends Model
 {
-	protected $guarded = [];
+    protected $guarded = [];
 
-	public static function boot()
+    public static function boot()
     {
-    	parent::boot();
+        parent::boot();
 
-    	static::deleting(function (Model $language) {
-	        /**
-	         * Delete the existing seoable information.
-	         */
-	        $language->translations()->delete();
-	    });
+        static::deleting(function (Model $language) {
+            /**
+             * Delete the existing seoable information.
+             */
+            $language->translations()->delete();
+        });
     }
 
-	public function getIcon()
-	{
-		if (!$this->icon) {
-			return $this->getNoIconAvailableImage();
-		}
-		return asset("storage/$this->icon");
-	}
+    public function getIcon()
+    {
+        if (! $this->icon) {
+            return $this->getNoIconAvailableImage();
+        }
 
-	public function isDefault()
-	{
-		return ($this->language === config('app.locale'));
-	}
+        return asset("storage/$this->icon");
+    }
 
-	public function currentlySelected()
-	{
-		return ($this->language == request()->getTranslatableLocale());
-	}
+    public function isDefault()
+    {
+        return ($this->language === config('app.locale'));
+    }
 
-	public function setTranslatableLocaleRoute()
-	{
-		return route('set-translatable-locale', $this);
-	}
+    public function currentlySelected()
+    {
+        return ($this->language == request()->getTranslatableLocale());
+    }
 
-	public function isClickable()
-	{
-		if (request()->has('editMode') && request()->editMode == 'create') {
-			return false;
-		}
+    public function setTranslatableLocaleRoute()
+    {
+        return route('set-translatable-locale', $this);
+    }
 
-		return true;
-	}
+    public function isClickable()
+    {
+        if (request()->has('editMode') && request()->editMode == 'create') {
+            return false;
+        }
 
-	public static function currentTranslatableModel ()
-	{
-		return self::where('language', request()->getTranslatableLocale())->first();
-	}
+        return true;
+    }
 
-	public static function currentTranslatableIsDefault ()
-	{
-		return (request()->getTranslatableLocale() === config('app.locale'));
-	}
+    public static function currentTranslatableModel()
+    {
+        return self::where('language', request()->getTranslatableLocale())->first();
+    }
 
-	protected function getBase64StringFromImage(string $image_location): string
-	{
-		return 'data:image/png;base64,' . base64_encode(file_get_contents($image_location));
-	}
+    public static function currentTranslatableIsDefault()
+    {
+        return (request()->getTranslatableLocale() === config('app.locale'));
+    }
 
-	protected function getPrepackedImagePath(string $image):string
-	{
-		return __dir__ . '/../../resources/flags/' . strtoupper($image) . '.png';
-	}
+    protected function getBase64StringFromImage(string $image_location): string
+    {
+        return 'data:image/png;base64,' . base64_encode(file_get_contents($image_location));
+    }
 
-	protected function getNoIconAvailableImage(): string
-	{
-		$prepacked_image_location = $this->getPrepackedImagePath($this->language);
-		if (file_exists($prepacked_image_location)) {
-			return $this->getBase64StringFromImage($prepacked_image_location);
-		}
+    protected function getPrepackedImagePath(string $image):string
+    {
+        return __dir__ . '/../../resources/flags/' . strtoupper($image) . '.png';
+    }
 
-		/**
-		 * No pre packed flag icon is available so we return the none available image.
-		 */
-		return $this->getBase64StringFromImage(
-			$this->getPrepackedImagePath('UNKNOWN')
-		);
-	}
+    protected function getNoIconAvailableImage(): string
+    {
+        $prepacked_image_location = $this->getPrepackedImagePath($this->language);
+        if (file_exists($prepacked_image_location)) {
+            return $this->getBase64StringFromImage($prepacked_image_location);
+        }
 
-	public function translations()
-	{
-		return $this->hasMany(Translation::class);
-	}
+        /**
+         * No pre packed flag icon is available so we return the none available image.
+         */
+        return $this->getBase64StringFromImage(
+            $this->getPrepackedImagePath('UNKNOWN')
+        );
+    }
+
+    public function translations()
+    {
+        return $this->hasMany(Translation::class);
+    }
 }

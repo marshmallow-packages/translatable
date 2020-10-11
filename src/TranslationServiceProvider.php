@@ -2,11 +2,11 @@
 
 namespace Marshmallow\Translatable;
 
-use Illuminate\Translation\Translator;
-use Marshmallow\Translatable\Scanner\Drivers\Translation;
-use Marshmallow\Translatable\Scanner\ContractDatabaseLoader;
-use Marshmallow\Translatable\Scanner\InterfaceDatabaseLoader;
 use Illuminate\Translation\TranslationServiceProvider as ServiceProvider;
+use Illuminate\Translation\Translator;
+use Marshmallow\Translatable\Scanner\ContractDatabaseLoader;
+use Marshmallow\Translatable\Scanner\Drivers\Translation;
+use Marshmallow\Translatable\Scanner\InterfaceDatabaseLoader;
 
 class TranslationServiceProvider extends ServiceProvider
 {

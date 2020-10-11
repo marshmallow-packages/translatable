@@ -2,36 +2,37 @@
 
 namespace Marshmallow\Translatable;
 
-use Request;
-use Laravel\Nova\Nova;
-use Laravel\Nova\Events\ServingNova;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Laravel\Nova\Events\ServingNova;
+use Laravel\Nova\Nova;
 use Marshmallow\Translatable\Models\Language;
+use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
+use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
+use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
+use Marshmallow\Translatable\Scanner\Drivers\Translation;
 use Marshmallow\Translatable\Scanner\Scanner;
 use Marshmallow\Translatable\Scanner\TranslationManager;
-use Marshmallow\Translatable\Scanner\Drivers\Translation;
-use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
-use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
-use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
+use Request;
 
 class ServiceProvider extends BaseServiceProvider
 {
     public function boot()
     {
-    	Request::macro('setTranslatableLocale', function(Language $language) {
-    		Session::put('translatable-locale', $language->language);
-		});
+        Request::macro('setTranslatableLocale', function (Language $language) {
+            Session::put('translatable-locale', $language->language);
+        });
 
-    	Request::macro('getTranslatableLocale', function() {
-    		if ($session = Session::get('translatable-locale')) {
-    			return $session;
-    		}
-    		return config('app.locale');
-		});
+        Request::macro('getTranslatableLocale', function () {
+            if ($session = Session::get('translatable-locale')) {
+                return $session;
+            }
 
-		Nova::serving(function (ServingNova $event) {
+            return config('app.locale');
+        });
+
+        Nova::serving(function (ServingNova $event) {
             Nova::script('language-toggle-field', __DIR__.'/../dist/js/field.js');
             Nova::style('language-toggle-field', __DIR__.'/../dist/css/field.css');
         });
@@ -50,7 +51,7 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-    	$this->mergeConfiguration();
+        $this->mergeConfiguration();
 
         $this->registerCommands();
 
@@ -92,6 +93,7 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->app->singleton(Scanner::class, function () {
             $config = $this->app['config']['translatable'];
+
             return new Scanner(new Filesystem, $config['scan_paths'], $config['translation_methods']);
         });
 

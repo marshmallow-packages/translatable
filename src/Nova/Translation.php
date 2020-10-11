@@ -3,21 +3,19 @@
 namespace Marshmallow\Translatable\Nova;
 
 use App\Nova\Resource;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
-use Laravel\Nova\Fields\BelongsTo;
-use Illuminate\Database\Eloquent\Model;
 use Marshmallow\LiveUpdate\TextLiveUpdate;
-use Marshmallow\Translatable\Nova\Language;
-use Marshmallow\AdvancedImage\AdvancedImage;
-use Marshmallow\Translatable\Nova\Translation;
 use Marshmallow\Translatable\Nova\Filters\LanguageFilter;
 use Marshmallow\Translatable\Nova\Filters\NoTranslationAvailableFilter;
 
 class Translation extends Resource
 {
-	public static $group = 'Translation';
+    public static $group = 'Translation';
+
     /**
      * The model the resource corresponds to.
      *
@@ -52,28 +50,28 @@ class Translation extends Resource
     {
         return [
 
-        	BelongsTo::make(__('Language'), 'language', Language::class),
+            BelongsTo::make(__('Language'), 'language', Language::class),
 
             Text::make(__('Group'), 'group')
-            	->sortable()
-            	->rules([
-            		'required'
-            	])
-            	->default('single'),
+                ->sortable()
+                ->rules([
+                    'required',
+                ])
+                ->default('single'),
 
             Text::make(__('Key'), 'key')
-            	->sortable()
-            	->rules([
-            		'required'
-            	]),
+                ->sortable()
+                ->rules([
+                    'required',
+                ]),
 
             TextLiveUpdate::make(__('Value'), 'value')->onlyOnIndex(),
 
             Textarea::make(__('Value'), 'value')
-            	->sortable()
-            	->rules([
-            		'required',
-            	]),
+                ->sortable()
+                ->rules([
+                    'required',
+                ]),
         ];
     }
 
@@ -97,8 +95,8 @@ class Translation extends Resource
     public function filters(Request $request)
     {
         return [
-        	new LanguageFilter,
-        	new NoTranslationAvailableFilter,
+            new LanguageFilter,
+            new NoTranslationAvailableFilter,
         ];
     }
 

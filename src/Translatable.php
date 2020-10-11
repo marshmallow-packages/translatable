@@ -4,5 +4,5 @@ namespace Marshmallow\Translatable;
 
 class Translatable
 {
-	//
+    //
 }

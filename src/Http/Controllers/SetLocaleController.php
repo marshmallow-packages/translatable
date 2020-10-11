@@ -8,9 +8,10 @@ use Marshmallow\Translatable\Models\Language;
 
 class SetLocaleController extends Controller
 {
-	public function __invoke(Language $language)
-	{
-		Session::put('locale', $language->language);
+    public function __invoke(Language $language)
+    {
+        Session::put('locale', $language->language);
+
         return redirect()->back();
-	}
+    }
 }

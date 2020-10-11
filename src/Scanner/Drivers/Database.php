@@ -103,7 +103,7 @@ class Database extends Translation implements DriverInterface
             $this->addLanguage($language);
         }
 
-    	Language::where('language', $language)
+        Language::where('language', $language)
             ->first()
             ->translations()
             ->updateOrCreate([
@@ -131,15 +131,15 @@ class Database extends Translation implements DriverInterface
         }
 
         Language::where('language', $language)
-	            ->first()
-	            ->translations()
-	            ->updateOrCreate([
-	                'group' => $vendor,
-	                'key' => $key,
-	            ], [
-	                'key' => $key,
-	                'value' => $value,
-	            ]);
+                ->first()
+                ->translations()
+                ->updateOrCreate([
+                    'group' => $vendor,
+                    'key' => $key,
+                ], [
+                    'key' => $key,
+                    'value' => $value,
+                ]);
     }
 
     /**

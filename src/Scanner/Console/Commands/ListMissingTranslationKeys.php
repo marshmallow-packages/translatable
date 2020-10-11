@@ -2,8 +2,6 @@
 
 namespace Marshmallow\Translatable\Scanner\Console\Commands;
 
-use Marshmallow\Translatable\Scanner\Console\Commands\BaseCommand;
-
 class ListMissingTranslationKeys extends BaseCommand
 {
     /**

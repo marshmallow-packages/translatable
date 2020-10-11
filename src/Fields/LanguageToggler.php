@@ -4,8 +4,8 @@ namespace Marshmallow\Translatable\Fields;
 
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Http\Resources\LanguageTogglerResource;
+use Marshmallow\Translatable\Models\Language;
 
 class LanguageToggler extends Field
 {
@@ -32,7 +32,7 @@ class LanguageToggler extends Field
     {
         return array_merge([
             'languages' => LanguageTogglerResource::collection(Language::get()),
-            'toggler_clickable' =>  $this->getToggleClickableStatus(),
+            'toggler_clickable' => $this->getToggleClickableStatus(),
             'toggler_notification' => $this->getToggleNotification(),
         ], parent::meta());
     }
@@ -44,23 +44,23 @@ class LanguageToggler extends Field
 
     protected function getToggleClickableStatus()
     {
-    	return (!(request()->has('editMode') && request()->editMode == 'create'));
+        return (! (request()->has('editMode') && request()->editMode == 'create'));
     }
 
     protected function getToggleNotification()
     {
-    	if ($this->getToggleClickableStatus()) {
-    		return null;
-    	}
+        if ($this->getToggleClickableStatus()) {
+            return null;
+        }
 
-    	if (Language::currentTranslatableIsDefault()) {
-    		return null;
-    	}
+        if (Language::currentTranslatableIsDefault()) {
+            return null;
+        }
 
-    	return __('
+        return __('
     		<strong>Please note:</strong> You have currently selected a different language in your translation settings. However, you are now creating a new resource. This needs to be done in the default language which is :language. So please keep this in mind while you fill in the field below.
     	', [
-    		'language' => config('app.locale'),
-    	]);
+            'language' => config('app.locale'),
+        ]);
     }
 }
