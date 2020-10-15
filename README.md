@@ -17,6 +17,7 @@ You can install the package via composer:
 composer require marshmallow/translatable
 ```
 
+
 ## Usage
 Please reference the official documentation at [MrMallow Documentation](https://mrmallow.nl/packages/nova/translatable.html)
 
