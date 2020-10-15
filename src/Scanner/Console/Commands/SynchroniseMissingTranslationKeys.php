@@ -57,7 +57,6 @@ class SynchroniseMissingTranslationKeys extends BaseCommand
                 continue;
             }
             foreach ($languages as $language) {
-
                 $value = ($translation->group !== 'single') ? $translation->value : '';
 
                 $language

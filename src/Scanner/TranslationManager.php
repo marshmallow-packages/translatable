@@ -2,10 +2,10 @@
 
 namespace Marshmallow\Translatable\Scanner;
 
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
-use Marshmallow\Translatable\Scanner\Drivers\Database;
+use Illuminate\Filesystem\Filesystem;
 use Marshmallow\Translatable\Scanner\Drivers\File;
+use Marshmallow\Translatable\Scanner\Drivers\Database;
 
 class TranslationManager
 {

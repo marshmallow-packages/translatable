@@ -6,7 +6,6 @@ use Illuminate\Translation\Translator;
 use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
 use Marshmallow\Translatable\Scanner\ContractDatabaseLoader;
-use Marshmallow\Translatable\Scanner\InterfaceDatabaseLoader;
 use Illuminate\Translation\TranslationServiceProvider as ServiceProvider;
 
 class TranslationServiceProvider extends ServiceProvider
@@ -36,6 +35,7 @@ class TranslationServiceProvider extends ServiceProvider
 
             $trans = new Translator($loader, $locale);
             $trans->setFallback($app['config']['app.fallback_locale']);
+
             return $trans;
         });
     }

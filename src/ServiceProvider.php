@@ -29,6 +29,7 @@ class ServiceProvider extends BaseServiceProvider
             if ($session = Session::get('translatable-locale')) {
                 return $session;
             }
+
             return config('app.locale');
         });
 
@@ -40,6 +41,7 @@ class ServiceProvider extends BaseServiceProvider
             if ($session = Session::get('user-locale')) {
                 return $session;
             }
+
             return config('app.locale');
         });
 
@@ -105,6 +107,7 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->app->singleton(Scanner::class, function () {
             $config = $this->app['config']['translatable'];
+
             return new Scanner(new Filesystem, $config['scan_paths'], $config['translation_methods']);
         });
 
