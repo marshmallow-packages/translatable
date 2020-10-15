@@ -2,16 +2,15 @@
 
 namespace Marshmallow\Translatable\Traits;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Model;
+use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Models\Translatable as TranslatableModel;
 
 trait Translatable
 {
-    public $translatable = null;
-
-    protected $protected_columns = [
+    protected $protected_from_translations = [
         'id',
         'created_at',
         'updated_at',
@@ -183,7 +182,12 @@ trait Translatable
         return in_array($key, $this->getTranslatableAttributes());
     }
 
-    public function ignoreFromTranslations(): array
+    public function notTranslateColumns(): array
+    {
+        return [];
+    }
+
+    public function translatableColumns(): array
     {
         return [];
     }
@@ -192,15 +196,26 @@ trait Translatable
      * This is a traits used on Elequent models and on
      * Nova resources. We check here which one we have.
      */
-    public function getIgnoreFromTranslations()
+    public function getNotTranslateColumns()
     {
         if (class_exists(\App\Nova\Resource::class) && $this instanceof \App\Nova\Resource) {
             $resource = new $this::$model;
-
-            return $resource->ignoreFromTranslations();
+            return $resource->notTranslateColumns();
         }
+        return $this->notTranslateColumns();
+    }
 
-        return $this->ignoreFromTranslations();
+    /**
+     * This is a traits used on Elequent models and on
+     * Nova resources. We check here which one we have.
+     */
+    public function getTranslatableColumns()
+    {
+        if (class_exists(\App\Nova\Resource::class) && $this instanceof \App\Nova\Resource) {
+            $resource = new $this::$model;
+            return $resource->translatableColumns();
+        }
+        return $this->translatableColumns();
     }
 
     /**
@@ -209,22 +224,23 @@ trait Translatable
     public function getTranslatableAttributes(): array
     {
         $translatable_columns = array_keys($this->getAttributes());
-        if (isset($this->translatable) && is_array($this->translatable)) {
-            $translatable_columns = $this->translatable;
+        if (!empty($this->getTranslatableColumns())) {
+            $translatable_columns = $this->getTranslatableColumns();
         }
 
-        foreach ($this->getIgnoreFromTranslations() as $ignore_column) {
+        foreach ($this->getNotTranslateColumns() as $ignore_column) {
             $key = array_search($ignore_column, $translatable_columns);
             unset($translatable_columns[$key]);
         }
-
-        if (isset($this->protected_columns) && is_array($this->protected_columns)) {
-            foreach ($this->protected_columns as $protected_column) {
+        if (isset($this->protected_from_translations) && is_array($this->protected_from_translations)) {
+            foreach ($this->protected_from_translations as $protected_column) {
                 $key = array_search($protected_column, $translatable_columns);
+                if ($key === false) {
+                    continue;
+                }
                 unset($translatable_columns[$key]);
             }
         }
-
         return $translatable_columns;
     }
 
@@ -328,10 +344,10 @@ trait Translatable
             return $language->language;
         }
 
-        if (request()->getTranslatableLocale()) {
+        if (URL::isNova(request())) {
             return request()->getTranslatableLocale();
         }
 
-        return config('app.locale');
+        return request()->getUserLocale();
     }
 }

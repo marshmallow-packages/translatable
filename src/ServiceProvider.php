@@ -2,19 +2,20 @@
 
 namespace Marshmallow\Translatable;
 
+use Request;
+use Laravel\Nova\Nova;
+use Laravel\Nova\Events\ServingNova;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-use Laravel\Nova\Events\ServingNova;
-use Laravel\Nova\Nova;
 use Marshmallow\Translatable\Models\Language;
-use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
-use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
-use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
-use Marshmallow\Translatable\Scanner\Drivers\Translation;
 use Marshmallow\Translatable\Scanner\Scanner;
 use Marshmallow\Translatable\Scanner\TranslationManager;
-use Request;
+use Marshmallow\Translatable\Scanner\Drivers\Translation;
+use Marshmallow\Translatable\Console\Commands\InstallCommand;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
+use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
+use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -28,7 +29,17 @@ class ServiceProvider extends BaseServiceProvider
             if ($session = Session::get('translatable-locale')) {
                 return $session;
             }
+            return config('app.locale');
+        });
 
+        Request::macro('setUserLocale', function (Language $language) {
+            Session::put('user-locale', $language->language);
+        });
+
+        Request::macro('getUserLocale', function () {
+            if ($session = Session::get('user-locale')) {
+                return $session;
+            }
             return config('app.locale');
         });
 
@@ -77,6 +88,7 @@ class ServiceProvider extends BaseServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
+                InstallCommand::class,
                 ListMissingTranslationKeys::class,
                 SynchroniseMissingTranslationKeys::class,
                 SynchroniseTranslationsCommand::class,
@@ -93,7 +105,6 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->app->singleton(Scanner::class, function () {
             $config = $this->app['config']['translatable'];
-
             return new Scanner(new Filesystem, $config['scan_paths'], $config['translation_methods']);
         });
 
