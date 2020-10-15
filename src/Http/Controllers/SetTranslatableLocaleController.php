@@ -11,6 +11,7 @@ class SetTranslatableLocaleController extends Controller
     public function __invoke(Language $language, Request $request)
     {
         $request->setTranslatableLocale($language);
+
         return redirect()->back();
     }
 }

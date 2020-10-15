@@ -200,8 +200,10 @@ trait Translatable
     {
         if (class_exists(\App\Nova\Resource::class) && $this instanceof \App\Nova\Resource) {
             $resource = new $this::$model;
+
             return $resource->notTranslateColumns();
         }
+
         return $this->notTranslateColumns();
     }
 
@@ -213,8 +215,10 @@ trait Translatable
     {
         if (class_exists(\App\Nova\Resource::class) && $this instanceof \App\Nova\Resource) {
             $resource = new $this::$model;
+
             return $resource->translatableColumns();
         }
+
         return $this->translatableColumns();
     }
 
@@ -224,7 +228,7 @@ trait Translatable
     public function getTranslatableAttributes(): array
     {
         $translatable_columns = array_keys($this->getAttributes());
-        if (!empty($this->getTranslatableColumns())) {
+        if (! empty($this->getTranslatableColumns())) {
             $translatable_columns = $this->getTranslatableColumns();
         }
 
@@ -241,6 +245,7 @@ trait Translatable
                 unset($translatable_columns[$key]);
             }
         }
+
         return $translatable_columns;
     }
 

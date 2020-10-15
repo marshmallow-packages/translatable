@@ -4,8 +4,8 @@ namespace Marshmallow\Translatable\Fields;
 
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Marshmallow\Translatable\Http\Resources\LanguageTogglerResource;
 use Marshmallow\Translatable\Models\Language;
+use Marshmallow\Translatable\Http\Resources\LanguageTogglerResource;
 
 class LanguageToggler extends Field
 {

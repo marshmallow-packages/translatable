@@ -4,10 +4,10 @@ namespace Marshmallow\Translatable\Scanner\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Marshmallow\Translatable\Scanner\Drivers\Database;
-use Marshmallow\Translatable\Scanner\Drivers\File;
-use Marshmallow\Translatable\Scanner\Drivers\Translation;
 use Marshmallow\Translatable\Scanner\Scanner;
+use Marshmallow\Translatable\Scanner\Drivers\File;
+use Marshmallow\Translatable\Scanner\Drivers\Database;
+use Marshmallow\Translatable\Scanner\Drivers\Translation;
 
 class SynchroniseTranslationsCommand extends Command
 {
