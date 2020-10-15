@@ -38,6 +38,5 @@ return [
     'scan_paths' => [
     	app_path(),
     	resource_path(),
-    	base_path('vendor/marshmallow')
     ],
 ];

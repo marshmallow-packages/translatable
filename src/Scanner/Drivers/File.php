@@ -2,10 +2,10 @@
 
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
+use Illuminate\Filesystem\Filesystem;
 use Marshmallow\Translatable\Scanner\Exceptions\LanguageExistsException;
 
 class File extends Translation implements DriverInterface
@@ -176,7 +176,7 @@ class File extends Translation implements DriverInterface
             if (strpos($file->getPathname(), 'vendor')) {
                 $vendor = Str::before(Str::after($file->getPathname(), 'vendor'.DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR);
 
-                return ["{$vendor}::single" => new Collection(json_decode($this->disk->get($file), true))];
+                return ["single" => new Collection(json_decode($this->disk->get($file), true))];
             }
 
             return ['single' => new Collection(json_decode($this->disk->get($file), true))];

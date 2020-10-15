@@ -2,15 +2,15 @@
 
 namespace Marshmallow\Translatable\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Session;
 use Marshmallow\Translatable\Models\Language;
 
 class SetLocaleController extends Controller
 {
-    public function __invoke(Language $language)
+    public function __invoke(Language $language, Request $request)
     {
-        Session::put('locale', $language->language);
+        $request->setUserLocale($language);
 
         return redirect()->back();
     }

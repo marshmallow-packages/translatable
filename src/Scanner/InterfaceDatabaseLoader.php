@@ -2,8 +2,8 @@
 
 namespace Marshmallow\Translatable\Scanner;
 
-use Illuminate\Translation\LoaderInterface;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
+use Symfony\Component\Translation\Loader\LoaderInterface;
 
 class InterfaceDatabaseLoader implements LoaderInterface
 {

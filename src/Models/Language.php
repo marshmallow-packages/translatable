@@ -3,10 +3,20 @@
 namespace Marshmallow\Translatable\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Marshmallow\Translatable\Traits\Translatable;
 
 class Language extends Model
 {
+    use Translatable;
+
     protected $guarded = [];
+
+    public function translatableColumns(): array
+    {
+        return [
+            'name',
+        ];
+    }
 
     public static function boot()
     {

@@ -2,13 +2,13 @@
 
 namespace Marshmallow\Translatable\Http\Controllers;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
-use Marshmallow\Translatable\Http\Requests\TranslationRequest;
+use Illuminate\Pagination\Paginator;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
+use Marshmallow\Translatable\Http\Requests\TranslationRequest;
 
 class LanguageTranslationController extends Controller
 {
