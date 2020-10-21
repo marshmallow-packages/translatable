@@ -11,8 +11,10 @@ use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Scanner\Scanner;
 use Marshmallow\Translatable\Scanner\TranslationManager;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
+use Marshmallow\Translatable\Console\Commands\PresetCommand;
 use Marshmallow\Translatable\Console\Commands\InstallCommand;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
 use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
 use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
 use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
@@ -94,6 +96,8 @@ class ServiceProvider extends BaseServiceProvider
                 ListMissingTranslationKeys::class,
                 SynchroniseMissingTranslationKeys::class,
                 SynchroniseTranslationsCommand::class,
+                PresetCommand::class,
+                GeneratePresetCommand::class,
             ]);
         }
     }

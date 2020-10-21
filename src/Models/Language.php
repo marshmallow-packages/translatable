@@ -98,6 +98,15 @@ class Language extends Model
         );
     }
 
+    public function getPreset()
+    {
+        return $this->translations()->where('value', '!=', '')->get()->map(function ($user) {
+            return collect($user->toArray())
+                        ->only(['group', 'key', 'value'])
+                        ->all();
+        })->toArray();
+    }
+
     public function translations()
     {
         return $this->hasMany(Translation::class);
