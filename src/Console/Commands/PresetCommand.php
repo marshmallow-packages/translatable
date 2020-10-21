@@ -4,14 +4,15 @@ namespace Marshmallow\Translatable\Console\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Models\Translation;
 
 class PresetCommand extends Command
 {
     protected $preset;
+
     protected $language;
+
     protected $untranslated_items = [];
 
     /**
@@ -48,14 +49,14 @@ class PresetCommand extends Command
         /**
          * Check if we interpreted everything correctly.
          */
-        if (!$this->importContextIsCorrect()) {
+        if (! $this->importContextIsCorrect()) {
             return $this->stopImporter();
         }
 
         /**
          * Check if there is something to import or not.
          */
-        if (!$this->checkIfThereIsSomethingToImport()) {
+        if (! $this->checkIfThereIsSomethingToImport()) {
             return $this->stopImporter();
         }
 
@@ -70,7 +71,7 @@ class PresetCommand extends Command
         /**
          * Continue with the import!!
          */
-        if (!$this->option('force') && !$this->confirm(__('Please type "yes" to start the import'))) {
+        if (! $this->option('force') && ! $this->confirm(__('Please type "yes" to start the import'))) {
             return $this->stopImporter();
         }
 
@@ -114,6 +115,7 @@ class PresetCommand extends Command
         $this->untranslated_items = $this->buildUntranslatedPresetArray();
         if (count($this->untranslated_items) === 0) {
             $this->info('There is nothing to import for you.');
+
             return false;
         }
 
@@ -156,7 +158,7 @@ class PresetCommand extends Command
             'local_language_name' => $this->language->name,
         ]);
 
-        if (!$this->confirm($confirm_text)) {
+        if (! $this->confirm($confirm_text)) {
             return false;
         }
 
@@ -166,6 +168,7 @@ class PresetCommand extends Command
     private function stopImporter()
     {
         $this->error(__('Importing preset has been stopped.'));
+
         return 0;
     }
 
@@ -179,7 +182,7 @@ class PresetCommand extends Command
                                         ->where('key', $translation_preset['key'])
                                         ->first();
 
-            if (!$translation || ! $translation->value) {
+            if (! $translation || ! $translation->value) {
                 $untranslated_items[] = $translation_preset;
             }
             $this->output->progressAdvance();
@@ -188,7 +191,7 @@ class PresetCommand extends Command
 
         $this->info(
             __('We have found :count preset value(s) that we can fill for you.', [
-                'count' => count($untranslated_items)
+                'count' => count($untranslated_items),
             ])
         );
 
@@ -198,6 +201,7 @@ class PresetCommand extends Command
     private function getPreset(string $preset_file_path)
     {
         $preset = include($preset_file_path);
+
         return $preset;
     }
 
@@ -215,7 +219,7 @@ class PresetCommand extends Command
     {
         $presets = [];
         $files = glob($this->getPresetFolderPath() . "/*.{php}", GLOB_BRACE);
-        foreach($files as $file) {
+        foreach ($files as $file) {
             $preset = $this->getPreset($file);
             $presets[$preset['locale']] = $preset['name'];
         }

@@ -4,10 +4,8 @@ namespace Marshmallow\Translatable\Console\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Marshmallow\Translatable\Models\Language;
 use Marshmallow\HelperFunctions\Facades\Arrayable;
-use Marshmallow\Translatable\Models\Translation;
 
 class GeneratePresetCommand extends Command
 {
@@ -53,7 +51,6 @@ class GeneratePresetCommand extends Command
         }
 
         foreach ($languages as $language) {
-
             $generated_preset = [
                 'locale' => $language->language,
                 'name' => $language->getTranslation('name', $language->language),
@@ -76,6 +73,7 @@ class GeneratePresetCommand extends Command
     {
         $languages = Language::get()->pluck('name', 'language')->toArray();
         $languages['all'] = __('All');
+
         return $languages;
     }
 }
