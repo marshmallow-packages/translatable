@@ -29,7 +29,6 @@ class InstallCommand extends Command
      */
     public function handle()
     {
-        $this->truncateTable();
         $this->syncFilesToDatabase();
         $this->syncInlineTranslartions();
         $this->generateNovaResources();
@@ -56,11 +55,5 @@ class InstallCommand extends Command
         $this->info('Starting migrating language files to database');
         Artisan::call('translation:sync-translations file database');
         $this->info('Translation files are now available in the translations table.');
-    }
-
-    protected function truncateTable()
-    {
-        DB::table('translations')->truncate();
-        $this->info('Table truncated');
     }
 }
