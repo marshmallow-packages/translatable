@@ -16,14 +16,14 @@ class SynchroniseTranslationsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'translation:sync-translations {from?} {to?} {language?}';
+    protected $signature = 'translatable:sync-file-to-database';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Synchronise translations between drivers';
+    protected $description = 'Synchronise translations from your language files to the database';
 
     /**
      * File scanner.
@@ -77,45 +77,18 @@ class SynchroniseTranslationsCommand extends Command
     {
         $languages = array_keys($this->translation->allLanguages()->toArray());
 
-        // If a valid from driver has been specified as an argument.
-        if ($this->argument('from') && in_array($this->argument('from'), $this->drivers)) {
-            $this->fromDriver = $this->argument('from');
-        }
-
-        // When the from driver will be entered manually or if the argument is invalid.
-        else {
-            $this->fromDriver = $this->anticipate(__('translation::translation.prompt_from_driver'), $this->drivers);
-
-            if (! in_array($this->fromDriver, $this->drivers)) {
-                return $this->error(__('translation::translation.invalid_driver'));
-            }
-        }
+        // Create the driver.
+        $this->fromDriver = $this->createDriver('file');
 
         // Create the driver.
-        $this->fromDriver = $this->createDriver($this->fromDriver);
+        $this->toDriver = $this->createDriver('database');
 
-        // When the to driver has been specified.
-        if ($this->argument('to') && in_array($this->argument('to'), $this->drivers)) {
-            $this->toDriver = $this->argument('to');
-        }
-
-        // When the to driver will be entered manually.
-        else {
-            $this->toDriver = $this->anticipate(__('translation::translation.prompt_to_driver'), $this->drivers);
-
-            if (! in_array($this->toDriver, $this->drivers)) {
-                return $this->error(__('translation::translation.invalid_driver'));
-            }
-        }
-
-        // Create the driver.
-        $this->toDriver = $this->createDriver($this->toDriver);
-
-        $this->line(__('translation::translation.syncing'));
+        $this->line(__('Syncing files to the database has started.'));
 
         $translations = $this->mergeLanguages($this->toDriver, $this->fromDriver->allTranslations());
 
-        $this->info(__('translation::translation.synced'));
+        $this->info(__('All files are now available in your translation module.'));
+        $this->info(__('We recommend you run "php artisan translatable:sync-missing" to make sure the new translations are avaialable in all your languages.'));
     }
 
     private function createDriver($driver)

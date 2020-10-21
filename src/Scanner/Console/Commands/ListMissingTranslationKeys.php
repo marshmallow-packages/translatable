@@ -9,7 +9,7 @@ class ListMissingTranslationKeys extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'translation:list-missing-translation-keys';
+    protected $signature = 'translatable:list-missing';
 
     /**
      * The console command description.
