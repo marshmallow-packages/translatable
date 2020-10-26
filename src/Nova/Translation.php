@@ -14,7 +14,35 @@ use Marshmallow\Translatable\Nova\Filters\NoTranslationAvailableFilter;
 
 class Translation extends Resource
 {
-    public static $group = 'Translation';
+    /**
+     * Get the logical group associated with the resource.
+     *
+     * @return string
+     */
+    public static function group()
+    {
+        return __('Translation');
+    }
+
+    /**
+     * Get the displayable label of the resource.
+     *
+     * @return string
+     */
+    public static function label()
+    {
+        return __('Translations');
+    }
+
+    /**
+     * Get the displayable singular label of the resource.
+     *
+     * @return string
+     */
+    public static function singularLabel()
+    {
+        return __('Translation');
+    }
 
     /**
      * The model the resource corresponds to.
