@@ -188,7 +188,7 @@ class Database extends Translation implements DriverInterface
     public function getGroupTranslationsFor($language)
     {
         if (config('translatable.cache.use')) {
-            $translations = Cache::remember('translatable::getGroupTranslationsFor', config('translatable.cache.ttl'), function () use($language) {
+            $translations = Cache::remember('translatable::getGroupTranslationsFor', config('translatable.cache.ttl'), function () use ($language) {
                 return $this->getLanguage($language)
                             ->translations()
                             ->whereNotNull('group')
@@ -243,7 +243,7 @@ class Database extends Translation implements DriverInterface
     private function getLanguage($language)
     {
         if (config('translatable.cache.use')) {
-            return Cache::remember('Translatable::getLanguage', config('translatable.cache.ttl'), function () use($language) {
+            return Cache::remember('Translatable::getLanguage', config('translatable.cache.ttl'), function () use ($language) {
                 return Language::where('language', $language)->first();
             });
         } else {
