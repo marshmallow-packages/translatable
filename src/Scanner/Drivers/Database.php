@@ -3,6 +3,7 @@
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Models\Translation as TranslationModel;
 use Marshmallow\Translatable\Scanner\Exceptions\LanguageExistsException;
@@ -186,12 +187,23 @@ class Database extends Translation implements DriverInterface
      */
     public function getGroupTranslationsFor($language)
     {
-        $translations = $this->getLanguage($language)
-            ->translations()
-            ->whereNotNull('group')
-            ->where('group', 'not like', '%single')
-            ->get()
-            ->groupBy('group');
+        if (config('translatable.cache.use')) {
+            $translations = Cache::remember('translatable::getGroupTranslationsFor', config('translatable.cache.ttl'), function () use($language) {
+                return $this->getLanguage($language)
+                            ->translations()
+                            ->whereNotNull('group')
+                            ->where('group', 'not like', '%single')
+                            ->get()
+                            ->groupBy('group');
+            });
+        } else {
+            $translations = $this->getLanguage($language)
+                                ->translations()
+                                ->whereNotNull('group')
+                                ->where('group', 'not like', '%single')
+                                ->get()
+                                ->groupBy('group');
+        }
 
         return $translations->map(function ($translations) {
             return $translations->mapWithKeys(function ($translation) {
@@ -230,7 +242,13 @@ class Database extends Translation implements DriverInterface
      */
     private function getLanguage($language)
     {
-        return Language::where('language', $language)->first();
+        if (config('translatable.cache.use')) {
+            return Cache::remember('Translatable::getLanguage', config('translatable.cache.ttl'), function () use($language) {
+                return Language::where('language', $language)->first();
+            });
+        } else {
+            return Language::where('language', $language)->first();
+        }
     }
 
     /**
