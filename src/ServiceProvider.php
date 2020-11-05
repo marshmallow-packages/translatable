@@ -92,12 +92,12 @@ class ServiceProvider extends BaseServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                InstallCommand::class,
                 ListMissingTranslationKeys::class,
                 SynchroniseMissingTranslationKeys::class,
                 SynchroniseTranslationsCommand::class,
                 PresetCommand::class,
                 GeneratePresetCommand::class,
+                InstallCommand::class,
             ]);
         }
     }
