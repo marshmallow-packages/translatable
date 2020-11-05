@@ -62,6 +62,7 @@ class Database extends Translation implements DriverInterface
      * Get all translations for a particular language.
      *
      * @param string $language
+     *
      * @return Collection
      */
     public function allTranslationsFor($language)
@@ -76,6 +77,7 @@ class Database extends Translation implements DriverInterface
      * Add a new language to the application.
      *
      * @param string $language
+     *
      * @return void
      */
     public function addLanguage($language, $name = null)
@@ -96,15 +98,16 @@ class Database extends Translation implements DriverInterface
      * @param string $language
      * @param string $key
      * @param string $value
+     *
      * @return void
      */
     public function addGroupTranslation($language, $group, $key, $value = '')
     {
-        if (! $this->languageExists($language)) {
+        if (!$this->languageExists($language)) {
             $this->addLanguage($language);
         }
 
-        if (strpos($group, '::') !== false) {
+        if (false !== strpos($group, '::')) {
             $group = explode('::', $group);
             $group = $group[1];
         }
@@ -128,11 +131,12 @@ class Database extends Translation implements DriverInterface
      * @param string $language
      * @param string $key
      * @param string $value
+     *
      * @return void
      */
     public function addSingleTranslation($language, $vendor, $key, $value = '')
     {
-        if (! $this->languageExists($language)) {
+        if (!$this->languageExists($language)) {
             $this->addLanguage($language);
         }
 
@@ -152,6 +156,7 @@ class Database extends Translation implements DriverInterface
      * Get all of the single translations for a given language.
      *
      * @param string $language
+     *
      * @return Collection
      */
     public function getSingleTranslationsFor($language)
@@ -183,6 +188,7 @@ class Database extends Translation implements DriverInterface
      * Get all of the group translations for a given language.
      *
      * @param string $language
+     *
      * @return Collection
      */
     public function getGroupTranslationsFor($language)
@@ -216,6 +222,7 @@ class Database extends Translation implements DriverInterface
      * Determine whether or not a language exists.
      *
      * @param string $language
+     *
      * @return bool
      */
     public function languageExists($language)
@@ -227,6 +234,7 @@ class Database extends Translation implements DriverInterface
      * Get a collection of group names for a given language.
      *
      * @param string $language
+     *
      * @return Collection
      */
     public function getGroupsFor($language)
@@ -238,6 +246,7 @@ class Database extends Translation implements DriverInterface
      * Get a language from the database.
      *
      * @param string $language
+     *
      * @return Language
      */
     private function getLanguage($language)
@@ -257,12 +266,13 @@ class Database extends Translation implements DriverInterface
      * we use 'single' to cater for vendor JSON language files.
      *
      * @param Collection $groups
+     *
      * @return bool
      */
     private function hasLegacyGroups($groups)
     {
         return $groups->filter(function ($key) {
-            return $key === '';
+            return '' === $key;
         })->count() > 0;
     }
 }

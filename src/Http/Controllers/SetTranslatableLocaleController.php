@@ -2,8 +2,8 @@
 
 namespace Marshmallow\Translatable\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Marshmallow\Translatable\Models\Language;
 
 class SetTranslatableLocaleController extends Controller

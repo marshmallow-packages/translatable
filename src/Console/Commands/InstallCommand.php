@@ -36,8 +36,8 @@ class InstallCommand extends Command
     protected function generateNovaResources()
     {
         $this->info('Generating nova resources');
-        Artisan::call('marshmallow:resource Language Translatable');
-        Artisan::call('marshmallow:resource Translation Translatable');
+        Artisan::call('marshmallow:resource Language Translatable --force');
+        Artisan::call('marshmallow:resource Translation Translatable --force');
 
         $this->info('Language and Translation resources have been created and are available in Nova');
     }
@@ -52,7 +52,7 @@ class InstallCommand extends Command
     protected function syncFilesToDatabase()
     {
         $this->info('Starting migrating language files to database');
-        Artisan::call('translation:sync-translations file database');
+        Artisan::call('translatable:sync-file-to-database');
         $this->info('Translation files are now available in the translations table.');
     }
 }

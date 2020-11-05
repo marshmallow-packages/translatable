@@ -2,12 +2,10 @@
 
 namespace Marshmallow\Translatable\Facades;
 
-/**
- */
 class Translatable extends \Illuminate\Support\Facades\Facade
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected static function getFacadeAccessor()
     {

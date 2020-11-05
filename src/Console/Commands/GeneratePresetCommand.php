@@ -4,8 +4,8 @@ namespace Marshmallow\Translatable\Console\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use Marshmallow\Translatable\Models\Language;
 use Marshmallow\HelperFunctions\Facades\Arrayable;
+use Marshmallow\Translatable\Models\Language;
 
 class GeneratePresetCommand extends Command
 {
@@ -39,14 +39,14 @@ class GeneratePresetCommand extends Command
                 'all'
             );
 
-            if ($language === 'all') {
+            if ('all' === $language) {
                 $languages = Language::get();
             } else {
                 $languages = Language::where('language', $language)->get();
             }
         }
 
-        if (! $languages->count()) {
+        if (!$languages->count()) {
             throw new Exception(__('No language found to build a preset for.'));
         }
 
@@ -59,14 +59,14 @@ class GeneratePresetCommand extends Command
 
             Arrayable::storeInFile(
                 $generated_preset,
-                $this->getPresetFolderPath() . "/$language->language.php"
+                $this->getPresetFolderPath()."/$language->language.php"
             );
         }
     }
 
     private function getPresetFolderPath()
     {
-        return __dir__ . '/../../../resources/presets';
+        return __DIR__.'/../../../resources/presets';
     }
 
     private function getAvailableLanguagesArray()
