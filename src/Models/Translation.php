@@ -8,6 +8,13 @@ class Translation extends Model
 {
     protected $guarded = [];
 
+    /**
+     * The relationships that should always be loaded.
+     *
+     * @var array
+     */
+    protected $with = ['language'];
+
     public function language()
     {
         return $this->belongsTo(Language::class);

@@ -2,14 +2,21 @@
 
 namespace Marshmallow\Translatable\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Marshmallow\Translatable\Traits\Translatable;
+use Illuminate\Database\Eloquent\Model;
 
 class Language extends Model
 {
     use Translatable;
 
     protected $guarded = [];
+
+    /**
+     * The relationships that should always be loaded.
+     *
+     * @var array
+     */
+    // protected $with = ['translations'];
 
     public function translatableColumns(): array
     {
