@@ -2,8 +2,8 @@
 
 namespace Marshmallow\Translatable\Traits;
 
-use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Models\Translatable as TranslatableModel;
@@ -20,7 +20,7 @@ trait Translatable
     public static function bootTranslatable()
     {
         static::creating(function (Model $resource) {
-            /**
+            /*
              * Creating should always be done in the original
              * lanuage and our nova package will not make it
              * possible to insert translations directly. You
@@ -30,15 +30,13 @@ trait Translatable
         });
 
         static::updating(function (Model $resource) {
-
-            /**
+            /*
         	 * If the current translatable locale is different
         	 * from the original, then we are creating or updating
         	 * translations.
         	 */
             if ($resource->weAreTranslating()) {
-
-                /**
+                /*
         		 * Create the translations.
         		 */
                 $resource->setTranslation(
@@ -46,7 +44,7 @@ trait Translatable
                     $resource->getDirty()
                 );
 
-                /**
+                /*
         		 * Reset this resource to its original values
         		 * because the should nog be stored in the
         		 * resource itself.
@@ -56,7 +54,7 @@ trait Translatable
         });
 
         static::deleting(function (Model $resource) {
-            /**
+            /*
              * Delete the existing translations.
              */
             $resource->translatable()->delete();
@@ -65,17 +63,17 @@ trait Translatable
 
     public function weAreTranslating()
     {
-        return (Request::getTranslatableLocale() !== config('app.locale'));
+        return Request::getTranslatableLocale() !== config('app.locale');
     }
 
     public function weAreNotTranslating()
     {
-        return (! $this->weAreTranslating());
+        return !$this->weAreTranslating();
     }
 
     public function resetToOriginal(): self
     {
-        if (! $this->isDirty()) {
+        if (!$this->isDirty()) {
             return $this;
         }
         foreach ($this->getDirty() as $column => $new_value) {
@@ -94,7 +92,7 @@ trait Translatable
         $source_fields = $this->convertTranslationInputToArray($source_field, $translated_value);
 
         foreach ($source_fields as $source_field => $translated_value) {
-            if (! $this->isTranslatableAttribute($source_field)) {
+            if (!$this->isTranslatableAttribute($source_field)) {
                 continue;
             }
             if ($translatable = $this->getExistingTranslation($source_field, $language)) {
@@ -117,7 +115,7 @@ trait Translatable
      */
     public function getAttributeValue($key)
     {
-        if ($this->weAreNotTranslating() || ! $this->isTranslatableAttribute($key)) {
+        if ($this->weAreNotTranslating() || !$this->isTranslatableAttribute($key)) {
             return parent::getAttributeValue($key);
         }
 
@@ -136,7 +134,7 @@ trait Translatable
         if ($translation = $this->getExistingTranslation($source_field, $language)) {
             $translation = $translation->translated_value;
 
-            /**
+            /*
              * Make sure we apply casts and mutators.
              */
             return $this->transformModelValue($source_field, $translation);
@@ -146,7 +144,7 @@ trait Translatable
     }
 
     /**
-     * Set up the relationship
+     * Set up the relationship.
      */
     public function translatable()
     {
@@ -199,7 +197,7 @@ trait Translatable
     public function getNotTranslateColumns()
     {
         if (class_exists(\App\Nova\Resource::class) && $this instanceof \App\Nova\Resource) {
-            $resource = new $this::$model;
+            $resource = new $this::$model();
 
             return $resource->notTranslateColumns();
         }
@@ -214,7 +212,7 @@ trait Translatable
     public function getTranslatableColumns()
     {
         if (class_exists(\App\Nova\Resource::class) && $this instanceof \App\Nova\Resource) {
-            $resource = new $this::$model;
+            $resource = new $this::$model();
 
             return $resource->translatableColumns();
         }
@@ -228,7 +226,7 @@ trait Translatable
     public function getTranslatableAttributes(): array
     {
         $translatable_columns = array_keys($this->getAttributes());
-        if (! empty($this->getTranslatableColumns())) {
+        if (!empty($this->getTranslatableColumns())) {
             $translatable_columns = $this->getTranslatableColumns();
         }
 
@@ -239,7 +237,7 @@ trait Translatable
         if (isset($this->protected_from_translations) && is_array($this->protected_from_translations)) {
             foreach ($this->protected_from_translations as $protected_column) {
                 $key = array_search($protected_column, $translatable_columns);
-                if ($key === false) {
+                if (false === $key) {
                     continue;
                 }
                 unset($translatable_columns[$key]);
@@ -251,7 +249,7 @@ trait Translatable
 
     /**
      * Convert the input to an array so both methods below are possible
-     * $page->setTranslation('nl', 'name', 'Artikelen');
+     * $page->setTranslation('nl', 'name', 'Artikelen');.
      *
      * $page->setTranslation('nl', [
      *     'name' => 'Artikelen',
@@ -277,7 +275,7 @@ trait Translatable
      */
     public function fields(Request $request)
     {
-        if ($this->weAreNotTranslating() || ($request->has('editMode') && $request->editMode == 'create')) {
+        if ($this->weAreNotTranslating() || ($request->has('editMode') && 'create' == $request->editMode)) {
             return $this->addTranslationTogglerField(
                 $this->translatableFields($request),
                 $request
@@ -286,7 +284,7 @@ trait Translatable
 
         $fields = $this->translatableFields($request);
         foreach ($fields as $key => $field) {
-            if (isset($field->attribute) && ! $this->isTranslatableAttribute($field->attribute)) {
+            if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
                 unset($fields[$key]);
             }
         }
@@ -298,7 +296,7 @@ trait Translatable
     }
 
     /**
-     * LEGACY FROM MULTI-LANGUAGE PACKAGE
+     * LEGACY FROM MULTI-LANGUAGE PACKAGE.
      */
     public function localeRoute(Language $language = null)
     {
@@ -337,11 +335,11 @@ trait Translatable
     }
 
     /**
-     * LEGACY FROM MULTI-LANGUAGE PACKAGE
+     * LEGACY FROM MULTI-LANGUAGE PACKAGE.
      */
 
     /**
-     * Get the current locale
+     * Get the current locale.
      */
     public function getLocale(Language $language = null): string
     {

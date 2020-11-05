@@ -11,7 +11,7 @@ trait TranslatableFields
 
     public function fields(Request $request)
     {
-        if ($this->weAreNotTranslating() || ($request->has('editMode') && $request->editMode == 'create')) {
+        if ($this->weAreNotTranslating() || ($request->has('editMode') && 'create' == $request->editMode)) {
             return $this->addTranslationTogglerField(
                 $this->translatableFields($request),
                 $request
@@ -20,7 +20,7 @@ trait TranslatableFields
 
         $fields = $this->translatableFields($request);
         foreach ($fields as $key => $field) {
-            if (isset($field->attribute) && ! $this->isTranslatableAttribute($field->attribute)) {
+            if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
                 unset($fields[$key]);
             }
         }

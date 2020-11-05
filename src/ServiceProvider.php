@@ -2,22 +2,22 @@
 
 namespace Marshmallow\Translatable;
 
-use Request;
-use Laravel\Nova\Nova;
-use Laravel\Nova\Events\ServingNova;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Laravel\Nova\Events\ServingNova;
+use Laravel\Nova\Nova;
+use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
+use Marshmallow\Translatable\Console\Commands\InstallCommand;
+use Marshmallow\Translatable\Console\Commands\PresetCommand;
 use Marshmallow\Translatable\Models\Language;
+use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
+use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
+use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
+use Marshmallow\Translatable\Scanner\Drivers\Translation;
 use Marshmallow\Translatable\Scanner\Scanner;
 use Marshmallow\Translatable\Scanner\TranslationManager;
-use Marshmallow\Translatable\Scanner\Drivers\Translation;
-use Marshmallow\Translatable\Console\Commands\PresetCommand;
-use Marshmallow\Translatable\Console\Commands\InstallCommand;
-use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
-use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
-use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
-use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
+use Request;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -53,9 +53,9 @@ class ServiceProvider extends BaseServiceProvider
         });
 
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
         $this->publishes([
-            __DIR__ . '/../config/translatable.php' => config_path('translatable.php'),
+            __DIR__.'/../config/translatable.php' => config_path('translatable.php'),
         ]);
     }
 
@@ -80,7 +80,7 @@ class ServiceProvider extends BaseServiceProvider
      */
     private function mergeConfiguration()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/translatable.php', 'translatable');
+        $this->mergeConfigFrom(__DIR__.'/../config/translatable.php', 'translatable');
     }
 
     /**
@@ -112,7 +112,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->singleton(Scanner::class, function () {
             $config = $this->app['config']['translatable'];
 
-            return new Scanner(new Filesystem, $config['scan_paths'], $config['translation_methods']);
+            return new Scanner(new Filesystem(), $config['scan_paths'], $config['translation_methods']);
         });
 
         $this->app->singleton(Translation::class, function ($app) {

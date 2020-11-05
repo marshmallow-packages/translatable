@@ -32,7 +32,7 @@ class AddTranslationKeyCommand extends BaseCommand
         $type = $this->anticipate(__('translation::translation.prompt_type'), ['single', 'group']);
 
         // if the group type is selected, prompt for the group key
-        if ($type === 'group') {
+        if ('group' === $type) {
             $file = $this->ask(__('translation::translation.prompt_group'));
         }
         $key = $this->ask(__('translation::translation.prompt_key'));
@@ -40,7 +40,7 @@ class AddTranslationKeyCommand extends BaseCommand
 
         // attempt to add the key for single or group and fail gracefully if
         // exception is thrown
-        if ($type === 'single') {
+        if ('single' === $type) {
             try {
                 $this->translation->addSingleTranslation($language, 'single', $key, $value);
 
@@ -48,7 +48,7 @@ class AddTranslationKeyCommand extends BaseCommand
             } catch (\Exception $e) {
                 return $this->error($e->getMessage());
             }
-        } elseif ($type === 'group') {
+        } elseif ('group' === $type) {
             try {
                 $file = str_replace('.php', '', $file);
                 $this->translation->addGroupTranslation($language, $file, $key, $value);

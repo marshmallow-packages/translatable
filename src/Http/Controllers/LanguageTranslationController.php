@@ -2,13 +2,13 @@
 
 namespace Marshmallow\Translatable\Http\Controllers;
 
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
-use Illuminate\Pagination\Paginator;
-use Marshmallow\Translatable\Scanner\Drivers\Translation;
+use Illuminate\Support\Str;
 use Marshmallow\Translatable\Http\Requests\TranslationRequest;
+use Marshmallow\Translatable\Scanner\Drivers\Translation;
 
 class LanguageTranslationController extends Controller
 {
@@ -26,7 +26,7 @@ class LanguageTranslationController extends Controller
         $translations = $this->translation->filterTranslationsFor($language, $request->get('search'));
 
         if ($request->has('group') && $request->get('group')) {
-            if ($request->get('group') === 'single') {
+            if ('single' === $request->get('group')) {
                 $translations = $translations->get('single');
                 $translations = new Collection(['single' => $translations]);
             } else {
@@ -52,7 +52,7 @@ class LanguageTranslationController extends Controller
 
     public function update(Request $request, $language)
     {
-        if (! Str::contains($request->get('group'), 'single')) {
+        if (!Str::contains($request->get('group'), 'single')) {
             $this->translation->addGroupTranslation($language, $request->get('group'), $request->get('key'), $request->get('value') ?: '');
         } else {
             $this->translation->addSingleTranslation($language, $request->get('group'), $request->get('key'), $request->get('value') ?: '');

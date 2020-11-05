@@ -11,6 +11,7 @@ class Translation
      * Find all of the translations in the app without translation for a given language.
      *
      * @param string $language
+     *
      * @return array
      */
     public function findMissingTranslations($language)
@@ -24,8 +25,9 @@ class Translation
     /**
      * Recursively diff two arrays.
      *
-     * @param  array  $arrayOne
-     * @param  array  $arrayTwo
+     * @param array $arrayOne
+     * @param array $arrayTwo
+     *
      * @return array
      */
     public function arrayDiffAssocRecursive($arrayOne, $arrayTwo)
@@ -33,17 +35,17 @@ class Translation
         $difference = [];
         foreach ($arrayOne as $key => $value) {
             if (is_array($value) || $value instanceof Collection) {
-                if (! isset($arrayTwo[$key])) {
+                if (!isset($arrayTwo[$key])) {
                     $difference[$key] = $value;
-                } elseif (! (is_array($arrayTwo[$key]) || $arrayTwo[$key] instanceof Collection)) {
+                } elseif (!(is_array($arrayTwo[$key]) || $arrayTwo[$key] instanceof Collection)) {
                     $difference[$key] = $value;
                 } else {
                     $new_diff = $this->arrayDiffAssocRecursive($value, $arrayTwo[$key]);
-                    if ($new_diff != false) {
+                    if (false != $new_diff) {
                         $difference[$key] = $new_diff;
                     }
                 }
-            } elseif (! isset($arrayTwo[$key])) {
+            } elseif (!isset($arrayTwo[$key])) {
                 $difference[$key] = $value;
             }
         }
@@ -55,6 +57,7 @@ class Translation
      * Save all of the translations in the app without translation for a given language.
      *
      * @param string $language
+     *
      * @return void
      */
     public function saveMissingTranslations($language = false)
@@ -82,6 +85,7 @@ class Translation
      * Get all translations for a given language merged with the source language.
      *
      * @param string $language
+     *
      * @return Collection
      */
     public function getSourceLanguageTranslationsWith($language)
@@ -109,12 +113,13 @@ class Translation
      *
      * @param string $language
      * @param string $filter
+     *
      * @return Collection
      */
     public function filterTranslationsFor($language, $filter)
     {
         $allTranslations = $this->getSourceLanguageTranslationsWith(($language));
-        if (! $filter) {
+        if (!$filter) {
             return $allTranslations;
         }
 
