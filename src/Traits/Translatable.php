@@ -2,6 +2,7 @@
 
 namespace Marshmallow\Translatable\Traits;
 
+use App\Nova\Resource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Marshmallow\HelperFunctions\Facades\URL;
@@ -22,7 +23,7 @@ trait Translatable
         static::creating(function (Model $resource) {
             /*
              * Creating should always be done in the original
-             * lanuage and our nova package will not make it
+             * language and our nova package will not make it
              * possible to insert translations directly. You
              * will need to create the resource in the app.locale
              * first.
@@ -156,7 +157,7 @@ trait Translatable
      * can make it possible to get the language by more than just
      * the language column.
      */
-    protected function getLanguageByTranslationParameter($language): Model
+    protected function getLanguageByTranslationParameter($language): Language
     {
         return Language::where('language', $language)->firstOrFail();
     }
@@ -191,12 +192,12 @@ trait Translatable
     }
 
     /**
-     * This is a traits used on Elequent models and on
+     * This is a traits used on Eloquent models and on
      * Nova resources. We check here which one we have.
      */
     public function getNotTranslateColumns()
     {
-        if (class_exists(\App\Nova\Resource::class) && $this instanceof \App\Nova\Resource) {
+        if (class_exists(Resource::class) && $this instanceof Resource) {
             $resource = new $this::$model();
 
             return $resource->notTranslateColumns();
@@ -206,12 +207,12 @@ trait Translatable
     }
 
     /**
-     * This is a traits used on Elequent models and on
+     * This is a traits used on Eloquent models and on
      * Nova resources. We check here which one we have.
      */
     public function getTranslatableColumns()
     {
-        if (class_exists(\App\Nova\Resource::class) && $this instanceof \App\Nova\Resource) {
+        if (class_exists(Resource::class) && $this instanceof Resource) {
             $resource = new $this::$model();
 
             return $resource->translatableColumns();
@@ -249,10 +250,10 @@ trait Translatable
 
     /**
      * Convert the input to an array so both methods below are possible
-     * $page->setTranslation('nl', 'name', 'Artikelen');.
+     * $page->setTranslation('en', 'name', 'Products');.
      *
-     * $page->setTranslation('nl', [
-     *     'name' => 'Artikelen',
+     * $page->setTranslation('en', [
+     *     'name' => 'Products',
      * ]);
      */
     protected function convertTranslationInputToArray($source_field, $translated_value = null): array
@@ -276,7 +277,7 @@ trait Translatable
     public function fields(Request $request)
     {
         if ($this->weAreNotTranslating() || ($request->has('editMode') && 'create' == $request->editMode)) {
-            return $this->addTranslationTogglerField(
+            return $this->addTranslationToggleField(
                 $this->translatableFields($request),
                 $request
             );
@@ -289,7 +290,7 @@ trait Translatable
             }
         }
 
-        return $this->addTranslationTogglerField(
+        return $this->addTranslationToggleField(
             $fields,
             $request
         );

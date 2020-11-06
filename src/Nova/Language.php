@@ -97,10 +97,10 @@ class Language extends Resource
 
             AdvancedImage::make(__('Icon'), 'icon')
                         ->croppable(
-                            config('translatable.flagicon.height') / config('translatable.flagicon.width')
+                            config('translatable.flag_icon.height') / config('translatable.flag_icon.width')
                         )->resize(
-                            config('translatable.flagicon.height'),
-                            config('translatable.flagicon.width')
+                            config('translatable.flag_icon.height'),
+                            config('translatable.flag_icon.width')
                         ),
 
             Number::make(__('Translations'))
