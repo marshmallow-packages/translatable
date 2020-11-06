@@ -16,7 +16,7 @@ class Language extends Model
      *
      * @var array
      */
-    // protected $with = ['translations'];
+    protected $with = ['translations'];
 
     public function translatableColumns(): array
     {

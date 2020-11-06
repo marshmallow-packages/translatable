@@ -2,11 +2,11 @@
 
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
-use Marshmallow\Translatable\Models\Language;
-use Marshmallow\Translatable\Models\Translation as TranslationModel;
 use Marshmallow\Translatable\Scanner\Exceptions\LanguageExistsException;
+use Marshmallow\Translatable\Models\Translation as TranslationModel;
+use Marshmallow\Translatable\Models\Language;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Collection;
 
 class Database extends Translation implements DriverInterface
 {
@@ -14,10 +14,17 @@ class Database extends Translation implements DriverInterface
 
     protected $scanner;
 
+    // Store translations to avoid multiple reloads of the same translations per request.
+    protected static $translations = [];
+    protected $getLanguages;
+    protected $curTranslations;
+
     public function __construct($sourceLanguage, $scanner)
     {
         $this->sourceLanguage = $sourceLanguage;
         $this->scanner = $scanner;
+        $this->getLanguages = Language::cursor()->remember();
+        //  $this->getLanguages = Language::with('translations')->cursor()->remember();
     }
 
     /**
@@ -161,12 +168,24 @@ class Database extends Translation implements DriverInterface
      */
     public function getSingleTranslationsFor($language)
     {
+
+        if (!empty(self::$translations['single'][$language])) {
+            return self::$translations['single'][$language];
+        }
         $translations = $this->getLanguage($language)
             ->translations()
             ->where('group', 'like', '%single')
             ->orWhereNull('group')
             ->get()
             ->groupBy('group');
+
+        // $translations = $this->curTranslations
+        //     ->where('group', 'like', '%single')
+        //     ->orWhereNull('group')
+        //     ->groupBy('group');
+
+        // $this->getLanguage($language);
+        // $translations = $this->curTranslations->where('group', 'single')->groupBy('group'); //->where('group', 'null')
 
         // if there is no group, this is a legacy translation so we need to
         // update to 'single'. We do this here so it only happens once.
@@ -177,11 +196,13 @@ class Database extends Translation implements DriverInterface
             return $this->getSingleTranslationsFor($language);
         }
 
-        return $translations->map(function ($translations, $group) use ($language) {
+        self::$translations['single'][$language] = $translations->map(function ($translations, $group) use ($language) {
             return $translations->mapWithKeys(function ($translation) {
                 return [$translation->key => $translation->value];
             });
         });
+
+        return self::$translations['single'][$language];
     }
 
     /**
@@ -193,6 +214,10 @@ class Database extends Translation implements DriverInterface
      */
     public function getGroupTranslationsFor($language)
     {
+        if (!empty(self::$translations['group'][$language])) {
+            return self::$translations['group'][$language];
+        }
+
         if (config('translatable.cache.use')) {
             $translations = Cache::remember('translatable::getGroupTranslationsFor', config('translatable.cache.ttl'), function () use ($language) {
                 return $this->getLanguage($language)
@@ -204,18 +229,24 @@ class Database extends Translation implements DriverInterface
             });
         } else {
             $translations = $this->getLanguage($language)
-                                ->translations()
-                                ->whereNotNull('group')
-                                ->where('group', 'not like', '%single')
-                                ->get()
-                                ->groupBy('group');
+                            ->translations()
+                            ->whereNotNull('group')
+                            ->where('group', 'not like', '%single')
+                            ->get()
+                            ->groupBy('group');
+            // $translations = $this->curTranslations
+            //                 ->whereNotNull('group')
+            //                 ->where('group', 'not like', '%single')
+            //                 ->groupBy('group');
         }
 
-        return $translations->map(function ($translations) {
+        self::$translations['group'][$language] = $translations->map(function ($translations) {
             return $translations->mapWithKeys(function ($translation) {
                 return [$translation->key => $translation->value];
             });
         });
+
+        return self::$translations['group'][$language];
     }
 
     /**
@@ -251,12 +282,14 @@ class Database extends Translation implements DriverInterface
      */
     private function getLanguage($language)
     {
+
         if (config('translatable.cache.use')) {
             return Cache::remember('Translatable::getLanguage', config('translatable.cache.ttl'), function () use ($language) {
                 return Language::where('language', $language)->first();
             });
         } else {
-            return Language::where('language', $language)->first();
+            $language = $this->getLanguages->where('language', $language)->first();
+            return $language;
         }
     }
 

@@ -13,7 +13,7 @@ class Translation extends Model
      *
      * @var array
      */
-    protected $with = ['language'];
+    // protected $with = ['language'];
 
     public function language()
     {
