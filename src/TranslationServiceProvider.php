@@ -42,7 +42,7 @@ class TranslationServiceProvider extends ServiceProvider
 
     protected function registerDatabaseLoader()
     {
-        $this->app->singleton('translation.loader', function ($app) {
+        $this->app->singleton('translation.loader', function () {
             return new ContractDatabaseLoader($this->app->make(Translation::class));
         });
     }

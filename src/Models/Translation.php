@@ -4,16 +4,14 @@ namespace Marshmallow\Translatable\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Translation.
+ *
+ * @mixin Eloquent
+ */
 class Translation extends Model
 {
     protected $guarded = [];
-
-    /**
-     * The relationships that should always be loaded.
-     *
-     * @var array
-     */
-    // protected $with = ['language'];
 
     public function language()
     {

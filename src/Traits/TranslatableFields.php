@@ -12,7 +12,7 @@ trait TranslatableFields
     public function fields(Request $request)
     {
         if ($this->weAreNotTranslating() || ($request->has('editMode') && 'create' == $request->editMode)) {
-            return $this->addTranslationTogglerField(
+            return $this->addTranslationToggleField(
                 $this->translatableFields($request),
                 $request
             );
@@ -25,13 +25,13 @@ trait TranslatableFields
             }
         }
 
-        return $this->addTranslationTogglerField(
+        return $this->addTranslationToggleField(
             $fields,
             $request
         );
     }
 
-    protected function addTranslationTogglerField(array $fields, Request $request)
+    protected function addTranslationToggleField(array $fields, Request $request)
     {
         return array_merge([
             LanguageToggler::make(__('Select language')),

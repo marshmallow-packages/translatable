@@ -2,29 +2,27 @@
 
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
-use Marshmallow\Translatable\Scanner\Exceptions\LanguageExistsException;
-use Marshmallow\Translatable\Models\Translation as TranslationModel;
-use Marshmallow\Translatable\Models\Language;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
+use Marshmallow\Translatable\Models\Language;
+use Marshmallow\Translatable\Models\Translation as TranslationModel;
 
 class Database extends Translation implements DriverInterface
 {
-    protected $sourceLanguage;
-
     protected $scanner;
-
-    // Store translations to avoid multiple reloads of the same translations per request.
-    protected static $translations = [];
     protected $getLanguages;
+    protected $sourceLanguage;
     protected $curTranslations;
+
+    /*
+     * Store translations to avoid multiple reloads of the same translations per request.
+     */
+    protected static $translations = [];
 
     public function __construct($sourceLanguage, $scanner)
     {
         $this->sourceLanguage = $sourceLanguage;
         $this->scanner = $scanner;
         $this->getLanguages = Language::cursor()->remember();
-        //  $this->getLanguages = Language::with('translations')->cursor()->remember();
     }
 
     /**
@@ -42,9 +40,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Get all group translations from the application.
      *
-     * @return array
+     * @return Collection
      */
-    public function allGroup($language)
+    public function allGroup(string $language)
     {
         $groups = TranslationModel::getGroupsForLanguage($language);
 
@@ -68,11 +66,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Get all translations for a particular language.
      *
-     * @param string $language
-     *
      * @return Collection
      */
-    public function allTranslationsFor($language)
+    public function allTranslationsFor(string $language)
     {
         return Collection::make([
             'group' => $this->getGroupTranslationsFor($language),
@@ -162,16 +158,14 @@ class Database extends Translation implements DriverInterface
     /**
      * Get all of the single translations for a given language.
      *
-     * @param string $language
-     *
      * @return Collection
      */
-    public function getSingleTranslationsFor($language)
+    public function getSingleTranslationsFor(string $language)
     {
-
         if (!empty(self::$translations['single'][$language])) {
             return self::$translations['single'][$language];
         }
+
         $translations = $this->getLanguage($language)
             ->translations()
             ->where('group', 'like', '%single')
@@ -179,20 +173,17 @@ class Database extends Translation implements DriverInterface
             ->get()
             ->groupBy('group');
 
-        // $translations = $this->curTranslations
-        //     ->where('group', 'like', '%single')
-        //     ->orWhereNull('group')
-        //     ->groupBy('group');
-
-        // $this->getLanguage($language);
-        // $translations = $this->curTranslations->where('group', 'single')->groupBy('group'); //->where('group', 'null')
-
-        // if there is no group, this is a legacy translation so we need to
-        // update to 'single'. We do this here so it only happens once.
+        /*
+         * if there is no group, this is a legacy translation so we need to
+         * update to 'single'. We do this here so it only happens once.
+         */
         if ($this->hasLegacyGroups($translations->keys())) {
             TranslationModel::whereNull('group')->update(['group' => 'single']);
-            // if any legacy groups exist, rerun the method so we get the
-            // updated keys.
+
+            /*
+             * if any legacy groups exist, rerun the method so we get the
+             * updated keys.
+             */
             return $this->getSingleTranslationsFor($language);
         }
 
@@ -208,37 +199,20 @@ class Database extends Translation implements DriverInterface
     /**
      * Get all of the group translations for a given language.
      *
-     * @param string $language
-     *
      * @return Collection
      */
-    public function getGroupTranslationsFor($language)
+    public function getGroupTranslationsFor(string $language)
     {
         if (!empty(self::$translations['group'][$language])) {
             return self::$translations['group'][$language];
         }
 
-        if (config('translatable.cache.use')) {
-            $translations = Cache::remember('translatable::getGroupTranslationsFor', config('translatable.cache.ttl'), function () use ($language) {
-                return $this->getLanguage($language)
-                            ->translations()
-                            ->whereNotNull('group')
-                            ->where('group', 'not like', '%single')
-                            ->get()
-                            ->groupBy('group');
-            });
-        } else {
-            $translations = $this->getLanguage($language)
-                            ->translations()
-                            ->whereNotNull('group')
-                            ->where('group', 'not like', '%single')
-                            ->get()
-                            ->groupBy('group');
-            // $translations = $this->curTranslations
-            //                 ->whereNotNull('group')
-            //                 ->where('group', 'not like', '%single')
-            //                 ->groupBy('group');
-        }
+        $translations = $this->getLanguage($language)
+            ->translations()
+            ->whereNotNull('group')
+            ->where('group', 'not like', '%single')
+            ->get()
+            ->groupBy('group');
 
         self::$translations['group'][$language] = $translations->map(function ($translations) {
             return $translations->mapWithKeys(function ($translation) {
@@ -252,11 +226,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Determine whether or not a language exists.
      *
-     * @param string $language
-     *
      * @return bool
      */
-    public function languageExists($language)
+    public function languageExists(string $language)
     {
         return $this->getLanguage($language) ? true : false;
     }
@@ -264,11 +236,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Get a collection of group names for a given language.
      *
-     * @param string $language
-     *
      * @return Collection
      */
-    public function getGroupsFor($language)
+    public function getGroupsFor(string $language)
     {
         return $this->allGroup($language);
     }
@@ -276,21 +246,11 @@ class Database extends Translation implements DriverInterface
     /**
      * Get a language from the database.
      *
-     * @param string $language
-     *
      * @return Language
      */
-    private function getLanguage($language)
+    private function getLanguage(string $language)
     {
-
-        if (config('translatable.cache.use')) {
-            return Cache::remember('Translatable::getLanguage', config('translatable.cache.ttl'), function () use ($language) {
-                return Language::where('language', $language)->first();
-            });
-        } else {
-            $language = $this->getLanguages->where('language', $language)->first();
-            return $language;
-        }
+        return $this->getLanguages->where('language', $language)->first();
     }
 
     /**
@@ -298,11 +258,9 @@ class Database extends Translation implements DriverInterface
      * Previously, this was handled by setting the group value to NULL, now
      * we use 'single' to cater for vendor JSON language files.
      *
-     * @param Collection $groups
-     *
      * @return bool
      */
-    private function hasLegacyGroups($groups)
+    private function hasLegacyGroups(Collection $groups)
     {
         return $groups->filter(function ($key) {
             return '' === $key;

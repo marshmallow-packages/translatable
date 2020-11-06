@@ -2,9 +2,13 @@
 
 namespace Marshmallow\Translatable\Models;
 
-use Marshmallow\Translatable\Traits\Translatable;
 use Illuminate\Database\Eloquent\Model;
+use Marshmallow\Translatable\Traits\Translatable;
 
+/*
+ * @mixin \Eloquent
+ * @mixin \Illuminate\Database\Eloquent\Builder
+ */
 class Language extends Model
 {
     use Translatable;
