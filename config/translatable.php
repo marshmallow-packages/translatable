@@ -9,7 +9,7 @@ return [
     | Update the ratios for the flag uploader here.
     |
     */
-    'flagicon' => [
+    'flag_icon' => [
         'height' => 40,
         'width' => 40,
     ],
