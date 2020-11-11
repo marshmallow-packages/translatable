@@ -2,11 +2,11 @@
 
 namespace Marshmallow\Translatable;
 
+use Illuminate\Translation\TranslationServiceProvider as ServiceProvider;
 use Illuminate\Translation\Translator;
 use Marshmallow\HelperFunctions\Facades\URL;
-use Marshmallow\Translatable\Scanner\Drivers\Translation;
 use Marshmallow\Translatable\Scanner\ContractDatabaseLoader;
-use Illuminate\Translation\TranslationServiceProvider as ServiceProvider;
+use Marshmallow\Translatable\Scanner\Drivers\Translation;
 
 class TranslationServiceProvider extends ServiceProvider
 {
@@ -42,7 +42,7 @@ class TranslationServiceProvider extends ServiceProvider
 
     protected function registerDatabaseLoader()
     {
-        $this->app->singleton('translation.loader', function ($app) {
+        $this->app->singleton('translation.loader', function () {
             return new ContractDatabaseLoader($this->app->make(Translation::class));
         });
     }

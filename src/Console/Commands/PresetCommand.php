@@ -36,42 +36,40 @@ class PresetCommand extends Command
      */
     public function handle()
     {
-        /**
+        /*
          * Make sure we have a valid lanugage provided in the command
          */
         $this->fillLanguageProperty();
 
-        /**
+        /*
          * Get the correct preset that the user wishes to import.
          */
         $this->fillPresetProperty();
 
-        /**
+        /*
          * Check if we interpreted everything correctly.
          */
-        if (! $this->importContextIsCorrect()) {
+        if (!$this->importContextIsCorrect()) {
             return $this->stopImporter();
         }
 
-        /**
+        /*
          * Check if there is something to import or not.
          */
-        if (! $this->checkIfThereIsSomethingToImport()) {
+        if (!$this->checkIfThereIsSomethingToImport()) {
             return $this->stopImporter();
         }
 
-
-        /**
+        /*
          * Ask the user if they wish to see the values that will
          * be imported in a table in there terminal.
          */
         $this->askAndShowTheImportDataInATable();
 
-
-        /**
+        /*
          * Continue with the import!!
          */
-        if (! $this->option('force') && ! $this->confirm(__('Please type "yes" to start the import'))) {
+        if (!$this->option('force') && !$this->confirm(__('Please type "yes" to start the import'))) {
             return $this->stopImporter();
         }
 
@@ -113,7 +111,7 @@ class PresetCommand extends Command
     {
         $this->info('Matching preset to your database.');
         $this->untranslated_items = $this->buildUntranslatedPresetArray();
-        if (count($this->untranslated_items) === 0) {
+        if (0 === count($this->untranslated_items)) {
             $this->info('There is nothing to import for you.');
 
             return false;
@@ -131,7 +129,7 @@ class PresetCommand extends Command
     private function fillPresetProperty()
     {
         $preset_path = $this->getPresetFilePath($this->language->language);
-        if (! file_exists($preset_path)) {
+        if (!file_exists($preset_path)) {
             $preset = $this->choice(
                 __('We couldnt match a preset. Which preset do you wish to import?'),
                 $this->getAvailablePresetArray()
@@ -140,7 +138,7 @@ class PresetCommand extends Command
             $preset_path = $this->getPresetFilePath($preset);
         }
 
-        if (! file_exists($preset_path)) {
+        if (!file_exists($preset_path)) {
             throw new Exception(__('Preset is not available. Please try again.'));
         }
 
@@ -154,11 +152,11 @@ class PresetCommand extends Command
         }
 
         $confirm_text = __('We are going to import our ":preset_name" into your database connected to the language ":local_language_name". Is this correct?', [
-            'preset_name' => 'Preset ' . $this->preset['name'],
+            'preset_name' => 'Preset '.$this->preset['name'],
             'local_language_name' => $this->language->name,
         ]);
 
-        if (! $this->confirm($confirm_text)) {
+        if (!$this->confirm($confirm_text)) {
             return false;
         }
 
@@ -182,7 +180,7 @@ class PresetCommand extends Command
                                         ->where('key', $translation_preset['key'])
                                         ->first();
 
-            if (! $translation || ! $translation->value) {
+            if (!$translation || !$translation->value) {
                 $untranslated_items[] = $translation_preset;
             }
             $this->output->progressAdvance();
@@ -200,25 +198,25 @@ class PresetCommand extends Command
 
     private function getPreset(string $preset_file_path)
     {
-        $preset = include($preset_file_path);
+        $preset = include $preset_file_path;
 
         return $preset;
     }
 
     private function getPresetFilePath(string $language_code)
     {
-        return $this->getPresetFolderPath() . "/$language_code.php";
+        return $this->getPresetFolderPath()."/$language_code.php";
     }
 
     private function getPresetFolderPath()
     {
-        return __dir__ . '/../../../resources/presets';
+        return __DIR__.'/../../../resources/presets';
     }
 
     private function getAvailablePresetArray()
     {
         $presets = [];
-        $files = glob($this->getPresetFolderPath() . "/*.{php}", GLOB_BRACE);
+        $files = glob($this->getPresetFolderPath().'/*.{php}', GLOB_BRACE);
         foreach ($files as $file) {
             $preset = $this->getPreset($file);
             $presets[$preset['locale']] = $preset['name'];

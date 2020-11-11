@@ -2,6 +2,8 @@
 
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
+use Illuminate\Support\Collection;
+
 interface DriverInterface
 {
     /**
@@ -16,7 +18,7 @@ interface DriverInterface
      *
      * @return array
      */
-    public function allGroup($language);
+    public function allGroup(string $language);
 
     /**
      * Get all the translations from the application.
@@ -28,101 +30,63 @@ interface DriverInterface
     /**
      * Get all translations for a particular language.
      *
-     * @param string $language
      * @return Collection
      */
-    public function allTranslationsFor($language);
-
-    /**
-     * Add a new language to the application.
-     *
-     * @param string $language
-     * @return void
-     */
-    public function addLanguage($language, $name = null);
-
-    /**
-     * Add a new group type translation.
-     *
-     * @param string $language
-     * @param string $key
-     * @param string $value
-     * @return void
-     */
-    public function addGroupTranslation($language, $group, $key, $value = '');
-
-    /**
-     * Add a new single type translation.
-     *
-     * @param string $language
-     * @param string $key
-     * @param string $value
-     * @return void
-     */
-    public function addSingleTranslation($language, $vendor, $key, $value = '');
+    public function allTranslationsFor(string $language);
 
     /**
      * Get all of the single translations for a given language.
      *
-     * @param string $language
      * @return Collection
      */
-    public function getSingleTranslationsFor($language);
+    public function getSingleTranslationsFor(string $language);
 
     /**
      * Get all of the group translations for a given language.
      *
-     * @param string $language
      * @return Collection
      */
-    public function getGroupTranslationsFor($language);
+    public function getGroupTranslationsFor(string $language);
 
     /**
      * Determine whether or not a language exists.
      *
-     * @param string $language
      * @return bool
      */
-    public function languageExists($language);
+    public function languageExists(string $language);
 
     /**
      * Find all of the translations in the app without translation for a given language.
      *
-     * @param string $language
      * @return array
      */
-    public function findMissingTranslations($language);
+    public function findMissingTranslations(string $language);
 
     /**
      * Save all of the translations in the app without translation for a given language.
      *
-     * @param string $language
      * @return void
      */
-    public function saveMissingTranslations($language = false);
+    public function saveMissingTranslations(string $language = '');
 
     /**
      * Get a collection of group names for a given language.
      *
-     * @param string $language
      * @return Collection
      */
-    public function getGroupsFor($language);
+    public function getGroupsFor(string $language);
 
     /**
      * Get all translations for a given language merged with the source language.
      *
-     * @param string $language
      * @return Collection
      */
-    public function getSourceLanguageTranslationsWith($language);
+    public function getSourceLanguageTranslationsWith(string $language);
 
     /**
      * Filter all keys and translations for a given language and string.
      *
-     * @param string $language
-     * @param string $filter
      * @return Collection
      */
-    public function filterTranslationsFor($language, $filter);
+    public function filterTranslationsFor(string $language, string $filter);
 }

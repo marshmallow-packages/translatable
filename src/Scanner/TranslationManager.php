@@ -2,10 +2,11 @@
 
 namespace Marshmallow\Translatable\Scanner;
 
-use Illuminate\Support\Str;
 use Illuminate\Filesystem\Filesystem;
-use Marshmallow\Translatable\Scanner\Drivers\File;
+use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Marshmallow\Translatable\Scanner\Drivers\Database;
+use Marshmallow\Translatable\Scanner\Drivers\File;
 
 class TranslationManager
 {
@@ -28,8 +29,8 @@ class TranslationManager
         $driverResolver = Str::studly($driver);
         $method = "resolve{$driverResolver}Driver";
 
-        if (! method_exists($this, $method)) {
-            throw new \InvalidArgumentException("Invalid driver [$driver]");
+        if (!method_exists($this, $method)) {
+            throw new InvalidArgumentException("Invalid driver [$driver]");
         }
 
         return $this->{$method}();
@@ -37,7 +38,7 @@ class TranslationManager
 
     protected function resolveFileDriver()
     {
-        return new File(new Filesystem, $this->app['path.lang'], $this->app->config['app']['locale'], $this->scanner);
+        return new File(new Filesystem(), $this->app['path.lang'], $this->app->config['app']['locale'], $this->scanner);
     }
 
     protected function resolveDatabaseDriver()

@@ -3,11 +3,11 @@
 namespace Marshmallow\Translatable\Nova;
 
 use App\Nova\Resource;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
-use Laravel\Nova\Fields\BelongsTo;
-use Illuminate\Database\Eloquent\Model;
 use Marshmallow\LiveUpdate\TextLiveUpdate;
 use Marshmallow\Translatable\Nova\Filters\LanguageFilter;
 use Marshmallow\Translatable\Nova\Filters\NoTranslationAvailableFilter;
@@ -77,7 +77,6 @@ class Translation extends Resource
     public function fields(Request $request)
     {
         return [
-
             BelongsTo::make(__('Language'), 'language', Language::class),
 
             Text::make(__('Group'), 'group')
@@ -111,7 +110,6 @@ class Translation extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function cards(Request $request)
@@ -122,21 +120,19 @@ class Translation extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function filters(Request $request)
     {
         return [
-            new LanguageFilter,
-            new NoTranslationAvailableFilter,
+            new LanguageFilter(),
+            new NoTranslationAvailableFilter(),
         ];
     }
 
     /**
      * Get the lenses available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function lenses(Request $request)
@@ -147,7 +143,6 @@ class Translation extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function actions(Request $request)

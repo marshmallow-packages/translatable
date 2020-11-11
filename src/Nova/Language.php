@@ -3,14 +3,14 @@
 namespace Marshmallow\Translatable\Nova;
 
 use App\Nova\Resource;
-use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Number;
-use Laravel\Nova\Fields\HasMany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\Text;
 use Marshmallow\AdvancedImage\AdvancedImage;
-use Marshmallow\Translatable\Traits\TranslatableFields;
 use Marshmallow\Translatable\Models\Language as LanguageModel;
+use Marshmallow\Translatable\Traits\TranslatableFields;
 
 class Language extends Resource
 {
@@ -97,10 +97,10 @@ class Language extends Resource
 
             AdvancedImage::make(__('Icon'), 'icon')
                         ->croppable(
-                            config('translatable.flagicon.height') / config('translatable.flagicon.width')
+                            config('translatable.flag_icon.height') / config('translatable.flag_icon.width')
                         )->resize(
-                            config('translatable.flagicon.height'),
-                            config('translatable.flagicon.width')
+                            config('translatable.flag_icon.height'),
+                            config('translatable.flag_icon.width')
                         ),
 
             Number::make(__('Translations'))
@@ -116,7 +116,6 @@ class Language extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function cards(Request $request)
@@ -127,7 +126,6 @@ class Language extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function filters(Request $request)
@@ -138,7 +136,6 @@ class Language extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function lenses(Request $request)
@@ -149,7 +146,6 @@ class Language extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function actions(Request $request)

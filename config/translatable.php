@@ -1,8 +1,7 @@
 <?php
 
 return [
-
-	/*
+    /*
     |--------------------------------------------------------------------------
     | Language flag icons
     |--------------------------------------------------------------------------
@@ -10,14 +9,9 @@ return [
     | Update the ratios for the flag uploader here.
     |
     */
-	'flagicon' => [
-		'height' => 40,
-		'width' => 40,
-	],
-
-    'cache' => [
-        'use' => false,
-        'ttl' => 600,
+    'flag_icon' => [
+        'height' => 40,
+        'width' => 40,
     ],
 
     /*
@@ -41,7 +35,7 @@ return [
     |
     */
     'scan_paths' => [
-    	app_path(),
-    	resource_path(),
+        app_path(),
+        resource_path(),
     ],
 ];

@@ -5,11 +5,22 @@ namespace Marshmallow\Translatable\Models;
 use Illuminate\Database\Eloquent\Model;
 use Marshmallow\Translatable\Traits\Translatable;
 
+/*
+ * @mixin \Eloquent
+ * @mixin \Illuminate\Database\Eloquent\Builder
+ */
 class Language extends Model
 {
     use Translatable;
 
     protected $guarded = [];
+
+    /**
+     * The relationships that should always be loaded.
+     *
+     * @var array
+     */
+    protected $with = ['translations'];
 
     public function translatableColumns(): array
     {
@@ -23,7 +34,7 @@ class Language extends Model
         parent::boot();
 
         static::deleting(function (Model $language) {
-            /**
+            /*
              * Delete the existing seoable information.
              */
             $language->translations()->delete();
@@ -32,7 +43,7 @@ class Language extends Model
 
     public function getIcon()
     {
-        if (! $this->icon) {
+        if (!$this->icon) {
             return $this->getNoIconAvailableImage();
         }
 
@@ -41,12 +52,12 @@ class Language extends Model
 
     public function isDefault()
     {
-        return ($this->language === config('app.locale'));
+        return $this->language === config('app.locale');
     }
 
     public function currentlySelected()
     {
-        return ($this->language == request()->getTranslatableLocale());
+        return $this->language == request()->getTranslatableLocale();
     }
 
     public function setTranslatableLocaleRoute()
@@ -56,7 +67,7 @@ class Language extends Model
 
     public function isClickable()
     {
-        if (request()->has('editMode') && request()->editMode == 'create') {
+        if (request()->has('editMode') && 'create' == request()->editMode) {
             return false;
         }
 
@@ -70,17 +81,17 @@ class Language extends Model
 
     public static function currentTranslatableIsDefault()
     {
-        return (request()->getTranslatableLocale() === config('app.locale'));
+        return request()->getTranslatableLocale() === config('app.locale');
     }
 
     protected function getBase64StringFromImage(string $image_location): string
     {
-        return 'data:image/png;base64,' . base64_encode(file_get_contents($image_location));
+        return 'data:image/png;base64,'.base64_encode(file_get_contents($image_location));
     }
 
-    protected function getPrepackedImagePath(string $image):string
+    protected function getPrepackedImagePath(string $image): string
     {
-        return __dir__ . '/../../resources/flags/' . strtoupper($image) . '.png';
+        return __DIR__.'/../../resources/flags/'.strtoupper($image).'.png';
     }
 
     protected function getNoIconAvailableImage(): string
@@ -90,7 +101,7 @@ class Language extends Model
             return $this->getBase64StringFromImage($prepacked_image_location);
         }
 
-        /**
+        /*
          * No pre packed flag icon is available so we return the none available image.
          */
         return $this->getBase64StringFromImage(
