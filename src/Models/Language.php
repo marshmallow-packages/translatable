@@ -11,8 +11,6 @@ use Marshmallow\Translatable\Traits\Translatable;
  */
 class Language extends Model
 {
-    use Translatable;
-
     protected $guarded = [];
 
     /**
