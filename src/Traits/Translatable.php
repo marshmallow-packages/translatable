@@ -116,6 +116,7 @@ trait Translatable
      */
     public function getAttributeValue($key)
     {
+        return $this->getTranslation($key, $this->getLocale());
         if ($this->weAreNotTranslating() || !$this->isTranslatableAttribute($key)) {
             return parent::getAttributeValue($key);
         }
@@ -167,10 +168,11 @@ trait Translatable
      */
     protected function getExistingTranslation($source_field, Language $language): ? Model
     {
-        return $this->translatable()
-                    ->where('source_field', $source_field)
-                    ->where('language_id', $language->id)
-                    ->first();
+        return TranslatableModel::where('translatable_type', get_class($this))
+                        ->where('translatable_id', $this->getAttributes()[$this->primaryKey])
+                        ->where('source_field', $source_field)
+                        ->where('language_id', $language->id)
+                        ->first();
     }
 
     /**
