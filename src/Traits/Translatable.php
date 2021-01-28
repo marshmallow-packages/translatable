@@ -167,10 +167,15 @@ trait Translatable
      */
     protected function getExistingTranslation($source_field, Language $language): ? Model
     {
-        return $this->translatable()
-                    ->where('source_field', $source_field)
-                    ->where('language_id', $language->id)
-                    ->first();
+        if (! isset($this->getAttributes()[$this->primaryKey])) {
+            return null;
+        }
+
+        return TranslatableModel::where('translatable_type', get_class($this))
+                        ->where('translatable_id', $this->getAttributes()[$this->primaryKey])
+                        ->where('source_field', $source_field)
+                        ->where('language_id', $language->id)
+                        ->first();
     }
 
     /**
