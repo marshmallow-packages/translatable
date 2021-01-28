@@ -100,7 +100,7 @@ interface DriverInterface
      *
      * @return void
      */
-    public function saveMissingTranslations($language = false);
+    public function saveMissingTranslations(string $language = '');
 
     /**
      * Get a collection of group names for a given language.

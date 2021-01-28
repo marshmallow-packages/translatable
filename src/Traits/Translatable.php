@@ -2,12 +2,12 @@
 
 namespace Marshmallow\Translatable\Traits;
 
-use App\Nova\Resource;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
-use Marshmallow\HelperFunctions\Facades\URL;
-use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Models\Translatable as TranslatableModel;
+use Marshmallow\Translatable\Models\Language;
+use Marshmallow\HelperFunctions\Facades\URL;
+use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Model;
+use App\Nova\Resource;
 
 trait Translatable
 {

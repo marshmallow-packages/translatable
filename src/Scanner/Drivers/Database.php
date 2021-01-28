@@ -10,14 +10,15 @@ use Marshmallow\Translatable\Models\Translation as TranslationModel;
 
 class Database extends Translation implements DriverInterface
 {
-    protected $sourceLanguage;
-
     protected $scanner;
-
-    // Store translations to avoid multiple reloads of the same translations per request.
-    protected static $translations = [];
     protected $getLanguages;
+    protected $sourceLanguage;
     protected $curTranslations;
+
+    /*
+     * Store translations to avoid multiple reloads of the same translations per request.
+     */
+    protected static $translations = [];
 
     public function __construct($sourceLanguage, $scanner)
     {
@@ -42,9 +43,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Get all group translations from the application.
      *
-     * @return array
+     * @return Collection
      */
-    public function allGroup($language)
+    public function allGroup(string $language)
     {
         $groups = TranslationModel::getGroupsForLanguage($language);
 
@@ -68,11 +69,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Get all translations for a particular language.
      *
-     * @param string $language
-     *
      * @return Collection
      */
-    public function allTranslationsFor($language)
+    public function allTranslationsFor(string $language)
     {
         return Collection::make([
             'group' => $this->getGroupTranslationsFor($language),
@@ -162,16 +161,14 @@ class Database extends Translation implements DriverInterface
     /**
      * Get all of the single translations for a given language.
      *
-     * @param string $language
-     *
      * @return Collection
      */
-    public function getSingleTranslationsFor($language)
+    public function getSingleTranslationsFor(string $language)
     {
-
         if (!empty(self::$translations['single'][$language])) {
             return self::$translations['single'][$language];
         }
+
         $translations = $this->getLanguage($language)
             ->translations()
             ->where('group', 'like', '%single')
@@ -208,11 +205,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Get all of the group translations for a given language.
      *
-     * @param string $language
-     *
      * @return Collection
      */
-    public function getGroupTranslationsFor($language)
+    public function getGroupTranslationsFor(string $language)
     {
         if (!empty(self::$translations['group'][$language])) {
             return self::$translations['group'][$language];
@@ -252,11 +247,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Determine whether or not a language exists.
      *
-     * @param string $language
-     *
      * @return bool
      */
-    public function languageExists($language)
+    public function languageExists(string $language)
     {
         return $this->getLanguage($language) ? true : false;
     }
@@ -264,11 +257,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Get a collection of group names for a given language.
      *
-     * @param string $language
-     *
      * @return Collection
      */
-    public function getGroupsFor($language)
+    public function getGroupsFor(string $language)
     {
         return $this->allGroup($language);
     }
@@ -276,11 +267,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Get a language from the database.
      *
-     * @param string $language
-     *
      * @return Language
      */
-    private function getLanguage($language)
+    private function getLanguage(string $language)
     {
 
         if (config('translatable.cache.use')) {
@@ -298,11 +287,9 @@ class Database extends Translation implements DriverInterface
      * Previously, this was handled by setting the group value to NULL, now
      * we use 'single' to cater for vendor JSON language files.
      *
-     * @param Collection $groups
-     *
      * @return bool
      */
-    private function hasLegacyGroups($groups)
+    private function hasLegacyGroups(Collection $groups)
     {
         return $groups->filter(function ($key) {
             return '' === $key;
