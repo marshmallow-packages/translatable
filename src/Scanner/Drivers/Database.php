@@ -2,11 +2,10 @@
 
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
-use Marshmallow\Translatable\Scanner\Exceptions\LanguageExistsException;
+use Marshmallow\Translatable\Models\Translation as TranslationModel;
+use Marshmallow\Translatable\Models\Language;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
-use Marshmallow\Translatable\Models\Language;
-use Marshmallow\Translatable\Models\Translation as TranslationModel;
 
 class Database extends Translation implements DriverInterface
 {
@@ -184,12 +183,17 @@ class Database extends Translation implements DriverInterface
         // $this->getLanguage($language);
         // $translations = $this->curTranslations->where('group', 'single')->groupBy('group'); //->where('group', 'null')
 
-        // if there is no group, this is a legacy translation so we need to
-        // update to 'single'. We do this here so it only happens once.
+        /*
+         * if there is no group, this is a legacy translation so we need to
+         * update to 'single'. We do this here so it only happens once.
+         */
         if ($this->hasLegacyGroups($translations->keys())) {
             TranslationModel::whereNull('group')->update(['group' => 'single']);
-            // if any legacy groups exist, rerun the method so we get the
-            // updated keys.
+
+            /*
+             * if any legacy groups exist, rerun the method so we get the
+             * updated keys.
+             */
             return $this->getSingleTranslationsFor($language);
         }
 

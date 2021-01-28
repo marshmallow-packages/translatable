@@ -2,8 +2,8 @@
 
 namespace Marshmallow\Translatable\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Marshmallow\Translatable\Traits\Translatable;
+use Illuminate\Database\Eloquent\Model;
 
 /*
  * @mixin \Eloquent

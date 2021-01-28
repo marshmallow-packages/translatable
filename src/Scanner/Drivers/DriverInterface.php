@@ -30,8 +30,6 @@ interface DriverInterface
     /**
      * Get all translations for a particular language.
      *
-     * @param string $language
-     *
      * @return Collection
      */
     public function allTranslationsFor($language);
