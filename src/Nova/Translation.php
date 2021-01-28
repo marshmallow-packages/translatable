@@ -88,6 +88,11 @@ class Translation extends Resource
 
             Text::make(__('Key'), 'key')
                 ->sortable()
+                ->resolveUsing(function ($value) {
+                    $value_array = str_split($value, 75);
+                    return join("<br/>", $value_array);
+                })
+                ->asHtml()
                 ->rules([
                     'required',
                 ]),

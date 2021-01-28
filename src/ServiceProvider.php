@@ -5,7 +5,6 @@ namespace Marshmallow\Translatable;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Nova;
 use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
 use Marshmallow\Translatable\Console\Commands\InstallCommand;
@@ -47,7 +46,7 @@ class ServiceProvider extends BaseServiceProvider
             return config('app.locale');
         });
 
-        Nova::serving(function (ServingNova $event) {
+        Nova::serving(function () {
             Nova::script('language-toggle-field', __DIR__.'/../dist/js/field.js');
             Nova::style('language-toggle-field', __DIR__.'/../dist/css/field.css');
         });
