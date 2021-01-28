@@ -2,16 +2,16 @@
 
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
-use Illuminate\Support\Collection;
-use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Models\Translation as TranslationModel;
+use Marshmallow\Translatable\Models\Language;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Collection;
 
 class Database extends Translation implements DriverInterface
 {
     protected $scanner;
     protected $getLanguages;
     protected $sourceLanguage;
-    protected $curTranslations;
 
     /*
      * Store translations to avoid multiple reloads of the same translations per request.
@@ -208,11 +208,11 @@ class Database extends Translation implements DriverInterface
         }
 
         $translations = $this->getLanguage($language)
-            ->translations()
-            ->whereNotNull('group')
-            ->where('group', 'not like', '%single')
-            ->get()
-            ->groupBy('group');
+                            ->translations()
+                            ->whereNotNull('group')
+                            ->where('group', 'not like', '%single')
+                            ->get()
+                            ->groupBy('group');
 
         self::$translations['group'][$language] = $translations->map(function ($translations) {
             return $translations->mapWithKeys(function ($translation) {
