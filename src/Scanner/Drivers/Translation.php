@@ -2,8 +2,8 @@
 
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
-use Marshmallow\HelperFunctions\Facades\Str;
 use Illuminate\Support\Collection;
+use Marshmallow\HelperFunctions\Facades\Str;
 
 class Translation
 {

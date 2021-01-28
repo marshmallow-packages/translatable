@@ -3,10 +3,10 @@
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
 use Marshmallow\Translatable\Scanner\Exceptions\LanguageExistsException;
-use Marshmallow\Translatable\Models\Translation as TranslationModel;
-use Marshmallow\Translatable\Models\Language;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
+use Marshmallow\Translatable\Models\Language;
+use Marshmallow\Translatable\Models\Translation as TranslationModel;
 
 class Database extends Translation implements DriverInterface
 {
