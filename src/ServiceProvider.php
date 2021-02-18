@@ -2,21 +2,22 @@
 
 namespace Marshmallow\Translatable;
 
+use Request;
+use Laravel\Nova\Nova;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-use Laravel\Nova\Nova;
-use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
-use Marshmallow\Translatable\Console\Commands\InstallCommand;
-use Marshmallow\Translatable\Console\Commands\PresetCommand;
+use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Models\Language;
-use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
-use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
-use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
-use Marshmallow\Translatable\Scanner\Drivers\Translation;
 use Marshmallow\Translatable\Scanner\Scanner;
 use Marshmallow\Translatable\Scanner\TranslationManager;
-use Request;
+use Marshmallow\Translatable\Scanner\Drivers\Translation;
+use Marshmallow\Translatable\Console\Commands\PresetCommand;
+use Marshmallow\Translatable\Console\Commands\InstallCommand;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
+use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
+use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
+use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -27,7 +28,9 @@ class ServiceProvider extends BaseServiceProvider
         });
 
         Request::macro('getTranslatableLocale', function () {
-            if ($session = Session::get('translatable-locale')) {
+
+            $session_key = (URL::isNova(request())) ? 'translatable-locale' : 'user-locale';
+            if ($session = Session::get($session_key)) {
                 return $session;
             }
 
