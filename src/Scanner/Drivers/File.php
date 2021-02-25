@@ -2,10 +2,10 @@
 
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
+use Illuminate\Filesystem\Filesystem;
 use Marshmallow\Translatable\Scanner\Exceptions\LanguageExistsException;
 
 class File extends Translation implements DriverInterface
@@ -56,7 +56,7 @@ class File extends Translation implements DriverInterface
     {
         $groupPath = "{$this->languageFilesPath}".DIRECTORY_SEPARATOR."{$language}";
 
-        if (!$this->disk->exists($groupPath)) {
+        if (! $this->disk->exists($groupPath)) {
             return [];
         }
 
@@ -108,7 +108,7 @@ class File extends Translation implements DriverInterface
         }
 
         $this->disk->makeDirectory("{$this->languageFilesPath}".DIRECTORY_SEPARATOR."$language");
-        if (!$this->disk->exists("{$this->languageFilesPath}".DIRECTORY_SEPARATOR."{$language}.json")) {
+        if (! $this->disk->exists("{$this->languageFilesPath}".DIRECTORY_SEPARATOR."{$language}.json")) {
             $this->saveSingleTranslations($language, collect(['single' => collect()]));
         }
     }
@@ -124,14 +124,14 @@ class File extends Translation implements DriverInterface
      */
     public function addGroupTranslation($language, $group, $key, $value = '')
     {
-        if (!$this->languageExists($language)) {
+        if (! $this->languageExists($language)) {
             $this->addLanguage($language);
         }
 
         $translations = $this->getGroupTranslationsFor($language);
 
         // does the group exist? If not, create it.
-        if (!$translations->keys()->contains($group)) {
+        if (! $translations->keys()->contains($group)) {
             $translations->put($group, collect());
         }
 
@@ -153,7 +153,7 @@ class File extends Translation implements DriverInterface
      */
     public function addSingleTranslation($language, $vendor, $key, $value = '')
     {
-        if (!$this->languageExists($language)) {
+        if (! $this->languageExists($language)) {
             $this->addLanguage($language);
         }
 
@@ -308,7 +308,7 @@ class File extends Translation implements DriverInterface
         [$namespace, $group] = explode('::', $group);
         $directory = "{$this->languageFilesPath}".DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR."{$namespace}".DIRECTORY_SEPARATOR."{$language}";
 
-        if (!$this->disk->exists($directory)) {
+        if (! $this->disk->exists($directory)) {
             $this->disk->makeDirectory($directory, 0755, true);
         }
 
@@ -381,14 +381,14 @@ class File extends Translation implements DriverInterface
      */
     public function getVendorGroupFilesFor($language)
     {
-        if (!$this->disk->exists("{$this->languageFilesPath}".DIRECTORY_SEPARATOR.'vendor')) {
+        if (! $this->disk->exists("{$this->languageFilesPath}".DIRECTORY_SEPARATOR.'vendor')) {
             return;
         }
 
         $vendorGroups = [];
         foreach ($this->disk->directories("{$this->languageFilesPath}".DIRECTORY_SEPARATOR.'vendor') as $vendor) {
             $vendor = Arr::last(explode(DIRECTORY_SEPARATOR, $vendor));
-            if (!$this->disk->exists("{$this->languageFilesPath}".DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR."{$vendor}".DIRECTORY_SEPARATOR."{$language}")) {
+            if (! $this->disk->exists("{$this->languageFilesPath}".DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR."{$vendor}".DIRECTORY_SEPARATOR."{$language}")) {
                 array_push($vendorGroups, []);
             } else {
                 array_push($vendorGroups, $this->disk->allFiles("{$this->languageFilesPath}".DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR."{$vendor}".DIRECTORY_SEPARATOR."{$language}"));

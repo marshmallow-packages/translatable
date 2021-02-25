@@ -2,8 +2,8 @@
 
 namespace Marshmallow\Translatable\Models;
 
-use Marshmallow\Translatable\Traits\Translatable;
 use Illuminate\Database\Eloquent\Model;
+use Marshmallow\Translatable\Traits\Translatable;
 
 /*
  * @mixin \Eloquent
@@ -43,7 +43,7 @@ class Language extends Model
 
     public function getIcon()
     {
-        if (!$this->icon) {
+        if (! $this->icon) {
             return $this->getNoIconAvailableImage();
         }
 

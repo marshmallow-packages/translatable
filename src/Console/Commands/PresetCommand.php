@@ -49,14 +49,14 @@ class PresetCommand extends Command
         /*
          * Check if we interpreted everything correctly.
          */
-        if (!$this->importContextIsCorrect()) {
+        if (! $this->importContextIsCorrect()) {
             return $this->stopImporter();
         }
 
         /*
          * Check if there is something to import or not.
          */
-        if (!$this->checkIfThereIsSomethingToImport()) {
+        if (! $this->checkIfThereIsSomethingToImport()) {
             return $this->stopImporter();
         }
 
@@ -69,7 +69,7 @@ class PresetCommand extends Command
         /*
          * Continue with the import!!
          */
-        if (!$this->option('force') && !$this->confirm(__('Please type "yes" to start the import'))) {
+        if (! $this->option('force') && ! $this->confirm(__('Please type "yes" to start the import'))) {
             return $this->stopImporter();
         }
 
@@ -129,7 +129,7 @@ class PresetCommand extends Command
     private function fillPresetProperty()
     {
         $preset_path = $this->getPresetFilePath($this->language->language);
-        if (!file_exists($preset_path)) {
+        if (! file_exists($preset_path)) {
             $preset = $this->choice(
                 __('We couldnt match a preset. Which preset do you wish to import?'),
                 $this->getAvailablePresetArray()
@@ -138,7 +138,7 @@ class PresetCommand extends Command
             $preset_path = $this->getPresetFilePath($preset);
         }
 
-        if (!file_exists($preset_path)) {
+        if (! file_exists($preset_path)) {
             throw new Exception(__('Preset is not available. Please try again.'));
         }
 
@@ -156,7 +156,7 @@ class PresetCommand extends Command
             'local_language_name' => $this->language->name,
         ]);
 
-        if (!$this->confirm($confirm_text)) {
+        if (! $this->confirm($confirm_text)) {
             return false;
         }
 
@@ -180,7 +180,7 @@ class PresetCommand extends Command
                                         ->where('key', $translation_preset['key'])
                                         ->first();
 
-            if (!$translation || !$translation->value) {
+            if (! $translation || ! $translation->value) {
                 $untranslated_items[] = $translation_preset;
             }
             $this->output->progressAdvance();
