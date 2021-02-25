@@ -2,15 +2,16 @@
 
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
-use Marshmallow\Translatable\Models\Translation as TranslationModel;
-use Marshmallow\Translatable\Models\Language;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
+use Marshmallow\Translatable\Models\Language;
+use Marshmallow\Translatable\Models\Translation as TranslationModel;
 
 class Database extends Translation implements DriverInterface
 {
     protected $scanner;
+
     protected $getLanguages;
+
     protected $sourceLanguage;
 
     /*
@@ -106,7 +107,7 @@ class Database extends Translation implements DriverInterface
      */
     public function addGroupTranslation($language, $group, $key, $value = '')
     {
-        if (!$this->languageExists($language)) {
+        if (! $this->languageExists($language)) {
             $this->addLanguage($language);
         }
 
@@ -139,7 +140,7 @@ class Database extends Translation implements DriverInterface
      */
     public function addSingleTranslation($language, $vendor, $key, $value = '')
     {
-        if (!$this->languageExists($language)) {
+        if (! $this->languageExists($language)) {
             $this->addLanguage($language);
         }
 
@@ -162,7 +163,7 @@ class Database extends Translation implements DriverInterface
      */
     public function getSingleTranslationsFor(string $language)
     {
-        if (!empty(self::$translations['single'][$language])) {
+        if (! empty(self::$translations['single'][$language])) {
             return self::$translations['single'][$language];
         }
 
@@ -203,7 +204,7 @@ class Database extends Translation implements DriverInterface
      */
     public function getGroupTranslationsFor(string $language)
     {
-        if (!empty(self::$translations['group'][$language])) {
+        if (! empty(self::$translations['group'][$language])) {
             return self::$translations['group'][$language];
         }
 

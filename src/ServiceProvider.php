@@ -15,6 +15,7 @@ use Marshmallow\Translatable\Console\Commands\PresetCommand;
 use Marshmallow\Translatable\Console\Commands\InstallCommand;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
+use Marshmallow\Translatable\Console\Commands\DuplicateTranslationsCommand;
 use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
 use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
 use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
@@ -28,7 +29,6 @@ class ServiceProvider extends BaseServiceProvider
         });
 
         Request::macro('getTranslatableLocale', function () {
-
             $session_key = (URL::isNova(request())) ? 'translatable-locale' : 'user-locale';
             if ($session = Session::get($session_key)) {
                 return $session;
@@ -100,6 +100,7 @@ class ServiceProvider extends BaseServiceProvider
                 PresetCommand::class,
                 GeneratePresetCommand::class,
                 InstallCommand::class,
+                DuplicateTranslationsCommand::class,
             ]);
         }
     }

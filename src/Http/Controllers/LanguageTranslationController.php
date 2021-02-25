@@ -2,13 +2,13 @@
 
 namespace Marshmallow\Translatable\Http\Controllers;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
-use Marshmallow\Translatable\Http\Requests\TranslationRequest;
+use Illuminate\Pagination\Paginator;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
+use Marshmallow\Translatable\Http\Requests\TranslationRequest;
 
 class LanguageTranslationController extends Controller
 {
@@ -52,7 +52,7 @@ class LanguageTranslationController extends Controller
 
     public function update(Request $request, $language)
     {
-        if (!Str::contains($request->get('group'), 'single')) {
+        if (! Str::contains($request->get('group'), 'single')) {
             $this->translation->addGroupTranslation($language, $request->get('group'), $request->get('key'), $request->get('value') ?: '');
         } else {
             $this->translation->addSingleTranslation($language, $request->get('group'), $request->get('key'), $request->get('value') ?: '');

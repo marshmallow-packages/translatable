@@ -4,8 +4,8 @@ namespace Marshmallow\Translatable\Console\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use Marshmallow\HelperFunctions\Facades\Arrayable;
 use Marshmallow\Translatable\Models\Language;
+use Marshmallow\HelperFunctions\Facades\Arrayable;
 
 class GeneratePresetCommand extends Command
 {
@@ -46,7 +46,7 @@ class GeneratePresetCommand extends Command
             }
         }
 
-        if (!$languages->count()) {
+        if (! $languages->count()) {
             throw new Exception(__('No language found to build a preset for.'));
         }
 

@@ -3,11 +3,11 @@
 namespace Marshmallow\Translatable\Nova;
 
 use App\Nova\Resource;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\BelongsTo;
+use Illuminate\Database\Eloquent\Model;
 use Marshmallow\LiveUpdate\TextLiveUpdate;
 use Marshmallow\Translatable\Nova\Filters\LanguageFilter;
 use Marshmallow\Translatable\Nova\Filters\NoTranslationAvailableFilter;
@@ -90,7 +90,8 @@ class Translation extends Resource
                 ->sortable()
                 ->resolveUsing(function ($value) {
                     $value_array = str_split($value, 75);
-                    return join("<br/>", $value_array);
+
+                    return join('<br/>', $value_array);
                 })
                 ->asHtml()
                 ->rules([

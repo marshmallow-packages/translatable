@@ -20,7 +20,7 @@ trait TranslatableFields
 
         $fields = $this->translatableFields($request);
         foreach ($fields as $key => $field) {
-            if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
+            if (isset($field->attribute) && ! $this->isTranslatableAttribute($field->attribute)) {
                 unset($fields[$key]);
             }
         }

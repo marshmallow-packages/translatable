@@ -2,12 +2,12 @@
 
 namespace Marshmallow\Translatable\Traits;
 
-use Marshmallow\Translatable\Models\Translatable as TranslatableModel;
-use Marshmallow\Translatable\Models\Language;
-use Marshmallow\HelperFunctions\Facades\URL;
+use App\Nova\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
-use App\Nova\Resource;
+use Marshmallow\HelperFunctions\Facades\URL;
+use Marshmallow\Translatable\Models\Language;
+use Marshmallow\Translatable\Models\Translatable as TranslatableModel;
 
 trait Translatable
 {
@@ -69,12 +69,12 @@ trait Translatable
 
     public function weAreNotTranslating()
     {
-        return !$this->weAreTranslating();
+        return ! $this->weAreTranslating();
     }
 
     public function resetToOriginal(): self
     {
-        if (!$this->isDirty()) {
+        if (! $this->isDirty()) {
             return $this;
         }
         foreach ($this->getDirty() as $column => $new_value) {
@@ -93,7 +93,7 @@ trait Translatable
         $source_fields = $this->convertTranslationInputToArray($source_field, $translated_value);
 
         foreach ($source_fields as $source_field => $translated_value) {
-            if (!$this->isTranslatableAttribute($source_field)) {
+            if (! $this->isTranslatableAttribute($source_field)) {
                 continue;
             }
             if ($translatable = $this->getExistingTranslation($source_field, $language)) {
@@ -116,7 +116,7 @@ trait Translatable
      */
     public function getAttributeValue($key)
     {
-        if ($this->weAreNotTranslating() || !$this->isTranslatableAttribute($key)) {
+        if ($this->weAreNotTranslating() || ! $this->isTranslatableAttribute($key)) {
             return parent::getAttributeValue($key);
         }
 
@@ -232,7 +232,7 @@ trait Translatable
     public function getTranslatableAttributes(): array
     {
         $translatable_columns = array_keys($this->getAttributes());
-        if (!empty($this->getTranslatableColumns())) {
+        if (! empty($this->getTranslatableColumns())) {
             $translatable_columns = $this->getTranslatableColumns();
         }
 
@@ -290,7 +290,7 @@ trait Translatable
 
         $fields = $this->translatableFields($request);
         foreach ($fields as $key => $field) {
-            if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
+            if (isset($field->attribute) && ! $this->isTranslatableAttribute($field->attribute)) {
                 unset($fields[$key]);
             }
         }
