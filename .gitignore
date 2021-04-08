@@ -3,6 +3,7 @@ node_modules/
 npm-debug.log
 .idea/
 .DS_Store
+composer.lock
 
 # Laravel 4 specific
 bootstrap/compiled.php
