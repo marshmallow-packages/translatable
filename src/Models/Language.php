@@ -9,6 +9,7 @@ use Marshmallow\Translatable\Traits\Translatable;
  * @mixin \Eloquent
  * @mixin \Illuminate\Database\Eloquent\Builder
  */
+
 class Language extends Model
 {
     use Translatable;
@@ -43,7 +44,7 @@ class Language extends Model
 
     public function getIcon()
     {
-        if (! $this->icon) {
+        if (!$this->icon) {
             return $this->getNoIconAvailableImage();
         }
 
@@ -86,17 +87,22 @@ class Language extends Model
 
     protected function getBase64StringFromImage(string $image_location): string
     {
-        return 'data:image/png;base64,'.base64_encode(file_get_contents($image_location));
+        return 'data:image/png;base64,' . base64_encode(file_get_contents($image_location));
     }
 
     protected function getPrepackedImagePath(string $image): string
     {
-        return __DIR__.'/../../resources/flags/'.strtoupper($image).'.png';
+        return __DIR__ . '/../../resources/flags/' . strtoupper($image) . '.png';
     }
 
     protected function getNoIconAvailableImage(): string
     {
-        $prepacked_image_location = $this->getPrepackedImagePath($this->language);
+        $flag_name = $this->language;
+        if (isset($this->country_flag_class) && $this->country_flag_class) {
+            $flag_name = $this->country_flag_class;
+        }
+
+        $prepacked_image_location = $this->getPrepackedImagePath($flag_name);
         if (file_exists($prepacked_image_location)) {
             return $this->getBase64StringFromImage($prepacked_image_location);
         }
@@ -113,8 +119,8 @@ class Language extends Model
     {
         return $this->translations()->where('value', '!=', '')->get()->map(function ($user) {
             return collect($user->toArray())
-                        ->only(['group', 'key', 'value'])
-                        ->all();
+                ->only(['group', 'key', 'value'])
+                ->all();
         })->toArray();
     }
 
