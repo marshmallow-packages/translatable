@@ -35,9 +35,9 @@ class Translation
         $difference = [];
         foreach ($arrayOne as $key => $value) {
             if (is_array($value) || $value instanceof Collection) {
-                if (! isset($arrayTwo[$key])) {
+                if (!isset($arrayTwo[$key])) {
                     $difference[$key] = $value;
-                } elseif (! (is_array($arrayTwo[$key]) || $arrayTwo[$key] instanceof Collection)) {
+                } elseif (!(is_array($arrayTwo[$key]) || $arrayTwo[$key] instanceof Collection)) {
                     $difference[$key] = $value;
                 } else {
                     $new_diff = $this->arrayDiffAssocRecursive($value, $arrayTwo[$key]);
@@ -45,7 +45,7 @@ class Translation
                         $difference[$key] = $new_diff;
                     }
                 }
-            } elseif (! isset($arrayTwo[$key])) {
+            } elseif (!isset($arrayTwo[$key])) {
                 $difference[$key] = $value;
             }
         }
@@ -70,6 +70,7 @@ class Translation
             foreach ($missingTranslations as $type => $groups) {
                 foreach ($groups as $group => $translations) {
                     foreach ($translations as $key => $value) {
+                        $key = stripslashes($key);
                         if (Str::contains($group, 'single')) {
                             $this->addSingleTranslation($language, $group, $key);
                         } else {
@@ -119,7 +120,7 @@ class Translation
     public function filterTranslationsFor($language, $filter)
     {
         $allTranslations = $this->getSourceLanguageTranslationsWith(($language));
-        if (! $filter) {
+        if (!$filter) {
             return $allTranslations;
         }
 
