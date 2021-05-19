@@ -12,7 +12,7 @@
     "devDependencies": {
         "cross-env": "^7.0.3",
         "laravel-mix": "^6.0.19",
-        "laravel-nova": "^1.11",
+        "laravel-nova": "^1.12",
         "sass": "^1.32.12",
         "sass-loader": "^11.1.1"
     },
