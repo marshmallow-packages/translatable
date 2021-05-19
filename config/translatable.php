@@ -3,6 +3,17 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | Translate resources in Nova
+    |--------------------------------------------------------------------------
+    |
+    | When this is set to true, you will see the language selector when editing
+    | a resource in Laravel Nova.
+    |
+    */
+    'nova_translatable_fields' => true,
+
+    /*
+    |--------------------------------------------------------------------------
     | Language flag icons
     |--------------------------------------------------------------------------
     |
