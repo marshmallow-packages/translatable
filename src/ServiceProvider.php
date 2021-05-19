@@ -50,14 +50,14 @@ class ServiceProvider extends BaseServiceProvider
         });
 
         Nova::serving(function () {
-            Nova::script('language-toggle-field', __DIR__.'/../dist/js/field.js');
-            Nova::style('language-toggle-field', __DIR__.'/../dist/css/field.css');
+            Nova::script('language-toggle-field', __DIR__ . '/../dist/js/field.js');
+            Nova::style('language-toggle-field', __DIR__ . '/../dist/css/field.css');
         });
 
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');
         $this->publishes([
-            __DIR__.'/../config/translatable.php' => config_path('translatable.php'),
+            __DIR__ . '/../config/translatable.php' => config_path('translatable.php'),
         ]);
     }
 
@@ -82,7 +82,7 @@ class ServiceProvider extends BaseServiceProvider
      */
     private function mergeConfiguration()
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/translatable.php', 'translatable');
+        $this->mergeConfigFrom(__DIR__ . '/../config/translatable.php', 'translatable');
     }
 
     /**

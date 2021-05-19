@@ -11,6 +11,13 @@ trait TranslatableFields
 
     public function fields(Request $request)
     {
+        /**
+         * Only add the translation block if it is activated.
+         */
+        if (!config('translatable.nova_translatable_fields')) {
+            return $this->translatableFields($request);
+        }
+
         if ($this->weAreNotTranslating() || ($request->has('editMode') && 'create' == $request->editMode)) {
             return $this->addTranslationToggleField(
                 $this->translatableFields($request),
@@ -20,7 +27,7 @@ trait TranslatableFields
 
         $fields = $this->translatableFields($request);
         foreach ($fields as $key => $field) {
-            if (isset($field->attribute) && ! $this->isTranslatableAttribute($field->attribute)) {
+            if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
                 unset($fields[$key]);
             }
         }
