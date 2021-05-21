@@ -27,17 +27,28 @@ class TranslationServiceProvider extends ServiceProvider
         $this->app->singleton('translator', function ($app) {
             $loader = $app['translation.loader'];
 
-            if (URL::isNova(request())) {
-                $locale = request()->getTranslatableLocale();
-            } else {
-                $locale = request()->getUserLocale();
-            }
+            $locale = $this->getLocale($app);
 
             $trans = new Translator($loader, $locale);
             $trans->setFallback($app['config']['app.fallback_locale']);
 
             return $trans;
         });
+    }
+
+    protected function getLocale($app)
+    {
+        if (URL::isNova(request())) {
+            if (method_exists(request(), 'getTranslatableLocale')) {
+                return request()->getTranslatableLocale();
+            }
+        } else {
+            if (method_exists(request(), 'getUserLocale')) {
+                return request()->getUserLocale();
+            }
+        }
+
+        return $app['config']['app.fallback_locale'];
     }
 
     protected function registerDatabaseLoader()
