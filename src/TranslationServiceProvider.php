@@ -39,11 +39,11 @@ class TranslationServiceProvider extends ServiceProvider
     protected function getLocale($app)
     {
         if (URL::isNova(request())) {
-            if (method_exists(request(), 'getTranslatableLocale')) {
+            if (request()::hasMacro('getTranslatableLocale')) {
                 return request()->getTranslatableLocale();
             }
         } else {
-            if (method_exists(request(), 'getUserLocale')) {
+            if (request()::hasMacro('getUserLocale')) {
                 return request()->getUserLocale();
             }
         }
