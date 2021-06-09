@@ -18,6 +18,10 @@ trait TranslatableFields
             return $this->translatableFields($request);
         }
 
+        if (method_exists($this, 'showTranslatableFields') && !$this->showTranslatableFields()) {
+            return $this->translatableFields($request);
+        }
+
         if ($this->weAreNotTranslating() || ($request->has('editMode') && 'create' == $request->editMode)) {
             return $this->addTranslationToggleField(
                 $this->translatableFields($request),
