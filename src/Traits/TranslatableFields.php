@@ -18,7 +18,7 @@ trait TranslatableFields
             return $this->translatableFields($request);
         }
 
-        if (method_exists($this, 'showTranslatableFields') && !$this->showTranslatableFields()) {
+        if (method_exists($this, 'translatableFieldsEnabled') && !$this->translatableFieldsEnabled()) {
             return $this->translatableFields($request);
         }
 

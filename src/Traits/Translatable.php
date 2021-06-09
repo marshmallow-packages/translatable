@@ -64,17 +64,21 @@ trait Translatable
 
     public function weAreTranslating()
     {
+        if (method_exists($this, 'translatableFieldsEnabled') && !$this->translatableFieldsEnabled()) {
+            return false;
+        }
+
         return Request::getTranslatableLocale() !== config('app.locale');
     }
 
     public function weAreNotTranslating()
     {
-        return ! $this->weAreTranslating();
+        return !$this->weAreTranslating();
     }
 
     public function resetToOriginal(): self
     {
-        if (! $this->isDirty()) {
+        if (!$this->isDirty()) {
             return $this;
         }
         foreach ($this->getDirty() as $column => $new_value) {
@@ -93,7 +97,7 @@ trait Translatable
         $source_fields = $this->convertTranslationInputToArray($source_field, $translated_value);
 
         foreach ($source_fields as $source_field => $translated_value) {
-            if (! $this->isTranslatableAttribute($source_field)) {
+            if (!$this->isTranslatableAttribute($source_field)) {
                 continue;
             }
             if ($translatable = $this->getExistingTranslation($source_field, $language)) {
@@ -116,7 +120,7 @@ trait Translatable
      */
     public function getAttributeValue($key)
     {
-        if ($this->weAreNotTranslating() || ! $this->isTranslatableAttribute($key)) {
+        if ($this->weAreNotTranslating() || !$this->isTranslatableAttribute($key)) {
             return parent::getAttributeValue($key);
         }
 
@@ -165,17 +169,17 @@ trait Translatable
     /**
      * Check if this column is already translated.
      */
-    protected function getExistingTranslation($source_field, Language $language): ? Model
+    protected function getExistingTranslation($source_field, Language $language): ?Model
     {
-        if (! isset($this->getAttributes()[$this->primaryKey])) {
+        if (!isset($this->getAttributes()[$this->primaryKey])) {
             return null;
         }
 
         return TranslatableModel::where('translatable_type', get_class($this))
-                        ->where('translatable_id', $this->getAttributes()[$this->primaryKey])
-                        ->where('source_field', $source_field)
-                        ->where('language_id', $language->id)
-                        ->first();
+            ->where('translatable_id', $this->getAttributes()[$this->primaryKey])
+            ->where('source_field', $source_field)
+            ->where('language_id', $language->id)
+            ->first();
     }
 
     /**
@@ -232,7 +236,7 @@ trait Translatable
     public function getTranslatableAttributes(): array
     {
         $translatable_columns = array_keys($this->getAttributes());
-        if (! empty($this->getTranslatableColumns())) {
+        if (!empty($this->getTranslatableColumns())) {
             $translatable_columns = $this->getTranslatableColumns();
         }
 
@@ -290,7 +294,7 @@ trait Translatable
 
         $fields = $this->translatableFields($request);
         foreach ($fields as $key => $field) {
-            if (isset($field->attribute) && ! $this->isTranslatableAttribute($field->attribute)) {
+            if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
                 unset($fields[$key]);
             }
         }
