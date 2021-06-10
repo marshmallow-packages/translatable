@@ -11,6 +11,10 @@ trait TranslatableFields
 
     public function fields(Request $request)
     {
+        if (!$request->has('editMode')) {
+            return $this->translatableFields($request);
+        }
+
         /**
          * Only add the translation block if it is activated.
          */
@@ -22,7 +26,7 @@ trait TranslatableFields
             return $this->translatableFields($request);
         }
 
-        if ($this->weAreNotTranslating() || ($request->has('editMode') && 'create' == $request->editMode)) {
+        if ($this->weAreNotTranslating() || $request->editMode == 'create') {
             return $this->addTranslationToggleField(
                 $this->translatableFields($request),
                 $request
