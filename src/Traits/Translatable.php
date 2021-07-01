@@ -242,6 +242,9 @@ trait Translatable
 
         foreach ($this->getNotTranslateColumns() as $ignore_column) {
             $key = array_search($ignore_column, $translatable_columns);
+            if (false === $key) {
+                continue;
+            }
             unset($translatable_columns[$key]);
         }
         if (isset($this->protected_from_translations) && is_array($this->protected_from_translations)) {
