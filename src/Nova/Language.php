@@ -7,10 +7,8 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\HasMany;
-use Illuminate\Database\Eloquent\Model;
 use Marshmallow\AdvancedImage\AdvancedImage;
 use Marshmallow\Translatable\Traits\TranslatableFields;
-use Marshmallow\Translatable\Models\Language as LanguageModel;
 
 class Language extends Resource
 {
@@ -105,7 +103,7 @@ class Language extends Resource
 
             Number::make(__('Translations'))
                 ->onlyOnIndex()
-                ->resolveUsing(function ($collection, LanguageModel $language, $param) {
+                ->resolveUsing(function ($collection, $language, $param) {
                     return $language->translations->count();
                 }),
 

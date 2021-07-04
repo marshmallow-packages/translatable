@@ -5,8 +5,6 @@ namespace Marshmallow\Translatable\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
-use Marshmallow\Translatable\Models\Language;
-use Marshmallow\Translatable\Models\Translation;
 
 class DuplicateTranslationsCommand extends Command
 {
@@ -42,7 +40,7 @@ class DuplicateTranslationsCommand extends Command
     public function handle()
     {
         $translations = $this->getDuplicateTranslations();
-        if (! $translations->count()) {
+        if (!$translations->count()) {
             return $this->noDuplicatesFound();
         }
 
@@ -70,10 +68,10 @@ class DuplicateTranslationsCommand extends Command
     {
         $this->info('Bare with us, we are building a beautifull table for you.');
         $table_rows = $translations->map(function ($item) {
-            $occurrences = Translation::where('group', $item->group)
-                                        ->where('key', $item->key)
-                                        ->where('language_id', $item->language_id)
-                                        ->get();
+            $occurrences = config('translatable.models.translation')::where('group', $item->group)
+                ->where('key', $item->key)
+                ->where('language_id', $item->language_id)
+                ->get();
 
             $occurrence_ids = $occurrences->pluck('id')->toArray();
 
@@ -97,7 +95,7 @@ class DuplicateTranslationsCommand extends Command
 
     protected function fixThem(Collection $translations)
     {
-        $languages = Language::get();
+        $languages = config('translatable.models.language')::get();
 
         $deleted_count = 0;
 
@@ -120,9 +118,9 @@ class DuplicateTranslationsCommand extends Command
              * Get all the duplicate values so we can loop through them and make
              * sense of what we need to keep and what we need to delete.
              */
-            $all_occurrences = Translation::where('group', $translation->group)
-                                            ->where('key', $translation->key)
-                                            ->get();
+            $all_occurrences = config('translatable.models.translation')::where('group', $translation->group)
+                ->where('key', $translation->key)
+                ->get();
 
             /*
              * Keep everything that has been translated. We don't want to
@@ -139,7 +137,7 @@ class DuplicateTranslationsCommand extends Command
              * If we haven't found a translated record for every language, we need
              * to keep untranslated values for this translation.
              */
-            if (! $this->checkIfAllLanguagesAreFound($language_found_array)) {
+            if (!$this->checkIfAllLanguagesAreFound($language_found_array)) {
                 foreach ($language_found_array as $language_id => $found) {
                     if ($found) {
                         continue;
@@ -153,7 +151,7 @@ class DuplicateTranslationsCommand extends Command
              * Now delete every occurrence that is not in the keep_occurrences array.
              */
             foreach ($all_occurrences as $occurrence) {
-                if (! in_array($occurrence->id, $keep_occurrences)) {
+                if (!in_array($occurrence->id, $keep_occurrences)) {
                     $occurrence->delete();
                     ++$deleted_count;
                 }
@@ -172,16 +170,16 @@ class DuplicateTranslationsCommand extends Command
 
     protected function getDuplicateTranslations()
     {
-        return Translation::groupBy('key', 'group', 'language_id')
-                            ->selectRaw('translations.*, count(*) as occurrences')
-                            ->havingRaw('count(*) > 1')
-                            ->get();
+        return config('translatable.models.translation')::groupBy('key', 'group', 'language_id')
+            ->selectRaw('translations.*, count(*) as occurrences')
+            ->havingRaw('count(*) > 1')
+            ->get();
     }
 
     protected function checkIfAllLanguagesAreFound($language_found_array)
     {
         foreach ($language_found_array as $language_id => $found) {
-            if (! $found) {
+            if (!$found) {
                 return false;
             }
         }

@@ -6,7 +6,6 @@ use App\Nova\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
 use Marshmallow\HelperFunctions\Facades\URL;
-use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Models\Translatable as TranslatableModel;
 
 trait Translatable
@@ -153,7 +152,7 @@ trait Translatable
      */
     public function translatable()
     {
-        return $this->morphMany(TranslatableModel::class, 'translatable');
+        return $this->morphMany(config('translatable.models.translatable'), 'translatable');
     }
 
     /**
@@ -161,21 +160,21 @@ trait Translatable
      * can make it possible to get the language by more than just
      * the language column.
      */
-    protected function getLanguageByTranslationParameter($language): Language
+    protected function getLanguageByTranslationParameter($language)
     {
-        return Language::where('language', $language)->firstOrFail();
+        return config('translatable.models.language')::where('language', $language)->firstOrFail();
     }
 
     /**
      * Check if this column is already translated.
      */
-    protected function getExistingTranslation($source_field, Language $language): ?Model
+    protected function getExistingTranslation($source_field, $language): ?Model
     {
         if (!isset($this->getAttributes()[$this->primaryKey])) {
             return null;
         }
 
-        return TranslatableModel::where('translatable_type', get_class($this))
+        return config('translatable.models.translatable')::where('translatable_type', get_class($this))
             ->where('translatable_id', $this->getAttributes()[$this->primaryKey])
             ->where('source_field', $source_field)
             ->where('language_id', $language->id)
@@ -311,14 +310,14 @@ trait Translatable
     /**
      * LEGACY FROM MULTI-LANGUAGE PACKAGE.
      */
-    public function localeRoute(Language $language = null)
+    public function localeRoute($language = null)
     {
         return URL::buildFromArray(
             $this->getRouteParts($language)
         );
     }
 
-    protected function getRouteParts(Language $language = null)
+    protected function getRouteParts($language = null)
     {
         return array_filter([
             $this->getLocale($language),
@@ -332,7 +331,7 @@ trait Translatable
         return $this->getRouteKeyName();
     }
 
-    protected function getModelUrl(Language $language = null)
+    protected function getModelUrl($language = null)
     {
         $url_column = $this->getModelUrlField();
         if ($language) {
@@ -354,7 +353,7 @@ trait Translatable
     /**
      * Get the current locale.
      */
-    public function getLocale(Language $language = null): string
+    public function getLocale($language = null): string
     {
         if ($language) {
             return $language->language;

@@ -4,7 +4,6 @@ namespace Marshmallow\Translatable\Fields;
 
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Http\Resources\LanguageTogglerResource;
 
 class LanguageToggler extends Field
@@ -31,7 +30,7 @@ class LanguageToggler extends Field
     public function meta()
     {
         return array_merge([
-            'languages' => LanguageTogglerResource::collection(Language::get()),
+            'languages' => LanguageTogglerResource::collection(config('translatable.models.language')::get()),
             'toggler_clickable' => $this->getToggleClickableStatus(),
             'toggler_notification' => $this->getToggleNotification(),
         ], parent::meta());
@@ -43,7 +42,7 @@ class LanguageToggler extends Field
 
     protected function getToggleClickableStatus()
     {
-        return ! (request()->has('editMode') && 'create' == request()->editMode);
+        return !(request()->has('editMode') && 'create' == request()->editMode);
     }
 
     protected function getToggleNotification()
@@ -52,7 +51,7 @@ class LanguageToggler extends Field
             return null;
         }
 
-        if (Language::currentTranslatableIsDefault()) {
+        if (config('translatable.models.language')::currentTranslatableIsDefault()) {
             return null;
         }
 
