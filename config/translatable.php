@@ -49,4 +49,10 @@ return [
         app_path(),
         resource_path(),
     ],
+
+    'models' => [
+        'language' => \Marshmallow\Translatable\Models\Language::class,
+        'translation' => \Marshmallow\Translatable\Models\Translation::class,
+        'translatable' => \Marshmallow\Translatable\Models\Translatable::class,
+    ],
 ];

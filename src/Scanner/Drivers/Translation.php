@@ -3,6 +3,7 @@
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Marshmallow\HelperFunctions\Facades\Str;
 
 class Translation
@@ -80,6 +81,34 @@ class Translation
                 }
             }
         }
+    }
+
+    /**
+     * If a translation exists for EN but not for NL, this method
+     * will create it.
+     */
+    public function createTranslationsForAllLanguages()
+    {
+        $languages = config('translatable.models.language')::get();
+        $translations = config('translatable.models.translation')
+            ::select('*', DB::raw('count(*) as total'))
+            ->groupBy(['key', 'group'])
+            ->get();
+
+        foreach ($translations as $translation) {
+            if ($languages->count() == $translation->total) {
+                continue;
+            }
+            foreach ($languages as $language) {
+                $value = ('single' !== $translation->group) ? $translation->value : null;
+
+                if (!$this->translationExists($language->language, $translation->group, $translation->key)) {
+                    $this->createNewTranslation($language->language, $translation->group, $translation->key, $value);
+                }
+            }
+        }
+
+        return 0;
     }
 
     /**

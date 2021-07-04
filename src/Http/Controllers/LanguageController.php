@@ -3,7 +3,6 @@
 namespace Marshmallow\Translatable\Http\Controllers;
 
 use Illuminate\Routing\Controller;
-use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
 use Marshmallow\Translatable\Http\Resources\LanguageTogglerResource;
 
@@ -18,6 +17,6 @@ class LanguageController extends Controller
 
     public function index()
     {
-        return LanguageTogglerResource::collection(Language::get());
+        return LanguageTogglerResource::collection(config('translatable.models.language')::get());
     }
 }

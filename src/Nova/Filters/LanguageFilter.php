@@ -4,7 +4,6 @@ namespace Marshmallow\Translatable\Nova\Filters;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Filters\Filter;
-use Marshmallow\Translatable\Models\Language;
 
 class LanguageFilter extends Filter
 {
@@ -39,6 +38,6 @@ class LanguageFilter extends Filter
      */
     public function options(Request $request)
     {
-        return Language::get()->pluck('id', 'name')->toArray();
+        return config('translatable.models.language')::get()->pluck('id', 'name')->toArray();
     }
 }

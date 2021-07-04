@@ -24,7 +24,7 @@ class ServiceProvider extends BaseServiceProvider
 {
     public function boot()
     {
-        Request::macro('setTranslatableLocale', function (Language $language) {
+        Request::macro('setTranslatableLocale', function ($language) {
             Session::put('translatable-locale', $language->language);
         });
 

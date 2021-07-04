@@ -19,9 +19,12 @@ class Language extends Model
     /**
      * The relationships that should always be loaded.
      *
+     * STEF: I commented this because this loaded 40.000 models
+     * instead of the 4.000 available models.
+     *
      * @var array
      */
-    protected $with = ['translations'];
+    // protected $with = ['translations'];
 
     public function translatableColumns(): array
     {

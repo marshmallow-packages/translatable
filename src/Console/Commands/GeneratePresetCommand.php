@@ -4,7 +4,6 @@ namespace Marshmallow\Translatable\Console\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use Marshmallow\Translatable\Models\Language;
 use Marshmallow\HelperFunctions\Facades\Arrayable;
 
 class GeneratePresetCommand extends Command
@@ -31,7 +30,7 @@ class GeneratePresetCommand extends Command
     public function handle()
     {
         if ($this->argument('language')) {
-            $languages = Language::where('language', $this->argument('language'))->get();
+            $languages = config('translatable.models.language')::where('language', $this->argument('language'))->get();
         } else {
             $language = $this->choice(
                 __('Please select a language for which you wish to generate a preset.'),
@@ -40,13 +39,13 @@ class GeneratePresetCommand extends Command
             );
 
             if ('all' === $language) {
-                $languages = Language::get();
+                $languages = config('translatable.models.language')::get();
             } else {
-                $languages = Language::where('language', $language)->get();
+                $languages = config('translatable.models.language')::where('language', $language)->get();
             }
         }
 
-        if (! $languages->count()) {
+        if (!$languages->count()) {
             throw new Exception(__('No language found to build a preset for.'));
         }
 
@@ -59,19 +58,19 @@ class GeneratePresetCommand extends Command
 
             Arrayable::storeInFile(
                 $generated_preset,
-                $this->getPresetFolderPath()."/$language->language.php"
+                $this->getPresetFolderPath() . "/$language->language.php"
             );
         }
     }
 
     private function getPresetFolderPath()
     {
-        return __DIR__.'/../../../resources/presets';
+        return __DIR__ . '/../../../resources/presets';
     }
 
     private function getAvailableLanguagesArray()
     {
-        $languages = Language::get()->pluck('name', 'language')->toArray();
+        $languages = config('translatable.models.language')::get()->pluck('name', 'language')->toArray();
         $languages['all'] = __('All');
 
         return $languages;

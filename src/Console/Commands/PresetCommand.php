@@ -4,8 +4,6 @@ namespace Marshmallow\Translatable\Console\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use Marshmallow\Translatable\Models\Language;
-use Marshmallow\Translatable\Models\Translation;
 
 class PresetCommand extends Command
 {
@@ -49,14 +47,14 @@ class PresetCommand extends Command
         /*
          * Check if we interpreted everything correctly.
          */
-        if (! $this->importContextIsCorrect()) {
+        if (!$this->importContextIsCorrect()) {
             return $this->stopImporter();
         }
 
         /*
          * Check if there is something to import or not.
          */
-        if (! $this->checkIfThereIsSomethingToImport()) {
+        if (!$this->checkIfThereIsSomethingToImport()) {
             return $this->stopImporter();
         }
 
@@ -69,7 +67,7 @@ class PresetCommand extends Command
         /*
          * Continue with the import!!
          */
-        if (! $this->option('force') && ! $this->confirm(__('Please type "yes" to start the import'))) {
+        if (!$this->option('force') && !$this->confirm(__('Please type "yes" to start the import'))) {
             return $this->stopImporter();
         }
 
@@ -81,7 +79,7 @@ class PresetCommand extends Command
         $this->output->progressStart(count($this->untranslated_items));
 
         foreach ($this->untranslated_items as $preset) {
-            Translation::updateOrCreate([
+            config('translatable.models.translation')::updateOrCreate([
                 'group' => $preset['group'],
                 'key' => $preset['key'],
                 'language_id' => $this->language->id,
@@ -123,13 +121,13 @@ class PresetCommand extends Command
     private function fillLanguageProperty()
     {
         $language = $this->argument('language');
-        $this->language = Language::where('language', $language)->firstOrFail();
+        $this->language = config('translatable.models.language')::where('language', $language)->firstOrFail();
     }
 
     private function fillPresetProperty()
     {
         $preset_path = $this->getPresetFilePath($this->language->language);
-        if (! file_exists($preset_path)) {
+        if (!file_exists($preset_path)) {
             $preset = $this->choice(
                 __('We couldnt match a preset. Which preset do you wish to import?'),
                 $this->getAvailablePresetArray()
@@ -138,7 +136,7 @@ class PresetCommand extends Command
             $preset_path = $this->getPresetFilePath($preset);
         }
 
-        if (! file_exists($preset_path)) {
+        if (!file_exists($preset_path)) {
             throw new Exception(__('Preset is not available. Please try again.'));
         }
 
@@ -152,11 +150,11 @@ class PresetCommand extends Command
         }
 
         $confirm_text = __('We are going to import our ":preset_name" into your database connected to the language ":local_language_name". Is this correct?', [
-            'preset_name' => 'Preset '.$this->preset['name'],
+            'preset_name' => 'Preset ' . $this->preset['name'],
             'local_language_name' => $this->language->name,
         ]);
 
-        if (! $this->confirm($confirm_text)) {
+        if (!$this->confirm($confirm_text)) {
             return false;
         }
 
@@ -175,12 +173,12 @@ class PresetCommand extends Command
         $untranslated_items = [];
         $this->output->progressStart(count($this->preset['preset']));
         foreach ($this->preset['preset'] as $translation_preset) {
-            $translation = Translation::where('language_id', $this->language->id)
-                                        ->where('group', $translation_preset['group'])
-                                        ->where('key', $translation_preset['key'])
-                                        ->first();
+            $translation = config('translatable.models.translation')::where('language_id', $this->language->id)
+                ->where('group', $translation_preset['group'])
+                ->where('key', $translation_preset['key'])
+                ->first();
 
-            if (! $translation || ! $translation->value) {
+            if (!$translation || !$translation->value) {
                 $untranslated_items[] = $translation_preset;
             }
             $this->output->progressAdvance();
@@ -205,18 +203,18 @@ class PresetCommand extends Command
 
     private function getPresetFilePath(string $language_code)
     {
-        return $this->getPresetFolderPath()."/$language_code.php";
+        return $this->getPresetFolderPath() . "/$language_code.php";
     }
 
     private function getPresetFolderPath()
     {
-        return __DIR__.'/../../../resources/presets';
+        return __DIR__ . '/../../../resources/presets';
     }
 
     private function getAvailablePresetArray()
     {
         $presets = [];
-        $files = glob($this->getPresetFolderPath().'/*.{php}', GLOB_BRACE);
+        $files = glob($this->getPresetFolderPath() . '/*.{php}', GLOB_BRACE);
         foreach ($files as $file) {
             $preset = $this->getPreset($file);
             $presets[$preset['locale']] = $preset['name'];
