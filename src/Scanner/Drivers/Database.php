@@ -2,16 +2,16 @@
 
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
-use Marshmallow\Translatable\Models\Translation as TranslationModel;
-use Marshmallow\Translatable\Models\Language;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 
 class Database extends Translation implements DriverInterface
 {
     protected $scanner;
+
     protected $getLanguages;
+
     protected $sourceLanguage;
 
     /*
@@ -23,7 +23,7 @@ class Database extends Translation implements DriverInterface
     {
         $this->sourceLanguage = $sourceLanguage;
         $this->scanner = $scanner;
-        $this->getLanguages = Language::cursor()->remember();
+        $this->getLanguages = config('translatable.models.language')::cursor()->remember();
     }
 
     /**
@@ -33,7 +33,7 @@ class Database extends Translation implements DriverInterface
      */
     public function allLanguages()
     {
-        return Language::all()->mapWithKeys(function ($language) {
+        return config('translatable.models.language')::all()->mapWithKeys(function ($language) {
             return [$language->language => $language->name ?: $language->language];
         });
     }
@@ -45,7 +45,7 @@ class Database extends Translation implements DriverInterface
      */
     public function allGroup(string $language)
     {
-        $groups = TranslationModel::getGroupsForLanguage($language);
+        $groups = config('translatable.models.translation')::getGroupsForLanguage($language);
 
         return $groups->map(function ($translation) {
             return $translation->group;
@@ -90,7 +90,7 @@ class Database extends Translation implements DriverInterface
             throw new LanguageExistsException(__('translation::errors.language_exists', ['language' => $language]));
         }
 
-        Language::create([
+        config('translatable.models.language')::create([
             'language' => $language,
             'name' => $name,
         ]);
@@ -116,17 +116,9 @@ class Database extends Translation implements DriverInterface
             $group = $group[1];
         }
 
-        Language::where('language', $language)
-            ->first()
-            ->translations()
-            ->updateOrCreate([
-                'group' => $group,
-                'key' => $key,
-            ], [
-                'group' => $group,
-                'key' => $key,
-                'value' => $value,
-            ]);
+        if (!$this->translationExists($language, $group, $key)) {
+            $this->createNewTranslation($language, $group, $key, $value);
+        }
     }
 
     /**
@@ -144,16 +136,30 @@ class Database extends Translation implements DriverInterface
             $this->addLanguage($language);
         }
 
-        Language::where('language', $language)
-            ->first()
-            ->translations()
-            ->updateOrCreate([
-                'group' => $vendor,
-                'key' => $key,
-            ], [
-                'key' => $key,
-                'value' => $value,
-            ]);
+        if (!$this->translationExists($language, $vendor, $key)) {
+            $this->createNewTranslation($language, $vendor, $key, $value);
+        }
+    }
+
+    public function createNewTranslation($language, $vendor, $key, $value = '')
+    {
+        $language = config('translatable.models.language')::where('language', $language)->first();
+        config('translatable.models.translation')::create([
+            'language_id' => $language->id,
+            'group' => $vendor,
+            'key' => $key,
+            'value' => $value,
+        ]);
+    }
+
+    public function translationExists($language, $vendor, $key)
+    {
+        return config('translatable.models.translation')
+            ::join('languages', 'languages.id', '=', 'translations.language_id')
+            ->where('languages.language', $language)
+            ->where('translations.group', $vendor)
+            ->where(DB::raw('BINARY translations.key'), $key)
+            ->first();
     }
 
     /**
@@ -175,7 +181,7 @@ class Database extends Translation implements DriverInterface
          * update to 'single'. We do this here so it only happens once.
          */
         if ($this->hasLegacyGroups($translations->keys())) {
-            TranslationModel::whereNull('group')->update(['group' => 'single']);
+            config('translatable.models.translation')::whereNull('group')->update(['group' => 'single']);
 
             /*
              * if any legacy groups exist, rerun the method so we get the
@@ -239,7 +245,6 @@ class Database extends Translation implements DriverInterface
     /**
      * Get a language from the database.
      *
-     * @return Language
      */
     private function getLanguage(string $language)
     {
