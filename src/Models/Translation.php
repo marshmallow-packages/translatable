@@ -28,4 +28,14 @@ class Translation extends Model
             ->distinct()
             ->get();
     }
+
+    public function scopeOnlyGrouped($query)
+    {
+        return $query->whereNotNull('group')->whereIn('group', ['single']);
+    }
+
+    public function scopeOnlySingle($query)
+    {
+        return $query->whereNotNull('group')->whereNotIn('group', ['single']);
+    }
 }
