@@ -14,6 +14,9 @@ class Language extends Model
 {
     use Translatable;
 
+    // protected $with = ['groupedTranslations', 'singleTranslations'];
+    //  protected $with = ['groupedTranslations'];
+
     protected $guarded = [];
 
     /**
@@ -130,5 +133,15 @@ class Language extends Model
     public function translations()
     {
         return $this->hasMany(Translation::class);
+    }
+
+    public function groupedTranslations()
+    {
+        return $this->hasMany(Translation::class)->whereNotIn('group', ['single'])->whereNotNull('group');
+    }
+
+    public function singleTranslations()
+    {
+        return $this->hasMany(Translation::class)->whereIn('group', ['single'])->whereNotNull('group');
     }
 }

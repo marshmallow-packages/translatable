@@ -5,6 +5,7 @@ namespace Marshmallow\Translatable\Scanner\Drivers;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+
 class Database extends Translation implements DriverInterface
 {
     protected $scanner;
@@ -172,12 +173,8 @@ class Database extends Translation implements DriverInterface
             return self::$translations['single'][$language];
         }
 
-        $translations = $this->getLanguage($language)
-            ->translations()
-            ->where('group', 'like', '%single')
-            ->orWhereNull('group')
-            ->get()
-            ->groupBy('group');
+        $translations = $this->getLanguage($language)->singleTranslations();
+        $translations = $translations->select(['group', 'value', 'key'])->get()->groupBy('group');
 
         /*
          * if there is no group, this is a legacy translation so we need to
@@ -193,7 +190,7 @@ class Database extends Translation implements DriverInterface
             return $this->getSingleTranslationsFor($language);
         }
 
-        self::$translations['single'][$language] = $translations->map(function ($translations, $group) use ($language) {
+        self::$translations['single'][$language] = $translations->map(function ($translations) {
             return $translations->mapWithKeys(function ($translation) {
                 return [$translation->key => $translation->value];
             });
@@ -213,14 +210,10 @@ class Database extends Translation implements DriverInterface
             return self::$translations['group'][$language];
         }
 
-        $translations = $this->getLanguage($language)
-            ->translations()
-            ->whereNotNull('group')
-            ->where('group', 'not like', '%single')
-            ->get()
-            ->groupBy('group');
+        $translations = $this->getLanguage($language)->groupedTranslations();
+        $translations = $translations->select(['group', 'value', 'key'])->get()->groupBy('group');
 
-        self::$translations['group'][$language] = $translations->map(function ($translations) {
+        self::$translations['group'][$language] = collect($translations)->map(function ($translations) {
             return $translations->mapWithKeys(function ($translation) {
                 return [$translation->key => $translation->value];
             });
