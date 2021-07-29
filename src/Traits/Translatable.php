@@ -6,7 +6,7 @@ use App\Nova\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
 use Marshmallow\HelperFunctions\Facades\URL;
-use Marshmallow\Translatable\Models\Translatable as TranslatableModel;
+use Marshmallow\Translatable\Facades\Translatable as TranslatableFacade;
 
 trait Translatable
 {
@@ -162,7 +162,7 @@ trait Translatable
      */
     protected function getLanguageByTranslationParameter($language)
     {
-        return config('translatable.models.language')::where('language', $language)->firstOrFail();
+        return TranslatableFacade::getLanguageByTranslationParameter($language);
     }
 
     /**
