@@ -5,6 +5,7 @@ namespace Marshmallow\Translatable;
 use Request;
 use Laravel\Nova\Nova;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Models\Language;
@@ -26,6 +27,7 @@ class ServiceProvider extends BaseServiceProvider
     {
         Request::macro('setTranslatableLocale', function ($language) {
             Session::put('translatable-locale', $language->language);
+            Cache::put('translatable-locale', $language->language);
         });
 
         Request::macro('getTranslatableLocale', function () {
@@ -33,17 +35,24 @@ class ServiceProvider extends BaseServiceProvider
             if ($session = Session::get($session_key)) {
                 return $session;
             }
+            if ($cache = Cache::get($session_key)) {
+                return $cache;
+            }
 
             return config('app.locale');
         });
 
         Request::macro('setUserLocale', function (Language $language) {
             Session::put('user-locale', $language->language);
+            Cache::put('user-locale', $language->language);
         });
 
         Request::macro('getUserLocale', function () {
             if ($session = Session::get('user-locale')) {
                 return $session;
+            }
+            if ($cache = Cache::get('user-locale')) {
+                return $cache;
             }
 
             return config('app.locale');
