@@ -174,6 +174,13 @@ trait Translatable
             return null;
         }
 
+        if ($this->translatable) {
+            return $this->translatable
+                ->where('source_field', $source_field)
+                ->where('language_id', $language->id)
+                ->first();
+        }
+
         return config('translatable.models.translatable')::where('translatable_type', get_class($this))
             ->where('translatable_id', $this->getAttributes()[$this->primaryKey])
             ->where('source_field', $source_field)
