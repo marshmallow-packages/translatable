@@ -32,14 +32,21 @@ class ServiceProvider extends BaseServiceProvider
 
         Request::macro('getTranslatableLocale', function () {
             $session_key = (URL::isNova(request())) ? 'translatable-locale' : 'user-locale';
-            if ($session = Session::get($session_key)) {
-                return $session;
-            }
-            if ($cache = Cache::get($session_key)) {
-                return $cache;
+            $app_locale = config('app.locale');
+
+            if (Session::has($session_key)) {
+                return Session::get($session_key);
+            } else {
+                Session::put($session_key, $app_locale);
             }
 
-            return config('app.locale');
+            if (Cache::has($session_key)) {
+                return Cache::get($session_key);
+            } else {
+                Cache::put($session_key, $app_locale);
+            }
+
+            return $app_locale;
         });
 
         Request::macro('setUserLocale', function (Language $language) {
