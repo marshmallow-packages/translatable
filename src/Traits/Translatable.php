@@ -354,6 +354,26 @@ trait Translatable
     }
 
     /**
+     * STATICS
+     */
+
+    /**
+     * Get a resource by its translated slug.
+     */
+    public static function getByTranslatedSlug($slug, $slug_column = 'slug')
+    {
+        $translation = config('translatable.models.translatable')::where('translated_value', $slug)
+            ->where('translatable_type', self::class)
+            ->first();
+
+        if ($translation) {
+            return $translation->translatable;
+        }
+
+        return self::where($slug_column, $slug)->first();
+    }
+
+    /**
      * LEGACY FROM MULTI-LANGUAGE PACKAGE.
      */
 
