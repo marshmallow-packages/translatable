@@ -2,6 +2,7 @@
 
 namespace Marshmallow\Translatable;
 
+use Error;
 use App\Nova\Resource;
 use Eminiarts\Tabs\Tabs;
 
