@@ -15,14 +15,20 @@ class TranslatableTabs
 
         foreach ($tabs as $tab_name => $fields) {
             foreach ($fields as $key => $field) {
-                if (isset($field->attribute)) {
-                    $attribute = $field->attribute;
-                    if (!$resource->isTranslatableAttribute($attribute)) {
-                        unset($tabs[$tab_name][$key]);
+
+                try {
+                    if (isset($field->attribute)) {
+                        $attribute = $field->attribute;
+                        if (!$resource->isTranslatableAttribute($attribute)) {
+                            unset($tabs[$tab_name][$key]);
+                        }
                     }
+                } catch (Error $e) {
+                    //
                 }
             }
         }
+
         return new Tabs($name, $tabs);
     }
 }
