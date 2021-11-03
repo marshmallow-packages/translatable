@@ -2,9 +2,9 @@
 
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-
 
 class Database extends Translation implements DriverInterface
 {
@@ -213,11 +213,15 @@ class Database extends Translation implements DriverInterface
         $translations = $this->getLanguage($language)->groupedTranslations();
         $translations = $translations->select(['group', 'value', 'key'])->get()->groupBy('group');
 
-        self::$translations['group'][$language] = collect($translations)->map(function ($translations) {
-            return $translations->mapWithKeys(function ($translation) {
-                return [$translation->key => $translation->value];
+        $translationArray = [];
+
+        $translations->map(function ($translations) use (&$translationArray) {
+            $translations->map(function ($translation) use (&$translationArray) {
+                Arr::set($translationArray, "{$translation->group}.{$translation->key}", $translation->value);
             });
         });
+
+        self::$translations['group'][$language] = collect($translationArray);
 
         return self::$translations['group'][$language];
     }
