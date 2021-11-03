@@ -89,9 +89,6 @@ class Scanner
                     if (preg_match("/(^[a-zA-Z0-9:_-]+([.][^\1)\ ]+)+$)/siU", $key, $arrayMatches)) {
                         continue;
                     } else {
-                        if ($key !== 'terms_accepted') {
-                            continue;
-                        }
                         $results['single']['validation']["attributes.{$key}"] = '';
                     }
                 }
