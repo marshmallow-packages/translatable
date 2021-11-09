@@ -10,6 +10,8 @@ use Marshmallow\Translatable\Facades\Translatable as TranslatableFacade;
 
 trait Translatable
 {
+    protected $use_translator = true;
+
     protected $protected_from_translations = [
         'id',
         'created_at',
@@ -35,7 +37,7 @@ trait Translatable
         	 * from the original, then we are creating or updating
         	 * translations.
         	 */
-            if ($resource->weAreTranslating()) {
+            if ($resource->translatorActive() && $resource->weAreTranslating()) {
                 /*
         		 * Create the translations.
         		 */
@@ -59,6 +61,23 @@ trait Translatable
              */
             $resource->translatable()->delete();
         });
+    }
+
+    public function dontTranslate()
+    {
+        $this->use_translator = false;
+        return $this;
+    }
+
+    public function doTranslate()
+    {
+        $this->use_translator = true;
+        return $this;
+    }
+
+    public function translatorActive()
+    {
+        return $this->use_translator === true;
     }
 
     public function weAreTranslating()
