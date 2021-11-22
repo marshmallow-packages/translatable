@@ -39,8 +39,8 @@ trait Translatable
         	 */
             if ($resource->translatorActive() && $resource->weAreTranslating()) {
                 /*
-        		 * Create the translations.
-        		 */
+                * Create the translations.
+                */
                 $resource->setTranslation(
                     Request::getTranslatableLocale(),
                     $resource
@@ -48,8 +48,8 @@ trait Translatable
 
                 /*
         		 * Reset this resource to its original values
-        		 * because the should nog be stored in the
-        		 * resource itself.
+                 * because the should nog be stored in the
+                 * resource itself.
         		 */
                 $resource->resetToOriginal();
             }
@@ -96,13 +96,9 @@ trait Translatable
 
     public function resetToOriginal(): self
     {
-        if (!$this->isDirty()) {
-            return $this;
-        }
-        foreach ($this->getDirty() as $column => $new_value) {
+        foreach ($this->getTranslatableAttributes() as $column) {
             $this->{$column} = $this->getOriginal($column);
         }
-
         return $this;
     }
 
