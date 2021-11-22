@@ -19,7 +19,7 @@
         "php": "^7.1|^8.0",
         "marshmallow/sluggable": "^v1.3.0",
         "marshmallow/live-update": "^v1.0.1",
-        "marshmallow/helpers": "v2.9.0",
+        "marshmallow/helpers": "^v2.11.1",
         "marshmallow/commands": "^v1.2.1",
         "marshmallow/nova-advanced-image": "^v1.1.1"
     },
