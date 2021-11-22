@@ -43,7 +43,7 @@ trait Translatable
         		 */
                 $resource->setTranslation(
                     Request::getTranslatableLocale(),
-                    $resource->getDirty()
+                    $resource
                 );
 
                 /*
@@ -119,7 +119,7 @@ trait Translatable
                 continue;
             }
             if ($translatable = $this->getExistingTranslation($source_field, $language)) {
-                $translatable->update([
+                $translatable->updateQuietly([
                     'translated_value' => $translated_value,
                 ]);
             } else {
@@ -295,6 +295,10 @@ trait Translatable
      */
     protected function convertTranslationInputToArray($source_field, $translated_value = null): array
     {
+        if ($source_field instanceof Model) {
+            return $source_field->toArray();
+        }
+
         if (is_array($source_field)) {
             return $source_field;
         }
