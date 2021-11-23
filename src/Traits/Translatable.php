@@ -52,6 +52,11 @@ trait Translatable
                  * resource itself.
         		 */
                 $resource->resetToOriginal();
+
+                foreach ($resource->getDirty() as $field => $value) {
+                    $original_value = $resource->getOriginal($field);
+                    $resource->$field = $original_value;
+                }
             }
         });
 
@@ -119,11 +124,15 @@ trait Translatable
                     'translated_value' => $translated_value,
                 ]);
             } else {
-                $this->translatable()->create([
-                    'source_field' => $source_field,
-                    'translated_value' => $translated_value,
-                    'language_id' => $language->id,
-                ]);
+                $this::withoutEvents(function () use ($source_field, $translated_value, $language) {
+                    $new_translatable = $this->translatable()->create([
+                        'source_field' => $source_field,
+                        'translated_value' => $translated_value,
+                        'language_id' => $language->id,
+                    ]);
+
+                    $new_translatable->saveQuietly();
+                });
             }
         }
     }
