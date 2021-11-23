@@ -48,6 +48,28 @@ class Language extends Model
         });
     }
 
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        if ($field == 'language') {
+            $languageModel = config('translatable.models.language');
+            $language = $languageModel::where('language', $value)->firstOrFail();
+            return $language;
+        }
+    }
+
+    public static function resolveRoute($value, $field = null)
+    {
+        $field = $field ?? 'language';
+        return self::where($field, $value)->firstOrFail();
+    }
+
     public function getIcon()
     {
         if (!$this->icon) {
