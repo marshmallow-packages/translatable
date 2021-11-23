@@ -10,6 +10,8 @@ use Marshmallow\Translatable\Facades\Translatable as TranslatableFacade;
 
 trait Translatable
 {
+    protected $use_translator = true;
+
     protected $protected_from_translations = [
         'id',
         'created_at',
@@ -35,19 +37,19 @@ trait Translatable
         	 * from the original, then we are creating or updating
         	 * translations.
         	 */
-            if ($resource->weAreTranslating()) {
+            if ($resource->translatorActive() && $resource->weAreTranslating()) {
                 /*
-        		 * Create the translations.
-        		 */
+                * Create the translations.
+                */
                 $resource->setTranslation(
                     Request::getTranslatableLocale(),
-                    $resource->getDirty()
+                    $resource
                 );
 
                 /*
         		 * Reset this resource to its original values
-        		 * because the should nog be stored in the
-        		 * resource itself.
+                 * because the should nog be stored in the
+                 * resource itself.
         		 */
                 $resource->resetToOriginal();
             }
@@ -59,6 +61,23 @@ trait Translatable
              */
             $resource->translatable()->delete();
         });
+    }
+
+    public function dontTranslate()
+    {
+        $this->use_translator = false;
+        return $this;
+    }
+
+    public function doTranslate()
+    {
+        $this->use_translator = true;
+        return $this;
+    }
+
+    public function translatorActive()
+    {
+        return $this->use_translator === true;
     }
 
     public function weAreTranslating()
@@ -77,13 +96,9 @@ trait Translatable
 
     public function resetToOriginal(): self
     {
-        if (!$this->isDirty()) {
-            return $this;
-        }
-        foreach ($this->getDirty() as $column => $new_value) {
+        foreach ($this->getTranslatableAttributes() as $column) {
             $this->{$column} = $this->getOriginal($column);
         }
-
         return $this;
     }
 
@@ -100,7 +115,7 @@ trait Translatable
                 continue;
             }
             if ($translatable = $this->getExistingTranslation($source_field, $language)) {
-                $translatable->update([
+                $translatable->updateQuietly([
                     'translated_value' => $translated_value,
                 ]);
             } else {
@@ -276,6 +291,10 @@ trait Translatable
      */
     protected function convertTranslationInputToArray($source_field, $translated_value = null): array
     {
+        if ($source_field instanceof Model) {
+            return $source_field->toArray();
+        }
+
         if (is_array($source_field)) {
             return $source_field;
         }

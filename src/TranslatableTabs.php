@@ -8,9 +8,24 @@ use Eminiarts\Tabs\Tabs;
 
 class TranslatableTabs
 {
+    protected function noEditModeAvailable()
+    {
+        return !request()->has('editMode');
+    }
+
+    protected function createModeActive()
+    {
+        return (request()->has('editMode') && 'create' == request()->editMode);
+    }
+
+    protected function shouldLoadNormalTabs(Resource $resource)
+    {
+        return $resource->weAreNotTranslating() || $this->noEditModeAvailable() || $this->createModeActive();
+    }
+
     public function make(Resource $resource, string $name, array $tabs): Tabs
     {
-        if ($resource->weAreNotTranslating() || (request()->has('editMode') && 'create' == request()->editMode)) {
+        if ($this->shouldLoadNormalTabs($resource)) {
             return new Tabs($name, $tabs);
         }
 
