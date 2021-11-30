@@ -43,7 +43,7 @@ trait Translatable
                 */
                 $resource->setTranslation(
                     Request::getTranslatableLocale(),
-                    $resource
+                    $resource->getDirty()
                 );
 
                 /*
@@ -52,11 +52,6 @@ trait Translatable
                  * resource itself.
         		 */
                 $resource->resetToOriginal();
-
-                foreach ($resource->getDirty() as $field => $value) {
-                    $original_value = $resource->getOriginal($field);
-                    $resource->$field = $original_value;
-                }
                 $resource->timestamps = false;
             }
         });
@@ -102,8 +97,8 @@ trait Translatable
 
     public function resetToOriginal(): self
     {
-        foreach ($this->getTranslatableAttributes() as $column) {
-            $this->{$column} = $this->getOriginal($column);
+        foreach ($this->getDirty() as $field => $value) {
+            $this->{$field} = $this->getOriginal($field);
         }
         return $this;
     }
