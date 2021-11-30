@@ -57,6 +57,7 @@ trait Translatable
                     $original_value = $resource->getOriginal($field);
                     $resource->$field = $original_value;
                 }
+                $resource->timestamps = false;
             }
         });
 
