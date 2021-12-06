@@ -4,7 +4,9 @@ namespace Marshmallow\Translatable;
 
 use Request;
 use Laravel\Nova\Nova;
+use Illuminate\Support\Facades\App;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 use Marshmallow\HelperFunctions\Facades\URL;
@@ -32,7 +34,7 @@ class ServiceProvider extends BaseServiceProvider
 
         Request::macro('getTranslatableLocale', function () {
             $session_key = (URL::isNova(request())) ? 'translatable-locale' : 'user-locale';
-            $app_locale = config('app.locale');
+            $app_locale = App::currentLocale();
 
             if (Session::has($session_key)) {
                 return Session::get($session_key);
@@ -52,17 +54,21 @@ class ServiceProvider extends BaseServiceProvider
         Request::macro('setUserLocale', function (Language $language) {
             Session::put('user-locale', $language->language);
             Cache::put('user-locale', $language->language);
+            App::setLocale($language->language);
         });
 
         Request::macro('getUserLocale', function () {
-            if ($session = Session::get('user-locale')) {
-                return $session;
-            }
-            if ($cache = Cache::get('user-locale')) {
-                return $cache;
+            $locale_key = 'user-locale';
+
+            if (Session::has($locale_key)) {
+                $locale = Session::get($locale_key);
+            } else if (Cache::has($locale_key)) {
+                $locale = Cache::get($locale_key);
+            } else {
+                $locale = App::currentLocale();
             }
 
-            return config('app.locale');
+            return $locale;
         });
 
         Nova::serving(function () {
@@ -89,7 +95,23 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerCommands();
 
         $this->registerContainerBindings();
+
+        $this->registerMiddleware();
     }
+
+    /**
+     * Register the middleware
+     *
+     * @param  string $middleware
+     */
+    protected function registerMiddleware()
+    {
+        $middleware = \Marshmallow\Translatable\Http\Middleware\Localization::class;
+        $kernel = $this->app[Kernel::class];
+        $kernel->appendMiddlewareToGroup('web', $middleware);
+    }
+
+
 
     /**
      * Merge package configuration.
