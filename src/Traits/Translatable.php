@@ -52,6 +52,7 @@ trait Translatable
                  * resource itself.
         		 */
                 $resource->resetToOriginal();
+                $resource->timestamps = false;
             }
         });
 
