@@ -87,7 +87,7 @@ trait Translatable
             return false;
         }
 
-        return Request::getTranslatableLocale() !== config('app.locale');
+        return Request::getTranslatableLocale() !== config('app.default_locale', config('app.locale'));
     }
 
     public function weAreNotTranslating()
