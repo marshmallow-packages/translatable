@@ -5,6 +5,7 @@ namespace Marshmallow\Translatable\Scanner\Drivers;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class Database extends Translation implements DriverInterface
 {
@@ -23,7 +24,10 @@ class Database extends Translation implements DriverInterface
     {
         $this->sourceLanguage = $sourceLanguage;
         $this->scanner = $scanner;
-        $this->getLanguages = config('translatable.models.language')::cursor()->remember();
+
+        if (Schema::hasTable('languages')) {
+            $this->getLanguages = config('translatable.models.language')::cursor()->remember();
+        }
     }
 
     /**
@@ -173,7 +177,11 @@ class Database extends Translation implements DriverInterface
             return self::$translations['single'][$language];
         }
 
-        $translations = $this->getLanguage($language)->singleTranslations();
+        $translations = $this->getLanguage($language)?->singleTranslations();
+        if (!$translations) {
+            return collect();
+        }
+
         $translations = $translations->select(['group', 'value', 'key'])->get()->groupBy('group');
 
         /*
@@ -210,7 +218,10 @@ class Database extends Translation implements DriverInterface
             return self::$translations['group'][$language];
         }
 
-        $translations = $this->getLanguage($language)->groupedTranslations();
+        $translations = $this->getLanguage($language)?->groupedTranslations();
+        if (!$translations) {
+            return collect();
+        }
         $translations = $translations->select(['group', 'value', 'key'])->get()->groupBy('group');
 
         $translationArray = [];
@@ -252,7 +263,7 @@ class Database extends Translation implements DriverInterface
      */
     private function getLanguage(string $language)
     {
-        return $this->getLanguages->where('language', $language)->first();
+        return $this->getLanguages?->where('language', $language)->first();
     }
 
     /**
