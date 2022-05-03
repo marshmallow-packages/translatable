@@ -2,14 +2,14 @@
 
 namespace Marshmallow\Translatable\Traits;
 
-use Illuminate\Http\Request;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Marshmallow\Translatable\Fields\LanguageToggler;
 
 trait TranslatableFields
 {
     use Translatable;
 
-    public function fields(Request $request)
+    public function fields(NovaRequest $request)
     {
         if (!$request->has('editMode')) {
             return $this->translatableFields($request);
@@ -46,12 +46,12 @@ trait TranslatableFields
         );
     }
 
-    protected function addTranslationToggleField(array $fields, Request $request)
+    protected function addTranslationToggleField(array $fields, NovaRequest $request)
     {
         return array_merge([
             LanguageToggler::make(__('Select language')),
         ], $fields);
     }
 
-    abstract public function translatableFields(Request $request);
+    abstract public function translatableFields(NovaRequest $request);
 }
