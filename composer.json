@@ -16,18 +16,25 @@
         "translatable"
     ],
     "require": {
-        "php": "^7.1|^8.0",
+        "php": "^8.0",
         "marshmallow/sluggable": "^v1.3.0",
         "marshmallow/live-update": "^v1.0.1",
         "marshmallow/helpers": "^v2.11.1",
         "marshmallow/commands": "^v1.2.1",
-        "marshmallow/nova-advanced-image": "^v1.1.1"
+        "marshmallow/nova-advanced-image": "^v2.0",
+        "laravel/nova": "^4.0"
     },
     "autoload": {
         "psr-4": {
             "Marshmallow\\Translatable\\": "src/"
         }
     },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://nova.laravel.com"
+        }
+    ],
     "extra": {
         "laravel": {
             "providers": [
