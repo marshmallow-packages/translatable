@@ -21,7 +21,7 @@
         "marshmallow/live-update": "^v1.0.1",
         "marshmallow/helpers": "^v2.11.1",
         "marshmallow/commands": "^v1.2.1",
-        "marshmallow/nova-advanced-image": "^v1.1.1",
+        "marshmallow/nova-advanced-image": "^v2.0",
         "laravel/nova": "^4.0"
     },
     "autoload": {
