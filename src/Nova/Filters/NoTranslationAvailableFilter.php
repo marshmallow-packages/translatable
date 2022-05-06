@@ -24,7 +24,7 @@ class NoTranslationAvailableFilter extends Filter
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function apply(Request $request, $query, $value)
+    public function apply(NovaRequest $request, $query, $value)
     {
         switch ($value) {
             case 'translated':
