@@ -3,7 +3,7 @@
 namespace Marshmallow\Translatable\Nova;
 
 use App\Nova\Resource;
-use Illuminate\Http\Request;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\HasMany;
@@ -72,11 +72,11 @@ class Language extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param \Illuminate\Http\Request $request Request
+     * @param \Laravel\Nova\Http\Requests\NovaRequest $request NovaRequest
      *
      * @return array
      */
-    public function translatableFields(Request $request)
+    public function translatableFields(NovaRequest $request)
     {
         return [
             Text::make(__('Name'), 'name')
@@ -116,7 +116,7 @@ class Language extends Resource
      *
      * @return array
      */
-    public function cards(Request $request)
+    public function cards(NovaRequest $request)
     {
         return [];
     }
@@ -126,7 +126,7 @@ class Language extends Resource
      *
      * @return array
      */
-    public function filters(Request $request)
+    public function filters(NovaRequest $request)
     {
         return [];
     }
@@ -136,7 +136,7 @@ class Language extends Resource
      *
      * @return array
      */
-    public function lenses(Request $request)
+    public function lenses(NovaRequest $request)
     {
         return [];
     }
@@ -146,7 +146,7 @@ class Language extends Resource
      *
      * @return array
      */
-    public function actions(Request $request)
+    public function actions(NovaRequest $request)
     {
         return [];
     }
