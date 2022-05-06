@@ -22,7 +22,7 @@ class LanguageFilter extends Filter
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function apply(Request $request, $query, $value)
+    public function apply(NovaRequest $request, $query, $value)
     {
         if ($value) {
             $query->where('language_id', $value);
