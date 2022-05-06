@@ -3,8 +3,9 @@
 namespace Marshmallow\Translatable\Traits;
 
 use App\Nova\Resource;
-use Laravel\Nova\Http\Requests\NovaRequest;
+use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Facades\Translatable as TranslatableFacade;
 

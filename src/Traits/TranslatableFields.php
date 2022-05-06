@@ -3,6 +3,7 @@
 namespace Marshmallow\Translatable\Traits;
 
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Illuminate\Http\Request;
 use Marshmallow\Translatable\Fields\LanguageToggler;
 
 trait TranslatableFields
