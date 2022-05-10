@@ -5,6 +5,7 @@ namespace Marshmallow\Translatable\Traits;
 use App\Nova\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Facades\Translatable as TranslatableFacade;
 
@@ -312,11 +313,11 @@ trait Translatable
     /**
      * Get the fields displayed by the resource.
      *
-     * @param \Illuminate\Http\Request $request Request
+     * @param \Laravel\Nova\Http\Requests\NovaRequest $request NovaRequest
      *
      * @return array
      */
-    public function fields(Request $request)
+    public function fields(NovaRequest $request)
     {
         if ($this->weAreNotTranslating() || ($request->has('editMode') && 'create' == $request->editMode)) {
             return $this->addTranslationToggleField(

@@ -1,5 +1,5 @@
 <template>
-    <panel-item :field="field">
+    <PanelItem :field="field">
         <div slot="value">
             <span v-for="language in field.languages" :key="language.language">
                 <a
@@ -21,7 +21,7 @@
                 </span>
             </span>
         </div>
-    </panel-item>
+    </PanelItem>
 </template>
 
 <script>
