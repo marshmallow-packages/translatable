@@ -74,17 +74,46 @@ class Translation extends Resource
      *
      * @return array
      */
-    public function fields(NovaRequest $request)
+
+    public function fieldsForCreate(NovaRequest $request)
     {
         return [
             BelongsTo::make(__('Language'), 'language', Language::class),
 
             Text::make(__('Group'), 'group')
                 ->sortable()
-                ->rules([
-                    'required',
-                ])
+                ->required()
                 ->default('single'),
+
+            Text::make(__('Key'), 'key')
+                ->sortable()
+                ->asHtml()
+                ->required()
+                ->resolveUsing(function ($value) {
+                    $value_array = str_split($value, 75);
+
+                    return join('<br/>', $value_array);
+                }),
+
+            Textarea::make(__('Value'), 'value')
+                ->sortable()
+                ->required(),
+        ];
+    }
+
+
+    public function fields(NovaRequest $request)
+    {
+        return [
+
+            BelongsTo::make(__('Language'), 'language', Language::class)
+                ->readonly(),
+
+            Text::make(__('Group'), 'group')
+                ->sortable()
+                ->required()
+                ->default('single')
+                ->readonly(),
 
             Text::make(__('Key'), 'key')
                 ->sortable()
@@ -94,17 +123,16 @@ class Translation extends Resource
                     return join('<br/>', $value_array);
                 })
                 ->asHtml()
-                ->rules([
-                    'required',
-                ]),
+                ->required()
+                ->readonly(),
 
-            TextLiveUpdate::make(__('Value'), 'value')->onlyOnIndex(),
+            TextLiveUpdate::make(__('Value'), 'value')
+                ->onlyOnIndex(),
 
             Textarea::make(__('Value'), 'value')
                 ->sortable()
-                ->rules([
-                    'required',
-                ]),
+                ->required()
+                ->hideFromIndex(),
         ];
     }
 
