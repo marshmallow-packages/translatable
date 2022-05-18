@@ -62,7 +62,7 @@
     };
 </script>
 
-<style type="text/css">
+<style>
     .mt-4 {
         margin-top: 1rem;
     }
@@ -74,7 +74,7 @@
     }
     .language-toggler.selected img,
     .language-toggler.selected.disabled img {
-        border: 3px solid #27ae60;
+        border: 3px solid rgba(var(--colors-primary-500));
     }
     .language-toggler.disabled img {
         border: 3px solid #ccc;
