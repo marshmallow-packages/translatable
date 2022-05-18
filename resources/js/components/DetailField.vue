@@ -1,6 +1,6 @@
 <template>
     <PanelItem :field="field">
-        <div slot="value">
+        <template #value>
             <span v-for="language in field.languages" :key="language.language">
                 <a
                     v-if="field.toggler_clickable"
@@ -20,7 +20,7 @@
                     <img :src="language.icon" class="rounded-full" />
                 </span>
             </span>
-        </div>
+        </template>
     </PanelItem>
 </template>
 
@@ -30,7 +30,7 @@
     };
 </script>
 
-<style type="text/css">
+<style>
     .language-toggler img {
         border: 3px solid transparent;
         padding: 5px;
@@ -41,7 +41,7 @@
     }
     .language-toggler.selected img,
     .language-toggler.selected.disabled img {
-        border: 3px solid #27ae60;
+        border: 3px solid rgba(var(--colors-primary-500));
     }
     .language-toggler.disabled img {
         border: 3px solid #ccc;
