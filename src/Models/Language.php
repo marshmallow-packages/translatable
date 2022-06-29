@@ -3,6 +3,7 @@
 namespace Marshmallow\Translatable\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Marshmallow\Translatable\Traits\Translatable;
 
 /*
@@ -46,6 +47,13 @@ class Language extends Model
              */
             $language->translations()->delete();
         });
+    }
+
+    public function translationCount(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->translations->count(),
+        );
     }
 
     /**
