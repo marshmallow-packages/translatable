@@ -101,11 +101,8 @@ class Language extends Resource
                     config('translatable.flag_icon.width')
                 ),
 
-            Number::make(__('Translations'))
-                ->onlyOnIndex()
-                ->resolveUsing(function ($collection, $language, $param) {
-                    return $language->translations->count();
-                }),
+            Number::make(__('Translations'), 'translation_count')
+                ->onlyOnIndex(),
 
             HasMany::make(__('Translations'), 'translations', Translation::class),
         ];
