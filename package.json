@@ -13,7 +13,7 @@
         "@inertiajs/inertia": "^0.11.0",
         "@inertiajs/inertia-vue3": "^0.6.0",
         "@vue/babel-plugin-jsx": "^1.1.1",
-        "@vue/compiler-sfc": "^3.2.33",
+        "@vue/compiler-sfc": "^3.2.42",
         "cross-env": "^7.0.3",
         "form-backend-validation": "^2.3.3",
         "laravel-mix": "^6.0.43",
