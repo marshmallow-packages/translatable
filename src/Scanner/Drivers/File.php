@@ -181,7 +181,7 @@ class File extends Translation implements DriverInterface
             if (strpos($file->getPathname(), 'vendor')) {
                 $vendor = Str::before(Str::after($file->getPathname(), 'vendor' . DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR);
 
-                return ['single' => new Collection(json_decode($this->disk->get($file), true))];
+                return ["{$vendor}::single" => new Collection(json_decode($this->disk->get($file), true))];
             }
 
             return ['single' => new Collection(json_decode($this->disk->get($file), true))];
@@ -211,6 +211,8 @@ class File extends Translation implements DriverInterface
             if (!is_array($groupData)) {
                 $file = $this->disk->get($group->getPathname());
                 $groupData = json_decode($file, true);
+            } else {
+                $groupData = $this->disk->getRequire($group->getPathname());
             }
 
             return [$group->getBasename('.php') => new Collection(Arr::dot($groupData))];
@@ -278,27 +280,11 @@ class File extends Translation implements DriverInterface
         // different path
         $translations = $translations instanceof Collection ? $translations->toArray() : $translations;
         ksort($translations);
-        $translations = $this->undotArray($translations);
+        $translations = array_undot($translations);
         if (Str::contains($group, '::')) {
             return $this->saveNamespacedGroupTranslations($language, $group, $translations);
         }
         $this->disk->put("{$this->languageFilesPath}" . DIRECTORY_SEPARATOR . "{$language}" . DIRECTORY_SEPARATOR . "{$group}.php", "<?php\n\nreturn " . var_export($translations, true) . ';' . \PHP_EOL);
-    }
-
-    protected function undotArray(array $dotNotationArray)
-    {
-        $array = [];
-        foreach ($dotNotationArray as $key => $value) {
-            // if there is a space after the dot, this could legitimately be
-            // a single key and not nested.
-            if (count(explode('. ', $key)) > 1) {
-                $array[$key] = $value;
-            } else {
-                Arr::set($array, $key, $value);
-            }
-        }
-
-        return $array;
     }
 
     /**
