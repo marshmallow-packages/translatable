@@ -43,7 +43,7 @@ class File extends Translation implements DriverInterface
             return [$language => $language];
         })->filter(function ($language) {
             // at the moemnt, we're not supporting vendor specific translations
-            return 'vendor' != $language;
+            return $language != 'vendor';
         });
     }
 
@@ -82,8 +82,7 @@ class File extends Translation implements DriverInterface
     /**
      * Get all translations for a particular language.
      *
-     * @param string $language
-     *
+     * @param  string  $language
      * @return Collection
      */
     public function allTranslationsFor($language)
@@ -97,8 +96,7 @@ class File extends Translation implements DriverInterface
     /**
      * Add a new language to the application.
      *
-     * @param string $language
-     *
+     * @param  string  $language
      * @return void
      */
     public function addLanguage($language, $name = null)
@@ -116,10 +114,9 @@ class File extends Translation implements DriverInterface
     /**
      * Add a new group type translation.
      *
-     * @param string $language
-     * @param string $key
-     * @param string $value
-     *
+     * @param  string  $language
+     * @param  string  $key
+     * @param  string  $value
      * @return void
      */
     public function addGroupTranslation($language, $group, $key, $value = '')
@@ -145,10 +142,9 @@ class File extends Translation implements DriverInterface
     /**
      * Add a new single type translation.
      *
-     * @param string $language
-     * @param string $key
-     * @param string $value
-     *
+     * @param  string  $language
+     * @param  string  $key
+     * @param  string  $value
      * @return void
      */
     public function addSingleTranslation($language, $vendor, $key, $value = '')
@@ -167,8 +163,7 @@ class File extends Translation implements DriverInterface
     /**
      * Get all of the single translations for a given language.
      *
-     * @param string $language
-     *
+     * @param  string  $language
      * @return Collection
      */
     public function getSingleTranslationsFor($language)
@@ -191,8 +186,7 @@ class File extends Translation implements DriverInterface
     /**
      * Get all of the group translations for a given language.
      *
-     * @param string $language
-     *
+     * @param  string  $language
      * @return Collection
      */
     public function getGroupTranslationsFor($language)
@@ -222,9 +216,8 @@ class File extends Translation implements DriverInterface
     /**
      * Get all the translations for a given file.
      *
-     * @param string $language
-     * @param string $file
-     *
+     * @param  string  $language
+     * @param  string  $file
      * @return array
      */
     public function getTranslationsForFile($language, $file)
@@ -243,8 +236,7 @@ class File extends Translation implements DriverInterface
     /**
      * Determine whether or not a language exists.
      *
-     * @param string $language
-     *
+     * @param  string  $language
      * @return bool
      */
     public function languageExists($language)
@@ -255,9 +247,8 @@ class File extends Translation implements DriverInterface
     /**
      * Add a new group of translations.
      *
-     * @param string $language
-     * @param string $group
-     *
+     * @param  string  $language
+     * @param  string  $group
      * @return void
      */
     public function addGroup($language, $group)
@@ -268,10 +259,9 @@ class File extends Translation implements DriverInterface
     /**
      * Save group type language translations.
      *
-     * @param string $language
-     * @param string $group
-     * @param array  $translations
-     *
+     * @param  string  $language
+     * @param  string  $group
+     * @param  array  $translations
      * @return void
      */
     public function saveGroupTranslations($language, $group, $translations)
@@ -290,10 +280,9 @@ class File extends Translation implements DriverInterface
     /**
      * Save namespaced group type language translations.
      *
-     * @param string $language
-     * @param string $group
-     * @param array  $translations
-     *
+     * @param  string  $language
+     * @param  string  $group
+     * @param  array  $translations
      * @return void
      */
     private function saveNamespacedGroupTranslations($language, $group, $translations)
@@ -311,9 +300,8 @@ class File extends Translation implements DriverInterface
     /**
      * Save single type language translations.
      *
-     * @param string $language
-     * @param array  $translations
-     *
+     * @param  string  $language
+     * @param  array  $translations
      * @return void
      */
     private function saveSingleTranslations($language, $translations)
@@ -331,8 +319,7 @@ class File extends Translation implements DriverInterface
     /**
      * Get all the group files for a given language.
      *
-     * @param string $language
-     *
+     * @param  string  $language
      * @return Collection
      */
     public function getGroupFilesFor($language)
@@ -348,8 +335,7 @@ class File extends Translation implements DriverInterface
     /**
      * Get a collection of group names for a given language.
      *
-     * @param string $language
-     *
+     * @param  string  $language
      * @return Collection
      */
     public function getGroupsFor($language)
@@ -368,8 +354,7 @@ class File extends Translation implements DriverInterface
     /**
      * Get all the vendor group files for a given language.
      *
-     * @param string $language
-     *
+     * @param  string  $language
      * @return Collection
      */
     public function getVendorGroupFilesFor($language)
