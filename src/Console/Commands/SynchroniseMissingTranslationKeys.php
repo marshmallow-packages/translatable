@@ -1,8 +1,9 @@
 <?php
 
-namespace Marshmallow\Translatable\Scanner\Console\Commands;
+namespace Marshmallow\Translatable\Console\Commands;
 
 use Illuminate\Support\Facades\DB;
+use Marshmallow\Translatable\Console\Commands\BaseCommand;
 
 class SynchroniseMissingTranslationKeys extends BaseCommand
 {

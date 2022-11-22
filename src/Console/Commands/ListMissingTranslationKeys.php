@@ -1,6 +1,8 @@
 <?php
 
-namespace Marshmallow\Translatable\Scanner\Console\Commands;
+namespace Marshmallow\Translatable\Console\Commands;
+
+use Marshmallow\Translatable\Console\Commands\BaseCommand;
 
 class ListMissingTranslationKeys extends BaseCommand
 {
@@ -35,18 +37,18 @@ class ListMissingTranslationKeys extends BaseCommand
         // check whether or not there are any missing translations
         $empty = true;
         foreach ($missingTranslations as $language => $values) {
-            if (! empty($values)) {
+            if (!empty($values)) {
                 $empty = false;
             }
         }
 
         // if no missing translations, inform the user and move on with your day
         if ($empty) {
-            return $this->info(__('translation::translation.no_missing_keys'));
+            return $this->info(__('translatable::translation.no_missing_keys'));
         }
 
         // set some headers for the table of results
-        $headers = [__('translation::translation.language'), __('translation::translation.type'), __('translation::translation.group'), __('translation::translation.key')];
+        $headers = [__('translatable::translation.language'), __('translatable::translation.type'), __('translatable::translation.group'), __('translatable::translation.key')];
 
         // iterate over each of the missing languages
         foreach ($missingTranslations as $language => $types) {

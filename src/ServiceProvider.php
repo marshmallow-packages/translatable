@@ -18,11 +18,12 @@ use Marshmallow\Translatable\Scanner\Drivers\Translation;
 use Marshmallow\Translatable\Console\Commands\PresetCommand;
 use Marshmallow\Translatable\Console\Commands\InstallCommand;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Marshmallow\Translatable\Console\Commands\AddLanguageCommand;
 use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
+use Marshmallow\Translatable\Console\Commands\ListMissingTranslationKeys;
 use Marshmallow\Translatable\Console\Commands\DuplicateTranslationsCommand;
-use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
-use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
-use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
+use Marshmallow\Translatable\Console\Commands\SynchroniseTranslationsCommand;
+use Marshmallow\Translatable\Console\Commands\SynchroniseMissingTranslationKeys;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -168,10 +169,10 @@ class ServiceProvider extends BaseServiceProvider
      */
     private function loadTranslations()
     {
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'translation');
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'translatable');
 
         $this->publishes([
-            __DIR__ . '/../resources/lang' => resource_path('lang/vendor/translation'),
+            __DIR__ . '/../resources/lang' => resource_path('lang/vendor/translatable'),
         ]);
     }
 
@@ -184,6 +185,9 @@ class ServiceProvider extends BaseServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
+                AddLanguageCommand::class,
+                AddTranslationKeyCommand::class,
+                ListLanguagesCommand::class,
                 ListMissingTranslationKeys::class,
                 SynchroniseMissingTranslationKeys::class,
                 SynchroniseTranslationsCommand::class,

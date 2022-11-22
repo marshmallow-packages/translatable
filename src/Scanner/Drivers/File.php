@@ -102,7 +102,7 @@ class File extends Translation implements DriverInterface
     public function addLanguage($language, $name = null)
     {
         if ($this->languageExists($language)) {
-            throw new LanguageExistsException(__('translation::errors.language_exists', ['language' => $language]));
+            throw new LanguageExistsException(__('translatable::errors.language_exists', ['language' => $language]));
         }
 
         $this->disk->makeDirectory("{$this->languageFilesPath}" . DIRECTORY_SEPARATOR . "$language");

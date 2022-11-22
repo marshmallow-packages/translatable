@@ -91,7 +91,7 @@ class Database extends Translation implements DriverInterface
     public function addLanguage($language, $name = null)
     {
         if ($this->languageExists($language)) {
-            throw new LanguageExistsException(__('translation::errors.language_exists', ['language' => $language]));
+            throw new LanguageExistsException(__('translatable::errors.language_exists', ['language' => $language]));
         }
 
         config('translatable.models.language')::create([
