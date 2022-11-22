@@ -103,6 +103,7 @@ class Translation
             });
         });
     }
+
     /**
      * If a translation exists for EN but not for NL, this method
      * will create it.
