@@ -1,6 +1,7 @@
 ![alt text](https://marshmallow.dev/cdn/media/logo-red-237x46.png "marshmallow.")
 
 # Nova Translatable
+
 [![Version](https://img.shields.io/packagist/v/marshmallow/translatable)](https://github.com/marshmallow-packages/translatable)
 [![Issues](https://img.shields.io/github/issues/marshmallow-packages/translatable)](https://github.com/marshmallow-packages/translatable)
 [![Code Coverage](https://img.shields.io/badge/coverage-100%25-success)](https://github.com/marshmallow-packages/translatable)
@@ -13,11 +14,17 @@ Add translation to your Nova Resources. The translations will be stored in a `tr
 ## Installation
 
 You can install the package via composer:
-``` bash
+
+```bash
 composer require marshmallow/translatable
 ```
 
+Publish configuration and assets
+
+`php artisan vendor:publish --provider="Marshmallow\Translatable\ServiceProvider"`
+
 ## Usage
+
 Please reference the official documentation at [MrMallow Documentation](https://mrmallow.nl/packages/nova/translatable.html)
 
 ## Changelog
@@ -36,8 +43,8 @@ If you discover any security related issues, please email stef@marshmallow.dev i
 
 ## Credits
 
-- [All Contributors](../../contributors)
-- [joedixon](https://github.com/joedixon/laravel-translation)
+-   [All Contributors](../../contributors)
+-   [joedixon](https://github.com/joedixon/laravel-translation)
 
 ## License
 
