@@ -11,8 +11,7 @@ class Translation
     /**
      * Find all of the translations in the app without translation for a given language.
      *
-     * @param string $language
-     *
+     * @param  string  $language
      * @return array
      */
     public function findMissingTranslations($language)
@@ -57,8 +56,7 @@ class Translation
     /**
      * Save all of the translations in the app without translation for a given language.
      *
-     * @param string $language
-     *
+     * @param  string  $language
      * @return void
      */
     public function saveMissingTranslations($language = false)
@@ -114,8 +112,7 @@ class Translation
     /**
      * Get all translations for a given language merged with the source language.
      *
-     * @param string $language
-     *
+     * @param  string  $language
      * @return Collection
      */
     public function getSourceLanguageTranslationsWith($language)
@@ -141,9 +138,8 @@ class Translation
     /**
      * Filter all keys and translations for a given language and string.
      *
-     * @param string $language
-     * @param string $filter
-     *
+     * @param  string  $language
+     * @param  string  $filter
      * @return Collection
      */
     public function filterTranslationsFor($language, $filter)
