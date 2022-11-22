@@ -60,6 +60,7 @@ class ServiceProvider extends BaseServiceProvider
             Session::put('user-locale', $language->language);
             Cache::put('user-locale', $language->language);
             App::setLocale($language->language);
+            app()->setLocale($language->language);
             event(new UserLocaleChanged($language));
         });
 
@@ -160,7 +161,7 @@ class ServiceProvider extends BaseServiceProvider
      */
     private function loadMigrations()
     {
-        if (config('translation.driver') !== 'database') {
+        if (config('translatable.driver') !== 'database') {
             return;
         }
 

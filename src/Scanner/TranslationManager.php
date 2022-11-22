@@ -24,7 +24,7 @@ class TranslationManager
 
     public function resolve()
     {
-        $driver = 'database';
+        $driver = $this->config['driver'] ?? 'database';
         $driverResolver = Str::studly($driver);
         $method = "resolve{$driverResolver}Driver";
 

@@ -6,6 +6,7 @@ return [
     'type' => 'Type',
     'file' => 'Bestand',
     'key' => 'Sleutel',
+    'prompt_recommend' => 'We raden aan om "php artisan translatable:sync-missing" te draaien om alle nieuwe vertalingen beschikbaar te maken in alle beschikbare talen.',
     'prompt_language' => 'Voer de taalcode in die u wilt toevoegen (bijvoorbeeld: en)',
     'prompt_name' => 'Voer de naam in die u wilt toevoegen (bijvoorbeeld: Engels)',
     'language_added' => 'Nieuwe taal met succes toegevoegd 🙌',

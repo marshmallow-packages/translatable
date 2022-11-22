@@ -101,6 +101,6 @@ class SynchroniseTranslationsCommand extends Command
             'language' => $language,
         ]);
 
-        $this->info(__('We recommend you run "php artisan translatable:sync-missing" to make sure the new translations are avaialable in all your languages.'));
+        $this->info(__('translatable::translatable.prompt_recommend'));
     }
 }
