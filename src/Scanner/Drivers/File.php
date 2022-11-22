@@ -202,16 +202,17 @@ class File extends Translation implements DriverInterface
 
             $groupData = $this->disk->getRequire($group->getPathname());
 
+            $group_key = $group->getBasename('.php');
+
             if (!is_array($groupData)) {
                 $file = $this->disk->get($group->getPathname());
+                if (Str::endsWith($group_key, '.json')) {
+                    return;
+                }
                 $groupData = json_decode($file, true);
             } else {
                 $groupData = $this->disk->getRequire($group->getPathname());
             }
-
-            // if it is nl.json do something krayzee
-            $group_key = $group->getBasename('.php');
-            ray('GROUP KEY', $group_key)->red();
 
             return [$group_key => new Collection(Arr::dot($groupData))];
         });
