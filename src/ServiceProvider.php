@@ -19,11 +19,14 @@ use Marshmallow\Translatable\Console\Commands\PresetCommand;
 use Marshmallow\Translatable\Console\Commands\InstallCommand;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Marshmallow\Translatable\Console\Commands\AddLanguageCommand;
+use Marshmallow\Translatable\Console\Commands\ListLanguagesCommand;
 use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
+use Marshmallow\Translatable\Console\Commands\AddTranslationKeyCommand;
 use Marshmallow\Translatable\Console\Commands\ListMissingTranslationKeys;
 use Marshmallow\Translatable\Console\Commands\DuplicateTranslationsCommand;
 use Marshmallow\Translatable\Console\Commands\SynchroniseTranslationsCommand;
 use Marshmallow\Translatable\Console\Commands\SynchroniseMissingTranslationKeys;
+use Marshmallow\Translatable\Console\Commands\SynchroniseTranslationsFromToCommand;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -187,6 +190,7 @@ class ServiceProvider extends BaseServiceProvider
             $this->commands([
                 AddLanguageCommand::class,
                 AddTranslationKeyCommand::class,
+                SynchroniseTranslationsFromToCommand::class,
                 ListLanguagesCommand::class,
                 ListMissingTranslationKeys::class,
                 SynchroniseMissingTranslationKeys::class,
