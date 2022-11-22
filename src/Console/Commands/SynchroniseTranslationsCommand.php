@@ -4,6 +4,7 @@ namespace Marshmallow\Translatable\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Artisan;
 use Marshmallow\Translatable\Scanner\Scanner;
 use Marshmallow\Translatable\Scanner\Drivers\File;
 use Marshmallow\Translatable\Scanner\Drivers\Database;
@@ -16,14 +17,14 @@ class SynchroniseTranslationsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'translatable:sync-file-to-database';
+    protected $signature = 'translatable:sync-file-to-database {language?}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Synchronise translations between drivers';
+    protected $description = 'Synchronise translations from your language files to the database';
 
     /**
      * File scanner.
@@ -50,13 +51,6 @@ class SynchroniseTranslationsCommand extends Command
     private $toDriver;
 
     /**
-     * Translation drivers.
-     *
-     * @var array
-     */
-    private $drivers = ['file', 'database'];
-
-    /**
      * Create a new command instance.
      *
      * @return void
@@ -78,62 +72,39 @@ class SynchroniseTranslationsCommand extends Command
         $languages = array_keys($this->translation->allLanguages()->toArray());
 
         // Create the driver.
-        $this->fromDriver = $this->createDriver('file');
+        $this->fromDriver = 'file';
 
         // Create the driver.
-        $this->toDriver = $this->createDriver('database');
+        $this->toDriver = 'database';
 
-        $this->line(__('Syncing files to the database has started.'));
+        if ($this->argument('language')) {
 
-        $translations = $this->mergeLanguages($this->toDriver, $this->fromDriver->allTranslations());
+            // If all languages should be synced.
+            if ($this->argument('language') == 'all') {
+                $language = false;
+            }
+            // When a specific language is set and is valid.
+            elseif (in_array($this->argument('language'), $languages)) {
+                $language = $this->argument('language');
+            } else {
+                return $this->error(__('translatable::translation.invalid_language'));
+            }
+        } // When the language will be entered manually or if the argument is invalid.
+        else {
+            $language = $this->anticipate(__('translatable::translation.prompt_language_if_any'), $languages);
 
-        $this->info(__('All files are now available in your translation module.'));
+            if ($language && !in_array($language, $languages)) {
+                return $this->error(__('translatable::translation.invalid_language'));
+            }
+        }
+
+        // Sync the translations.
+        Artisan::call('translateable:sync-translations', [
+            'from' => 'file',
+            'to' => 'database',
+            'language' => $language,
+        ]);
+
         $this->info(__('We recommend you run "php artisan translatable:sync-missing" to make sure the new translations are avaialable in all your languages.'));
-    }
-
-    private function createDriver($driver)
-    {
-        if ($driver === 'file') {
-            return new File(new Filesystem, app('path.lang'), config('app.locale'), $this->scanner);
-        }
-
-        return new Database(config('app.locale'), $this->scanner);
-    }
-
-    private function mergeLanguages($driver, $languages)
-    {
-        foreach ($languages as $language => $translations) {
-            $this->mergeTranslations($driver, $language, $translations);
-        }
-    }
-
-    private function mergeTranslations($driver, $language, $translations)
-    {
-        $this->mergeGroupTranslations($driver, $language, $translations['group']);
-        $this->mergeSingleTranslations($driver, $language, $translations['single']);
-    }
-
-    private function mergeGroupTranslations($driver, $language, $groups)
-    {
-        foreach ($groups as $group => $translations) {
-            foreach ($translations as $key => $value) {
-                if (is_array($value)) {
-                    continue;
-                }
-                $driver->addGroupTranslation($language, $group, $key, $value);
-            }
-        }
-    }
-
-    private function mergeSingleTranslations($driver, $language, $vendors)
-    {
-        foreach ($vendors as $vendor => $translations) {
-            foreach ($translations as $key => $value) {
-                if (is_array($value)) {
-                    continue;
-                }
-                $driver->addSingleTranslation($language, $vendor, $key, $value);
-            }
-        }
     }
 }

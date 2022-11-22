@@ -38,7 +38,7 @@ class SynchroniseMissingTranslationKeys extends BaseCommand
             // TEMP
             // $this->translation->createTranslationsForAllLanguages();
 
-            return $this->info(__('translation::translation.keys_synced'));
+            return $this->info(__('translatable::translation.keys_synced'));
         } catch (\Exception $e) {
             return $this->error($e->getMessage());
         }
