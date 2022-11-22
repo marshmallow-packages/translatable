@@ -16,9 +16,10 @@ interface DriverInterface
     /**
      * Get all group translations from the application.
      *
+     * @param  string  $language
      * @return array
      */
-    public function allGroup(string $language);
+    public function allGroup($language);
 
     /**
      * Get all the translations from the application.
@@ -30,63 +31,73 @@ interface DriverInterface
     /**
      * Get all translations for a particular language.
      *
+     * @param  string  $language
      * @return Collection
      */
-    public function allTranslationsFor(string $language);
+    public function allTranslationsFor($language);
 
     /**
      * Get all of the single translations for a given language.
      *
+     * @param  string  $language
      * @return Collection
      */
-    public function getSingleTranslationsFor(string $language);
+    public function getSingleTranslationsFor($language);
 
     /**
      * Get all of the group translations for a given language.
      *
+     * @param  string  $language
      * @return Collection
      */
-    public function getGroupTranslationsFor(string $language);
+    public function getGroupTranslationsFor($language);
 
     /**
      * Determine whether or not a language exists.
      *
+     * @param  string  $language
      * @return bool
      */
-    public function languageExists(string $language);
+    public function languageExists($language);
 
     /**
      * Find all of the translations in the app without translation for a given language.
      *
+     * @param  string  $language
      * @return array
      */
-    public function findMissingTranslations(string $language);
+    public function findMissingTranslations($language);
 
     /**
      * Save all of the translations in the app without translation for a given language.
      *
+     * @param  string  $language
      * @return void
      */
-    public function saveMissingTranslations(string $language = '');
+    public function saveMissingTranslations($language = false);
 
     /**
      * Get a collection of group names for a given language.
      *
+     * @param  string  $language
      * @return Collection
      */
-    public function getGroupsFor(string $language);
+    public function getGroupsFor($language);
 
     /**
      * Get all translations for a given language merged with the source language.
      *
+     * @param  string  $language
      * @return Collection
      */
-    public function getSourceLanguageTranslationsWith(string $language);
+    public function getSourceLanguageTranslationsWith($language);
 
     /**
      * Filter all keys and translations for a given language and string.
      *
+     * @param  string  $language
+     * @param  string  $filter
      * @return Collection
      */
-    public function filterTranslationsFor(string $language, string $filter);
+    public function filterTranslationsFor($language, $filter);
 }
