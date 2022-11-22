@@ -7,6 +7,7 @@ return [
     'file' => 'Bestand',
     'key' => 'Sleutel',
     'prompt_language' => 'Voer de taalcode in die u wilt toevoegen (bijvoorbeeld: en)',
+    'prompt_name' => 'Voer de naam in die u wilt toevoegen (bijvoorbeeld: Engels)',
     'language_added' => 'Nieuwe taal met succes toegevoegd 🙌',
     'prompt_language_for_key' => 'Voer de taal voor de sleutel in (bijvoorbeeld: en)',
     'prompt_type' => 'Is dit een json- of arraysleutel?',
