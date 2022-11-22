@@ -45,9 +45,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Get all group translations from the application.
      *
-     * @return Collection
+     * @return array
      */
-    public function allGroup(string $language)
+    public function allGroup($language)
     {
         $groups = config('translatable.models.translation')::getGroupsForLanguage($language);
 
@@ -71,9 +71,10 @@ class Database extends Translation implements DriverInterface
     /**
      * Get all translations for a particular language.
      *
+     * @param  string  $language
      * @return Collection
      */
-    public function allTranslationsFor(string $language)
+    public function allTranslationsFor($language)
     {
         return Collection::make([
             'group' => $this->getGroupTranslationsFor($language),
@@ -84,8 +85,7 @@ class Database extends Translation implements DriverInterface
     /**
      * Add a new language to the application.
      *
-     * @param string $language
-     *
+     * @param  string  $language
      * @return void
      */
     public function addLanguage($language, $name = null)
@@ -103,10 +103,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Add a new group type translation.
      *
-     * @param string $language
-     * @param string $key
-     * @param string $value
-     *
+     * @param  string  $language
+     * @param  string  $key
+     * @param  string  $value
      * @return void
      */
     public function addGroupTranslation($language, $group, $key, $value = '')
@@ -128,10 +127,9 @@ class Database extends Translation implements DriverInterface
     /**
      * Add a new single type translation.
      *
-     * @param string $language
-     * @param string $key
-     * @param string $value
-     *
+     * @param  string  $language
+     * @param  string  $key
+     * @param  string  $value
      * @return void
      */
     public function addSingleTranslation($language, $vendor, $key, $value = '')
@@ -145,6 +143,14 @@ class Database extends Translation implements DriverInterface
         }
     }
 
+    /**
+     * Save a new translation for a language.
+     *
+     * @param  string  $language
+     * @param  string  $key
+     * @param  string  $value
+     * @return void
+     */
     public function createNewTranslation($language, $vendor, $key, $value = '')
     {
         $language = config('translatable.models.language')::where('language', $language)->first();
@@ -156,6 +162,14 @@ class Database extends Translation implements DriverInterface
         ]);
     }
 
+    /**
+     * Determine whether or not a translations exists.
+     *
+     * @param  string  $language
+     * @param  string  $vendor
+     * @param  string  $key
+     * @return bool
+     */
     public function translationExists($language, $vendor, $key)
     {
         return config('translatable.models.translation')
@@ -169,9 +183,10 @@ class Database extends Translation implements DriverInterface
     /**
      * Get all of the single translations for a given language.
      *
+     * @param  string  $language
      * @return Collection
      */
-    public function getSingleTranslationsFor(string $language)
+    public function getSingleTranslationsFor($language)
     {
         if (!empty(self::$translations['single'][$language])) {
             return self::$translations['single'][$language];
@@ -210,9 +225,10 @@ class Database extends Translation implements DriverInterface
     /**
      * Get all of the group translations for a given language.
      *
+     * @param  string  $language
      * @return Collection
      */
-    public function getGroupTranslationsFor(string $language)
+    public function getGroupTranslationsFor($language)
     {
         if (!empty(self::$translations['group'][$language])) {
             return self::$translations['group'][$language];
@@ -240,9 +256,10 @@ class Database extends Translation implements DriverInterface
     /**
      * Determine whether or not a language exists.
      *
+     * @param  string  $language
      * @return bool
      */
-    public function languageExists(string $language)
+    public function languageExists($language)
     {
         return $this->getLanguage($language) ? true : false;
     }
@@ -250,9 +267,10 @@ class Database extends Translation implements DriverInterface
     /**
      * Get a collection of group names for a given language.
      *
+     * @param  string  $language
      * @return Collection
      */
-    public function getGroupsFor(string $language)
+    public function getGroupsFor($language)
     {
         return $this->allGroup($language);
     }
@@ -260,8 +278,10 @@ class Database extends Translation implements DriverInterface
     /**
      * Get a language from the database.
      *
+     * @param  string  $language
+     * @return Language
      */
-    private function getLanguage(string $language)
+    private function getLanguage($language)
     {
         return $this->getLanguages?->where('language', $language)->first();
     }
@@ -271,12 +291,13 @@ class Database extends Translation implements DriverInterface
      * Previously, this was handled by setting the group value to NULL, now
      * we use 'single' to cater for vendor JSON language files.
      *
+     * @param  Collection  $groups
      * @return bool
      */
-    private function hasLegacyGroups(Collection $groups)
+    private function hasLegacyGroups($groups)
     {
         return $groups->filter(function ($key) {
-            return '' === $key;
+            return $key === '';
         })->count() > 0;
     }
 }
