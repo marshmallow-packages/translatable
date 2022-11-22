@@ -89,6 +89,8 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishConfiguration();
 
         $this->loadTranslations();
+
+        $this->registerHelpers();
     }
 
     /**
@@ -177,6 +179,16 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([
             __DIR__ . '/../resources/lang' => resource_path('lang/vendor/translatable'),
         ]);
+    }
+
+    /**
+     * Register package helper functions.
+     *
+     * @return void
+     */
+    private function registerHelpers()
+    {
+        require __DIR__ . '/../resources/helpers.php';
     }
 
     /**
