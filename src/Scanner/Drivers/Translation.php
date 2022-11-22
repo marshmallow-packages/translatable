@@ -16,41 +16,10 @@ class Translation
      */
     public function findMissingTranslations($language)
     {
-        return $this->arrayDiffAssocRecursive(
+        return array_diff_assoc_recursive(
             $this->scanner->findTranslations(),
             $this->allTranslationsFor($language)
         );
-    }
-
-    /**
-     * Recursively diff two arrays.
-     *
-     * @param array $arrayOne
-     * @param array $arrayTwo
-     *
-     * @return array
-     */
-    public function arrayDiffAssocRecursive($arrayOne, $arrayTwo)
-    {
-        $difference = [];
-        foreach ($arrayOne as $key => $value) {
-            if (is_array($value) || $value instanceof Collection) {
-                if (!isset($arrayTwo[$key])) {
-                    $difference[$key] = $value;
-                } elseif (!(is_array($arrayTwo[$key]) || $arrayTwo[$key] instanceof Collection)) {
-                    $difference[$key] = $value;
-                } else {
-                    $new_diff = $this->arrayDiffAssocRecursive($value, $arrayTwo[$key]);
-                    if (false != $new_diff) {
-                        $difference[$key] = $new_diff;
-                    }
-                }
-            } elseif (!isset($arrayTwo[$key])) {
-                $difference[$key] = $value;
-            }
-        }
-
-        return $difference;
     }
 
     /**
