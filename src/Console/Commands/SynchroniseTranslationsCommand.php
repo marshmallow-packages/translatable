@@ -87,7 +87,7 @@ class SynchroniseTranslationsCommand extends Command
             elseif (in_array($this->argument('language'), $languages)) {
                 $language = $this->argument('language');
             } else {
-                return $this->error(__('translatable::translation.invalid_language'));
+                return $this->error(__('translatable::translatable.invalid_language'));
             }
         } // When the language will be entered manually or if the argument is invalid.
         else {
@@ -99,7 +99,7 @@ class SynchroniseTranslationsCommand extends Command
         }
 
         // Sync the translations.
-        Artisan::call('translateable:sync-translations', [
+        $this->call('translatable:sync-translations', [
             'from' => 'file',
             'to' => 'database',
             'language' => $language,

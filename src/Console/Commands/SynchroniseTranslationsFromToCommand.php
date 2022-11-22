@@ -16,7 +16,7 @@ class SynchroniseTranslationsFromToCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'translateable:sync-translations {from?} {to?} {language?}';
+    protected $signature = 'translatable:sync-translations {from?} {to?} {language?}';
 
     /**
      * The console command description.
@@ -84,10 +84,10 @@ class SynchroniseTranslationsFromToCommand extends Command
 
         // When the from driver will be entered manually or if the argument is invalid.
         else {
-            $this->fromDriver = $this->anticipate(__('translatable::translation.prompt_from_driver'), $this->drivers);
+            $this->fromDriver = $this->anticipate(__('translatable::translatable.prompt_from_driver'), $this->drivers);
 
             if (!in_array($this->fromDriver, $this->drivers)) {
-                return $this->error(__('translatable::translation.invalid_driver'));
+                return $this->error(__('translatable::translatable.invalid_driver'));
             }
         }
 
@@ -101,10 +101,10 @@ class SynchroniseTranslationsFromToCommand extends Command
 
         // When the to driver will be entered manually.
         else {
-            $this->toDriver = $this->anticipate(__('translatable::translation.prompt_to_driver'), $this->drivers);
+            $this->toDriver = $this->anticipate(__('translatable::translatable.prompt_to_driver'), $this->drivers);
 
             if (!in_array($this->toDriver, $this->drivers)) {
-                return $this->error(__('translatable::translation.invalid_driver'));
+                return $this->error(__('translatable::translatable.invalid_driver'));
             }
         }
 
@@ -122,18 +122,18 @@ class SynchroniseTranslationsFromToCommand extends Command
             elseif (in_array($this->argument('language'), $languages)) {
                 $language = $this->argument('language');
             } else {
-                return $this->error(__('translatable::translation.invalid_language'));
+                return $this->error(__('translatable::translatable.invalid_language'));
             }
         } // When the language will be entered manually or if the argument is invalid.
         else {
-            $language = $this->anticipate(__('translatable::translation.prompt_language_if_any'), $languages);
+            $language = $this->anticipate(__('translatable::translatable.prompt_language_if_any'), $languages);
 
             if ($language && !in_array($language, $languages)) {
-                return $this->error(__('translatable::translation.invalid_language'));
+                return $this->error(__('translatable::translatable.invalid_language'));
             }
         }
 
-        $this->line(__('translatable::translation.syncing'));
+        $this->line(__('translatable::translatable.syncing'));
 
         // If a specific language is set.
         if ($language) {
@@ -143,7 +143,7 @@ class SynchroniseTranslationsFromToCommand extends Command
             $translations = $this->mergeLanguages($this->toDriver, $this->fromDriver->allTranslations());
         }
 
-        $this->info(__('translatable::translation.synced'));
+        $this->info(__('translatable::translatable.synced'));
     }
 
     private function createDriver($driver)
