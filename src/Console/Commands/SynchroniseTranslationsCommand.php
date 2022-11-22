@@ -81,7 +81,7 @@ class SynchroniseTranslationsCommand extends Command
 
             // If all languages should be synced.
             if ($this->argument('language') == 'all') {
-                $language = false;
+                $language = 'all';
             }
             // When a specific language is set and is valid.
             elseif (in_array($this->argument('language'), $languages)) {
@@ -91,11 +91,7 @@ class SynchroniseTranslationsCommand extends Command
             }
         } // When the language will be entered manually or if the argument is invalid.
         else {
-            $language = $this->anticipate(__('translatable::translation.prompt_language_if_any'), $languages);
-
-            if ($language && !in_array($language, $languages)) {
-                return $this->error(__('translatable::translation.invalid_language'));
-            }
+            $language = 'all';
         }
 
         // Sync the translations.
