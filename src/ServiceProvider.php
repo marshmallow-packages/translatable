@@ -78,11 +78,13 @@ class ServiceProvider extends BaseServiceProvider
             Nova::style('language-toggle-field', __DIR__ . '/../dist/css/field.css');
         });
 
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');
-        $this->publishes([
-            __DIR__ . '/../config/translatable.php' => config_path('translatable.php'),
-        ]);
+        $this->loadMigrations();
+
+        $this->registerRoutes();
+
+        $this->publishConfiguration();
+
+        $this->loadTranslations();
     }
 
     /**
@@ -113,7 +115,27 @@ class ServiceProvider extends BaseServiceProvider
         $kernel->appendMiddlewareToGroup('web', $middleware);
     }
 
+    /**
+     * Register package routes.
+     *
+     * @return void
+     */
+    private function registerRoutes()
+    {
+        $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');
+    }
 
+    /**
+     * Publish package configuration.
+     *
+     * @return void
+     */
+    private function publishConfiguration()
+    {
+        $this->publishes([
+            __DIR__ . '/../config/translatable.php' => config_path('translatable.php'),
+        ], 'config');
+    }
 
     /**
      * Merge package configuration.
@@ -123,6 +145,34 @@ class ServiceProvider extends BaseServiceProvider
     private function mergeConfiguration()
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/translatable.php', 'translatable');
+    }
+
+    /**
+     * Load package migrations.
+     *
+     * @return void
+     */
+    private function loadMigrations()
+    {
+        if (config('translation.driver') !== 'database') {
+            return;
+        }
+
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+    }
+
+    /**
+     * Load package translations.
+     *
+     * @return void
+     */
+    private function loadTranslations()
+    {
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'translation');
+
+        $this->publishes([
+            __DIR__ . '/../resources/lang' => resource_path('lang/vendor/translation'),
+        ]);
     }
 
     /**
