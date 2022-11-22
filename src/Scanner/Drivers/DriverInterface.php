@@ -37,6 +37,34 @@ interface DriverInterface
     public function allTranslationsFor($language);
 
     /**
+     * Add a new language to the application.
+     *
+     * @param  string  $language
+     * @return void
+     */
+    public function addLanguage($language, $name = null);
+
+    /**
+     * Add a new group type translation.
+     *
+     * @param  string  $language
+     * @param  string  $key
+     * @param  string  $value
+     * @return void
+     */
+    public function addGroupTranslation($language, $group, $key, $value = '');
+
+    /**
+     * Add a new single type translation.
+     *
+     * @param  string  $language
+     * @param  string  $key
+     * @param  string  $value
+     * @return void
+     */
+    public function addSingleTranslation($language, $vendor, $key, $value = '');
+
+    /**
      * Get all of the single translations for a given language.
      *
      * @param  string  $language
