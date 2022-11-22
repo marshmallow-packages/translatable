@@ -2,9 +2,12 @@
 
 namespace Marshmallow\Translatable\Scanner\Drivers;
 
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Marshmallow\HelperFunctions\Facades\Str;
+use Illuminate\Support\Facades\Event;
+use Marshmallow\Translatable\Events\TranslationAdded;
 
 class Translation
 {
