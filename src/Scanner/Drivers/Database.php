@@ -114,11 +114,6 @@ class Database extends Translation implements DriverInterface
             $this->addLanguage($language);
         }
 
-        if (false !== strpos($group, '::')) {
-            $group = explode('::', $group);
-            $group = $group[1];
-        }
-
         if (!$this->translationExists($language, $group, $key)) {
             $this->createNewTranslation($language, $group, $key, $value);
         }
