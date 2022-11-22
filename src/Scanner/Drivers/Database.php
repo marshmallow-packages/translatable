@@ -148,6 +148,7 @@ class Database extends Translation implements DriverInterface
      */
     public function createNewTranslation($language, $vendor, $key, $value = '')
     {
+        // TEMP KEEP THIS FOR BACKWARDS COMPATIBILITY
         // $language = config('translatable.models.language')::where('language', $language)->first();
         // config('translatable.models.translation')::create([
         //     'language_id' => $language->id,

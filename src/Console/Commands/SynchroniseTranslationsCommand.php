@@ -23,7 +23,7 @@ class SynchroniseTranslationsCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Synchronise translations from your language files to the database';
+    protected $description = 'Synchronise translations between drivers';
 
     /**
      * File scanner.
@@ -93,8 +93,8 @@ class SynchroniseTranslationsCommand extends Command
 
     private function createDriver($driver)
     {
-        if ('file' === $driver) {
-            return new File(new Filesystem(), app('path.lang'), config('app.locale'), $this->scanner);
+        if ($driver === 'file') {
+            return new File(new Filesystem, app('path.lang'), config('app.locale'), $this->scanner);
         }
 
         return new Database(config('app.locale'), $this->scanner);

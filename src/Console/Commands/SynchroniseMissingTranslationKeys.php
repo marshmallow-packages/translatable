@@ -12,7 +12,7 @@ class SynchroniseMissingTranslationKeys extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'translatable:sync-missing';
+    protected $signature = 'translatable:sync-missing {language?}';
 
     /**
      * The console command description.
@@ -28,11 +28,17 @@ class SynchroniseMissingTranslationKeys extends BaseCommand
      */
     public function handle()
     {
-        try {
-            $this->translation->saveMissingTranslations();
-            $this->translation->createTranslationsForAllLanguages();
+        $language = $this->argument('language') ?: false;
 
-            return $this->info('✅ Saving missing translations found in your code to the database');
+        try {
+            // if we have a language, pass it in, if not the method will
+            // automagically sync all languages
+            $this->translation->saveMissingTranslations($language);
+
+            // TEMP
+            // $this->translation->createTranslationsForAllLanguages();
+
+            return $this->info(__('translation::translation.keys_synced'));
         } catch (\Exception $e) {
             return $this->error($e->getMessage());
         }
