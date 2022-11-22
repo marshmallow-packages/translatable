@@ -308,7 +308,7 @@ class File extends Translation implements DriverInterface
     {
         foreach ($translations as $group => $translation) {
             $vendor = Str::before($group, '::single');
-            $languageFilePath = 'single' !== $vendor ? 'vendor' . DIRECTORY_SEPARATOR . "{$vendor}" . DIRECTORY_SEPARATOR . "{$language}.json" : "{$language}.json";
+            $languageFilePath = $vendor !== 'single' ? 'vendor' . DIRECTORY_SEPARATOR . "{$vendor}" . DIRECTORY_SEPARATOR . "{$language}.json" : "{$language}.json";
             $this->disk->put(
                 "{$this->languageFilesPath}" . DIRECTORY_SEPARATOR . "{$languageFilePath}",
                 json_encode((object) $translations->get($group), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
