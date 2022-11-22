@@ -6,7 +6,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Filesystem\Filesystem;
-use Marshmallow\Translatable\Scanner\Exceptions\LanguageExistsException;
+use Marshmallow\Translatable\Exceptions\LanguageExistsException;
 
 class File extends Translation implements DriverInterface
 {
@@ -209,7 +209,11 @@ class File extends Translation implements DriverInterface
                 $groupData = $this->disk->getRequire($group->getPathname());
             }
 
-            return [$group->getBasename('.php') => new Collection(Arr::dot($groupData))];
+            // if it is nl.json do something krayzee
+            $group_key = $group->getBasename('.php');
+            ray('GROUP KEY', $group_key)->red();
+
+            return [$group_key => new Collection(Arr::dot($groupData))];
         });
     }
 

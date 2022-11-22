@@ -92,7 +92,7 @@ class Translation
         return $sourceTranslations->map(function ($groups, $type) use ($language, $languageTranslations) {
             return $groups->map(function ($translations, $group) use ($type, $language, $languageTranslations) {
                 $translations = $translations->toArray();
-                array_walk($translations, function (&$value, &$key) use ($type, $group, $language, $languageTranslations) {
+                array_walk($translations, function (&$value, $key) use ($type, $group, $language, $languageTranslations) {
                     $value = [
                         $this->sourceLanguage => $value,
                         $language => $languageTranslations->get($type, collect())->get($group, collect())->get($key),
@@ -119,9 +119,9 @@ class Translation
         }
 
         return $allTranslations->map(function ($groups, $type) use ($language, $filter) {
-            return $groups->map(function ($keys, $group) use ($language, $filter, $type) {
-                return collect($keys)->filter(function ($translations, $key) use ($group, $language, $filter, $type) {
-                    return Str::anyContains([$group, $key, $translations[$language], $translations[$this->sourceLanguage]], $filter);
+            return $groups->map(function ($keys, $group) use ($language, $filter) {
+                return collect($keys)->filter(function ($translations, $key) use ($group, $language, $filter) {
+                    return strs_contain([$group, $key, $translations[$language], $translations[$this->sourceLanguage]], $filter);
                 });
             })->filter(function ($keys) {
                 return $keys->isNotEmpty();
