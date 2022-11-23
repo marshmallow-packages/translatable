@@ -17,7 +17,11 @@ class TranslationServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->registerDatabaseTranslator();
+        if ($this->app['config']['translatable.driver'] === 'database') {
+            $this->registerDatabaseTranslator();
+        } else {
+            parent::register();
+        }
     }
 
     private function registerDatabaseTranslator()
