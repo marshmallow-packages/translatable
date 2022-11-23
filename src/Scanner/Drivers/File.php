@@ -191,13 +191,21 @@ class File extends Translation implements DriverInterface
      */
     public function getGroupTranslationsFor($language)
     {
-        return $this->getGroupFilesFor($language)->mapWithKeys(function ($group) {
+        return $this->getGroupFilesFor($language)->mapWithKeys(function ($group) use ($language) {
             // here we check if the path contains 'vendor' as these will be the
             // files which need namespacing
             if (Str::contains($group->getPathname(), 'vendor')) {
                 $vendor = Str::before(Str::after($group->getPathname(), 'vendor' . DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR);
 
-                return ["{$vendor}::{$group->getBasename('.php')}" => new Collection(Arr::dot($this->disk->getRequire($group->getPathname())))];
+                $vendor_path = Str::after(Str::after($group->getPathname(), 'vendor' . DIRECTORY_SEPARATOR), "{$vendor}/{$language}/");
+
+                if ($vendor_path == $group->getBasename()) {
+                    $group_name = $group->getBasename('.php');
+                } else {
+                    $group_name = Str::beforeLast($vendor_path, '.');
+                }
+
+                return ["{$vendor}::{$group_name}" => new Collection(Arr::dot($this->disk->getRequire($group->getPathname())))];
             }
 
             $groupData = $this->disk->getRequire($group->getPathname());
