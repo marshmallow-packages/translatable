@@ -4,6 +4,7 @@ namespace Marshmallow\Translatable\Scanner\Drivers;
 
 use Throwable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -16,6 +17,8 @@ class Database extends Translation implements DriverInterface
     protected $sourceLanguage;
 
     protected array $groupTranslationCache = [];
+
+    protected array $singleTranslationCache = [];
 
     protected array $languageCache = [];
 
@@ -195,6 +198,10 @@ class Database extends Translation implements DriverInterface
      */
     public function getSingleTranslationsFor($language)
     {
+        if (isset($this->singleTranslationCache[$language])) {
+            return $this->singleTranslationCache[$language];
+        }
+
         $translations = $this->getLanguage($language)
             ->translations()
             ->where('group', 'like', '%single')
@@ -211,11 +218,15 @@ class Database extends Translation implements DriverInterface
             return $this->getSingleTranslationsFor($language);
         }
 
-        return $translations->map(function ($translations, $group) {
+        $result = $translations->map(function ($translations, $group) {
             return $translations->mapWithKeys(function ($translation) {
                 return [$translation->key => $translation->value];
             });
         });
+
+        $this->singleTranslationCache[$language] = $result;
+
+        return $result;
     }
 
     /**
@@ -246,7 +257,7 @@ class Database extends Translation implements DriverInterface
         $result = $translations->map(function ($translations) {
             return $translations->mapWithKeys(function ($translation) {
                 return [$translation->key => $translation->value];
-            });
+            })->sortBy('key');
         });
 
         $this->groupTranslationCache[$language] = $result;
