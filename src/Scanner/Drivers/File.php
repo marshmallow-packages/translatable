@@ -176,7 +176,10 @@ class File extends Translation implements DriverInterface
             if (strpos($file->getPathname(), 'vendor')) {
                 $vendor = Str::before(Str::after($file->getPathname(), 'vendor' . DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR);
 
-                return ["{$vendor}::single" => new Collection(json_decode($this->disk->get($file), true))];
+                $group_name = "{$vendor}::single";
+                $group_name = "single";
+
+                return [$group_name => new Collection(json_decode($this->disk->get($file), true))];
             }
 
             return ['single' => new Collection(json_decode($this->disk->get($file), true))];

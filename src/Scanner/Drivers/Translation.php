@@ -41,7 +41,7 @@ class Translation
             foreach ($missingTranslations as $type => $groups) {
                 foreach ($groups as $group => $translations) {
                     foreach ($translations as $key => $value) {
-                        $key = stripslashes($key);
+                        // $key = stripslashes($key);
                         if (Str::contains($group, 'single')) {
                             $this->addSingleTranslation($language, $group, $key);
                         } else {
@@ -121,7 +121,14 @@ class Translation
                 continue;
             }
             foreach ($languages as $language) {
-                $value = ('single' !== $translation->group) ? $translation->value : null;
+                //  ('single' !== $translation->group) ? $translation->value :
+                $value = null;
+
+                // $translated_value = config('translatable.models.translation')::where('key', $translation->key)->where('language_id', $language->id)->first();
+
+                // if ($translated_value && $translated_value->value) {
+                // $value = $translated_value->value;
+                // }
 
                 if (!$this->translationExists($language->language, $translation->group, $translation->key)) {
                     $this->createNewTranslation($language->language, $translation->group, $translation->key, $value);
