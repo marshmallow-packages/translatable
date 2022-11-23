@@ -140,7 +140,8 @@ class SynchroniseTranslationsFromToCommand extends Command
             $this->mergeTranslations($this->toDriver, $language, $this->fromDriver->allTranslationsFor($language));
         } // Else process all languages.
         else {
-            $translations = $this->mergeLanguages($this->toDriver, $this->fromDriver->allTranslations());
+            $languages = $this->toDriver->allLanguages();
+            $translations = $this->mergeLanguages($this->toDriver, $languages);
         }
 
         $this->info(__('translatable::translatable.synced'));
@@ -157,7 +158,8 @@ class SynchroniseTranslationsFromToCommand extends Command
 
     private function mergeLanguages($driver, $languages)
     {
-        foreach ($languages as $language => $translations) {
+        foreach ($languages as $language => $language_name) {
+            $translations = $this->fromDriver->allTranslationsFor($language);
             $this->mergeTranslations($driver, $language, $translations);
         }
     }
