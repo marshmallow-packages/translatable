@@ -208,7 +208,9 @@ class File extends Translation implements DriverInterface
                     $group_name = Str::beforeLast($vendor_path, '.');
                 }
 
-                return ["{$vendor}::{$group_name}" => new Collection(Arr::dot($this->disk->getRequire($group->getPathname())))];
+                $groupData = $this->disk->getRequire($group->getPathname());
+
+                return ["{$vendor}::{$group_name}" => new Collection(Arr::dot($groupData))];
             }
 
             $groupData = $this->disk->getRequire($group->getPathname());
@@ -218,7 +220,7 @@ class File extends Translation implements DriverInterface
             if (!is_array($groupData)) {
                 $file = $this->disk->get($group->getPathname());
                 if (Str::endsWith($group_key, '.json')) {
-                    return;
+                    $group_key = 'single';
                 }
                 $groupData = json_decode($file, true);
             } else {
