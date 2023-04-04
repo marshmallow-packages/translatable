@@ -13,7 +13,7 @@ class AddActiveColumnToLanguagesTable extends Migration
      */
     public function up()
     {
-        if (!Schema::hasColumn('languages', 'active')) {
+        if (Schema::hasTable('languages') && !Schema::hasColumn('languages', 'active')) {
             Schema::table('languages', function (Blueprint $table) {
                 $table->boolean('active')->default(true)->after('country_flag_class');
             });
