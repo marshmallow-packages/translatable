@@ -47,6 +47,16 @@ trait TranslatableFields
         );
     }
 
+    public function translatableTabFields(array $fields): array
+    {
+        foreach ($fields as $key => $field) {
+            if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
+                unset($fields[$key]);
+            }
+        }
+        return $fields;
+    }
+
     protected function addTranslationToggleField(array $fields, NovaRequest $request)
     {
         return array_merge([
