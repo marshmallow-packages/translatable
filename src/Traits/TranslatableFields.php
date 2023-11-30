@@ -36,6 +36,9 @@ trait TranslatableFields
 
         $fields = $this->translatableFields($request);
         foreach ($fields as $key => $field) {
+            if (is_object($field) && get_class($field) == 'Eminiarts\Tabs\Tabs') {
+                continue;
+            }
             if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
                 unset($fields[$key]);
             }
