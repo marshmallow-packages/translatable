@@ -112,7 +112,7 @@ class Translation
     {
         $languages = config('translatable.models.language')::get();
         $translations = config('translatable.models.translation')
-            ::select('*', DB::raw('count(*) as total'))
+            ::select('key', 'group', DB::raw('count(DISTINCT id) as total'))
             ->groupBy(['key', 'group'])
             ->get();
 
