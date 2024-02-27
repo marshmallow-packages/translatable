@@ -201,8 +201,11 @@ class Database extends Translation implements DriverInterface
         if (isset($this->singleTranslationCache[$language])) {
             return $this->singleTranslationCache[$language];
         }
-
-        $translations = $this->getLanguage($language)
+        $languageModel = $this->getLanguage($language);
+        if (!$languageModel) {
+            return collect();
+        }
+        $translations = $languageModel
             ->translations()
             ->where('group', 'like', '%single')
             ->orWhereNull('group')
