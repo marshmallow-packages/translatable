@@ -10,6 +10,11 @@ class Translatable extends Model
         'source_field', 'translated_value', 'language_id',
     ];
 
+    public function language()
+    {
+        return $this->belongsTo(config('translatable.models.language'));
+    }
+
     public function translatable()
     {
         return $this->morphTo();

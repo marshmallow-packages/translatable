@@ -60,7 +60,6 @@ class ServiceProvider extends BaseServiceProvider
             Session::put('user-locale', $language->language);
             Cache::put('user-locale', $language->language);
             App::setLocale($language->language);
-            app()->setLocale($language->language);
             event(new UserLocaleChanged($language));
         });
 

@@ -5,6 +5,7 @@ namespace Marshmallow\Translatable\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Marshmallow\Translatable\Traits\Translatable;
+use Illuminate\Database\Eloquent\Builder;
 
 /*
  * @mixin \Eloquent
@@ -47,6 +48,11 @@ class Language extends Model
              */
             $language->translations()->delete();
         });
+    }
+
+    public function scopeActive(Builder $builder)
+    {
+        $builder->where('active', 1);
     }
 
     public function translationCount(): Attribute

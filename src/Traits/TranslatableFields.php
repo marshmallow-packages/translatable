@@ -36,6 +36,9 @@ trait TranslatableFields
 
         $fields = $this->translatableFields($request);
         foreach ($fields as $key => $field) {
+            if (is_object($field) && get_class($field) == 'Eminiarts\Tabs\Tabs') {
+                continue;
+            }
             if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
                 unset($fields[$key]);
             }
@@ -45,6 +48,35 @@ trait TranslatableFields
             $fields,
             $request
         );
+    }
+
+    public function translatableTabFields(array $fields): array
+    {
+        if (!request()->has('editMode')) {
+            return $fields;
+        }
+
+        /**
+         * Only add the translation block if it is activated.
+         */
+        if (!config('translatable.nova_translatable_fields')) {
+            return $fields;
+        }
+
+        if (method_exists($this, 'translatableFieldsEnabled') && !$this->translatableFieldsEnabled()) {
+            return $fields;
+        }
+
+        if ($this->weAreNotTranslating() || request()->editMode == 'create') {
+            return $fields;
+        }
+
+        foreach ($fields as $key => $field) {
+            if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
+                unset($fields[$key]);
+            }
+        }
+        return $fields;
     }
 
     protected function addTranslationToggleField(array $fields, NovaRequest $request)

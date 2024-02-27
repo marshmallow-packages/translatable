@@ -67,4 +67,16 @@ return [
         'translation' => \Marshmallow\Translatable\Models\Translation::class,
         'translatable' => \Marshmallow\Translatable\Models\Translatable::class,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Force locale
+    |--------------------------------------------------------------------------
+    |
+    | This is a query string parameter which will force the locale to be set
+    | to the given locale. This is useful for testing purposes and when
+    | you want to deep link to a specific locale.
+    |
+    */
+    'force_locale_query_string' => 'force_locale',
 ];
