@@ -124,7 +124,6 @@ class Translation extends Resource
 
             Textarea::make(__('Key'), 'key')
                 ->sortable()
-                ->asHtml()
                 ->required()
                 ->readonly()
                 ->onlyOnForms(),
