@@ -3,12 +3,13 @@
 namespace Marshmallow\Translatable\Nova;
 
 use App\Nova\Resource;
-use Laravel\Nova\Http\Requests\NovaRequest;
+use Illuminate\Support\Str;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 use Marshmallow\LiveUpdate\TextLiveUpdate;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Marshmallow\Translatable\Nova\Filters\LanguageFilter;
 use Marshmallow\Translatable\Nova\Filters\NoTranslationAvailableFilter;
 
@@ -113,13 +114,20 @@ class Translation extends Resource
             Text::make(__('Key'), 'key')
                 ->sortable()
                 ->resolveUsing(function ($value) {
-                    $value_array = str_split($value, 75);
-
-                    return join('<br/>', $value_array);
+                    $value = strip_tags($value);
+                    return Str::of($value)->limit(100);
                 })
                 ->asHtml()
                 ->required()
-                ->readonly(),
+                ->readonly()
+                ->exceptOnForms(),
+
+            Textarea::make(__('Key'), 'key')
+                ->sortable()
+                ->asHtml()
+                ->required()
+                ->readonly()
+                ->onlyOnForms(),
 
             TextLiveUpdate::make(__('Value'), 'value')
                 ->onlyOnIndex(),
