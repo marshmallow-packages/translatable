@@ -88,12 +88,7 @@ class Translation extends Resource
             Text::make(__('Key'), 'key')
                 ->sortable()
                 ->asHtml()
-                ->required()
-                ->resolveUsing(function ($value) {
-                    $value_array = str_split($value, 75);
-
-                    return join('<br/>', $value_array);
-                }),
+                ->required(),
 
             Textarea::make(__('Value'), 'value')
                 ->sortable()
