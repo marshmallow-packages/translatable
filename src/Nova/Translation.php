@@ -15,6 +15,8 @@ use Marshmallow\Translatable\Nova\Filters\NoTranslationAvailableFilter;
 
 class Translation extends Resource
 {
+    public static $clickAction = 'ignore';
+
     /**
      * Get the logical group associated with the resource.
      *
@@ -113,18 +115,17 @@ class Translation extends Resource
 
             Text::make(__('Key'), 'key')
                 ->sortable()
-                ->resolveUsing(function ($value) {
+                ->displayUsing(function ($value) {
                     $value = strip_tags($value);
                     return Str::of($value)->limit(100);
                 })
-                ->asHtml()
                 ->required()
                 ->readonly()
+                ->copyable()
                 ->exceptOnForms(),
 
             Textarea::make(__('Key'), 'key')
                 ->sortable()
-                ->asHtml()
                 ->required()
                 ->readonly()
                 ->onlyOnForms(),
