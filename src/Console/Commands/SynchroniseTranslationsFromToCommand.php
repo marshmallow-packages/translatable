@@ -16,7 +16,7 @@ class SynchroniseTranslationsFromToCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'translatable:sync-translations {from?} {to?} {language?}';
+    protected $signature = 'translatable:sync-translations {from?} {to?} {language?} {--active}';
 
     /**
      * The console command description.
@@ -75,7 +75,15 @@ class SynchroniseTranslationsFromToCommand extends Command
      */
     public function handle()
     {
-        $languages = array_keys($this->translation->allLanguages()->toArray());
+        $onlyActive = $this->option('active') ? true : false;
+
+        if ($onlyActive) {
+            $languages = $this->translation->allActiveLanguages();
+        } else {
+            $languages = $this->translation->allLanguages();
+        }
+
+        $languages = array_keys($languages->toArray());
 
         // If a valid from driver has been specified as an argument.
         if ($this->argument('from') && in_array($this->argument('from'), $this->drivers)) {
@@ -140,7 +148,11 @@ class SynchroniseTranslationsFromToCommand extends Command
             $this->mergeTranslations($this->toDriver, $language, $this->fromDriver->allTranslationsFor($language));
         } // Else process all languages.
         else {
-            $languages = $this->toDriver->allLanguages();
+            if ($onlyActive) {
+                $languages = $this->toDriver->allActiveLanguages();
+            } else {
+                $languages = $this->toDriver->allLanguages();
+            }
             $translations = $this->mergeLanguages($this->toDriver, $languages);
         }
 

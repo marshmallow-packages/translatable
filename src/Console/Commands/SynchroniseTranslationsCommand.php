@@ -17,7 +17,7 @@ class SynchroniseTranslationsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'translatable:sync-file-to-database {language?}';
+    protected $signature = 'translatable:sync-file-to-database {language?} {--active}';
 
     /**
      * The console command description.
@@ -69,7 +69,15 @@ class SynchroniseTranslationsCommand extends Command
      */
     public function handle()
     {
-        $languages = array_keys($this->translation->allLanguages()->toArray());
+        $onlyActive = $this->option('active') ? true : false;
+
+        if ($onlyActive) {
+            $languages = $this->translation->allActiveLanguages();
+        } else {
+            $languages = $this->translation->allLanguages();
+        }
+
+        $languages = array_keys($languages->toArray());
 
         // Create the driver.
         $this->fromDriver = 'file';
@@ -99,6 +107,7 @@ class SynchroniseTranslationsCommand extends Command
             'from' => 'file',
             'to' => 'database',
             'language' => $language,
+            '--active' => $onlyActive,
         ]);
 
         $this->info(__('translatable::translatable.prompt_recommend'));
