@@ -14,6 +14,13 @@ interface DriverInterface
     public function allLanguages();
 
     /**
+     * Get all active languages from the application.
+     *
+     * @return Collection
+     */
+    public function allActiveLanguages();
+
+    /**
      * Get all group translations from the application.
      *
      * @param  string  $language

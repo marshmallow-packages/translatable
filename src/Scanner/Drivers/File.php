@@ -48,6 +48,16 @@ class File extends Translation implements DriverInterface
     }
 
     /**
+     * Get all active languages from the application.
+     *
+     * @return Collection
+     */
+    public function allActiveLanguages()
+    {
+        return $this->allLanguages();
+    }
+
+    /**
      * Get all group translations from the application.
      *
      * @return array

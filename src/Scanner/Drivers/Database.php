@@ -46,6 +46,18 @@ class Database extends Translation implements DriverInterface
     }
 
     /**
+     * Get all active languages from the application.
+     *
+     * @return Collection
+     */
+    public function allActiveLanguages()
+    {
+        return config('translatable.models.language')::active()->get()->mapWithKeys(function ($language) {
+            return [$language->language => $language->name ?: $language->language];
+        });
+    }
+
+    /**
      * Get all group translations from the application.
      *
      * @return array
