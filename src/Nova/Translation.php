@@ -7,11 +7,15 @@ use Illuminate\Support\Str;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\BelongsTo;
-use Illuminate\Database\Eloquent\Model;
 use Marshmallow\LiveUpdate\TextLiveUpdate;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Marshmallow\Translatable\Nova\Language;
+use Marshmallow\Translatable\Facades\Translatable;
 use Marshmallow\Translatable\Nova\Filters\LanguageFilter;
+use Marshmallow\Translatable\Action\TranslateUsingDeeplAction;
+use Marshmallow\Translatable\Models\Language as LanguageModel;
 use Marshmallow\Translatable\Nova\Filters\NoTranslationAvailableFilter;
+use Marshmallow\Translatable\Nova\Actions\SetAutoTranslatorSourceLanguage;
 
 class Translation extends Resource
 {
@@ -103,6 +107,7 @@ class Translation extends Resource
 
     public function fields(NovaRequest $request)
     {
+        $auto_translator_source_language = Translatable::getAutoTranslatorSourceLanguage();
         return [
 
             BelongsTo::make(__('Language'), 'language', Language::class)
@@ -125,7 +130,16 @@ class Translation extends Resource
                 ->copyable()
                 ->copyableTo(
                     __('Value'),
-                    __('Use this value')
+                    __('Use this value'),
+                )
+                ->copyableWithAction(
+                    when: function () {
+                        return Translatable::deeplTranslaterIsActive();
+                    },
+                    action: TranslateUsingDeeplAction::class,
+                    icon: 'translate',
+                    target_field_label: __('Value'),
+                    tooltip: __('Translate value from :source to :target with Deepl', ['source' => $auto_translator_source_language->name, 'target' => $this->language?->name]),
                 )
                 ->asPlaceholder()
                 ->exceptOnForms(),
@@ -186,6 +200,12 @@ class Translation extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        $actions = [];
+
+        if (Translatable::deeplTranslaterIsActive()) {
+            $actions[] = SetAutoTranslatorSourceLanguage::make()->standalone();
+        }
+
+        return $actions;
     }
 }
