@@ -27,6 +27,17 @@ Publish configuration and assets
 
 Please reference the official documentation at [MrMallow Documentation](https://mrmallow.nl/packages/nova/translatable.html)
 
+### Use Deepl integration
+This package contains an integration with Deepl. This integration will add a button to the translations index view, that will automaticly translate your text via Deepl. Just add the following ENV variable to use this awesome feature.
+
+```env
+TRANSLATABLE_DEEPL_API_KEY=
+```
+This will use the free version of the Deepl API. If you have a paid subscription, you can add the following as well.
+```env
+TRANSLATABLE_DEEPL_API_PATH=https://api.deepl.com
+```
+
 ## Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.

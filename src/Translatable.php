@@ -2,9 +2,31 @@
 
 namespace Marshmallow\Translatable;
 
+use Illuminate\Support\Facades\Cache;
+use Marshmallow\Translatable\Models\Language;
+
 class Translatable
 {
     protected $languages = [];
+
+    public function deeplTranslaterIsActive(): bool
+    {
+        return config('translatable.deepl.api_path') &&
+            config('translatable.deepl.api_key');
+    }
+
+    public function getAutoTranslatorSourceLanguage(): Language
+    {
+        if ($language_id = Cache::get('auto-translator-source-language')) {
+            return Language::find($language_id);
+        }
+        $language = Language::where('language', config('app.locale'))->first();
+        if ($language) {
+            return $language;
+        }
+
+        return Language::first();
+    }
 
     public function getLanguageByTranslationParameter($language_identifier)
     {
