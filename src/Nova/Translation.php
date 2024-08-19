@@ -67,7 +67,8 @@ class Translation extends Resource
      * @var array
      */
     public static $search = [
-        'key', 'value',
+        'key',
+        'value',
     ];
 
     /**
@@ -113,7 +114,7 @@ class Translation extends Resource
                 ->default('single')
                 ->readonly(),
 
-            Text::make(__('Key'), 'key')
+            TextLiveUpdate::make(__('Key'), 'key')
                 ->sortable()
                 ->displayUsing(function ($value) {
                     $value = strip_tags($value);
@@ -122,6 +123,11 @@ class Translation extends Resource
                 ->required()
                 ->readonly()
                 ->copyable()
+                ->copyableTo(
+                    __('Value'),
+                    __('Use this value')
+                )
+                ->asPlaceholder()
                 ->exceptOnForms(),
 
             Textarea::make(__('Key'), 'key')
