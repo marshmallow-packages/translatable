@@ -1,6 +1,8 @@
 <?php
 
-namespace Marshmallow\Translatable\Scanner\Console\Commands;
+namespace Marshmallow\Translatable\Console\Commands;
+
+use Marshmallow\Translatable\Console\Commands\BaseCommand;
 
 class AddLanguageCommand extends BaseCommand
 {
@@ -9,7 +11,7 @@ class AddLanguageCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'translation:add-language';
+    protected $signature = 'translatable:add-language';
 
     /**
      * The console command description.
@@ -26,13 +28,13 @@ class AddLanguageCommand extends BaseCommand
     public function handle()
     {
         // ask the user for the language they wish to add
-        $language = $this->ask(__('translation::translation.prompt_language'));
-        $name = $this->ask(__('translation::translation.prompt_name'));
+        $language = $this->ask(__('translatable::translatable.prompt_language'));
+        $name = $this->ask(__('translatable::translatable.prompt_name'));
 
         // attempt to add the key and fail gracefully if exception thrown
         try {
             $this->translation->addLanguage($language, $name);
-            $this->info(__('translation::translation.language_added'));
+            $this->info(__('translatable::translatable.language_added'));
         } catch (\Exception $e) {
             $this->error($e->getMessage());
         }

@@ -1,6 +1,8 @@
 <?php
 
-namespace Marshmallow\Translatable\Scanner\Console\Commands;
+namespace Marshmallow\Translatable\Console\Commands;
+
+use Marshmallow\Translatable\Console\Commands\BaseCommand;
 
 class ListLanguagesCommand extends BaseCommand
 {
@@ -9,7 +11,7 @@ class ListLanguagesCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'translation:list-languages';
+    protected $signature = 'translatable:list-languages';
 
     /**
      * The console command description.
@@ -25,7 +27,7 @@ class ListLanguagesCommand extends BaseCommand
      */
     public function handle()
     {
-        $headers = [__('translation::translation.language_name'), __('translation::translation.language')];
+        $headers = [__('translatable::translatable.language_name'), __('translatable::translatable.language')];
         $languages = $this->translation->allLanguages()->toArray();
         $mappedLanguages = [];
 

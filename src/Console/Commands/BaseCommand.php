@@ -1,6 +1,6 @@
 <?php
 
-namespace Marshmallow\Translatable\Scanner\Console\Commands;
+namespace Marshmallow\Translatable\Console\Commands;
 
 use Illuminate\Console\Command;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;

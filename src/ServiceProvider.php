@@ -18,11 +18,15 @@ use Marshmallow\Translatable\Scanner\Drivers\Translation;
 use Marshmallow\Translatable\Console\Commands\PresetCommand;
 use Marshmallow\Translatable\Console\Commands\InstallCommand;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Marshmallow\Translatable\Console\Commands\AddLanguageCommand;
+use Marshmallow\Translatable\Console\Commands\ListLanguagesCommand;
 use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
+use Marshmallow\Translatable\Console\Commands\AddTranslationKeyCommand;
+use Marshmallow\Translatable\Console\Commands\ListMissingTranslationKeys;
 use Marshmallow\Translatable\Console\Commands\DuplicateTranslationsCommand;
-use Marshmallow\Translatable\Scanner\Console\Commands\ListMissingTranslationKeys;
-use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseTranslationsCommand;
-use Marshmallow\Translatable\Scanner\Console\Commands\SynchroniseMissingTranslationKeys;
+use Marshmallow\Translatable\Console\Commands\SynchroniseTranslationsCommand;
+use Marshmallow\Translatable\Console\Commands\SynchroniseMissingTranslationKeys;
+use Marshmallow\Translatable\Console\Commands\SynchroniseTranslationsFromToCommand;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -78,15 +82,15 @@ class ServiceProvider extends BaseServiceProvider
             Nova::style('language-toggle-field', __DIR__ . '/../dist/css/field.css');
         });
 
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');
-        $this->publishes([
-            __DIR__ . '/../config/translatable.php' => config_path('translatable.php'),
-        ]);
+        $this->loadMigrations();
 
-        $this->publishes([
-            __DIR__ . '/../database/migrations/' => database_path('migrations'),
-        ], 'translatable-migrations');
+        $this->registerRoutes();
+
+        $this->publishConfiguration();
+
+        $this->loadTranslations();
+
+        $this->registerHelpers();
     }
 
     /**
@@ -117,7 +121,27 @@ class ServiceProvider extends BaseServiceProvider
         $kernel->appendMiddlewareToGroup('web', $middleware);
     }
 
+    /**
+     * Register package routes.
+     *
+     * @return void
+     */
+    private function registerRoutes()
+    {
+        $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');
+    }
 
+    /**
+     * Publish package configuration.
+     *
+     * @return void
+     */
+    private function publishConfiguration()
+    {
+        $this->publishes([
+            __DIR__ . '/../config/translatable.php' => config_path('translatable.php'),
+        ], 'config');
+    }
 
     /**
      * Merge package configuration.
@@ -130,6 +154,44 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
+     * Load package migrations.
+     *
+     * @return void
+     */
+    private function loadMigrations()
+    {
+        if (config('translatable.driver') !== 'database') {
+            return;
+        }
+
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+    }
+
+    /**
+     * Load package translations.
+     *
+     * @return void
+     */
+    private function loadTranslations()
+    {
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'translatable');
+
+        $this->publishes([
+            __DIR__ . '/../resources/lang' => resource_path('lang/vendor/translatable'),
+        ]);
+    }
+
+    /**
+     * Register package helper functions.
+     *
+     * @return void
+     */
+    private function registerHelpers()
+    {
+        require __DIR__ . '/../resources/helpers.php';
+    }
+
+    /**
      * Register package commands.
      *
      * @return void
@@ -138,6 +200,10 @@ class ServiceProvider extends BaseServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
+                AddLanguageCommand::class,
+                AddTranslationKeyCommand::class,
+                SynchroniseTranslationsFromToCommand::class,
+                ListLanguagesCommand::class,
                 ListMissingTranslationKeys::class,
                 SynchroniseMissingTranslationKeys::class,
                 SynchroniseTranslationsCommand::class,

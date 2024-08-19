@@ -15,7 +15,8 @@ class Translation extends Model
 
     public function language()
     {
-        return $this->belongsTo(Language::class);
+        $language_model = config('translatable.models.language');
+        return $this->belongsTo($language_model);
     }
 
     public static function getGroupsForLanguage($language)

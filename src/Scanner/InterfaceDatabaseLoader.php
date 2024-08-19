@@ -2,6 +2,7 @@
 
 namespace Marshmallow\Translatable\Scanner;
 
+use Illuminate\Translation\LoaderInterface as IlluminateLoaderInterface;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
 use Symfony\Component\Translation\Loader\LoaderInterface;
 
@@ -17,19 +18,18 @@ class InterfaceDatabaseLoader implements LoaderInterface
     /**
      * Load the messages for the given locale.
      *
-     * @param string $locale
-     * @param string $group
-     * @param string $namespace
-     *
+     * @param  string  $locale
+     * @param  string  $group
+     * @param  string  $namespace
      * @return array
      */
     public function load($locale, $group, $namespace = null)
     {
-        if ('*' == $group && '*' == $namespace) {
+        if ($group == '*' && $namespace == '*') {
             return $this->translation->getSingleTranslationsFor($locale)->get('single', collect())->toArray();
         }
 
-        if (is_null($namespace) || '*' == $namespace) {
+        if (is_null($namespace) || $namespace == '*') {
             return $this->translation->getGroupTranslationsFor($locale)->filter(function ($value, $key) use ($group) {
                 return $key === $group;
             })->first();
@@ -43,24 +43,24 @@ class InterfaceDatabaseLoader implements LoaderInterface
     /**
      * Add a new namespace to the loader.
      *
-     * @param string $namespace
-     * @param string $hint
-     *
+     * @param  string  $namespace
+     * @param  string  $hint
      * @return void
      */
     public function addNamespace($namespace, $hint)
     {
+        //
     }
 
     /**
      * Add a new JSON path to the loader.
      *
-     * @param string $path
-     *
+     * @param  string  $path
      * @return void
      */
     public function addJsonPath($path)
     {
+        //
     }
 
     /**
