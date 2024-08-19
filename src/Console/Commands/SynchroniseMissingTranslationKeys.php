@@ -12,7 +12,7 @@ class SynchroniseMissingTranslationKeys extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'translatable:sync-missing {language?}';
+    protected $signature = 'translatable:sync-missing {language?} {--active}';
 
     /**
      * The console command description.
@@ -29,15 +29,16 @@ class SynchroniseMissingTranslationKeys extends BaseCommand
     public function handle()
     {
         $language = $this->argument('language') ?: false;
+        $onlyActive = $this->option('active') ? true : false;
 
         try {
             $this->line(__('translatable::translatable.syncing'));
             // if we have a language, pass it in, if not the method will
             // automagically sync all languages
-            $this->translation->saveMissingTranslations($language);
+            $this->translation->saveMissingTranslations($language, $onlyActive);
 
             // TEMP
-            $this->translation->createTranslationsForAllLanguages();
+            $this->translation->createTranslationsForAllLanguages($onlyActive);
 
             return $this->info(__('translatable::translatable.keys_synced'));
         } catch (\Exception $e) {

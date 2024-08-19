@@ -31,9 +31,10 @@ class Translation
      * @param  string  $language
      * @return void
      */
-    public function saveMissingTranslations($language = false)
+    public function saveMissingTranslations($language = false, $onlyActive = false)
     {
-        $languages = $language ? [$language => $language] : $this->allLanguages();
+        $allLanguages = $onlyActive ? $this->allActiveLanguages() : $this->allLanguages();
+        $languages = $language ? [$language => $language] : $allLanguages;
 
         foreach ($languages as $language => $name) {
             $missingTranslations = $this->findMissingTranslations($language);
@@ -108,9 +109,14 @@ class Translation
      * If a translation exists for EN but not for NL, this method
      * will create it.
      */
-    public function createTranslationsForAllLanguages()
+    public function createTranslationsForAllLanguages($onlyActive = false)
     {
-        $languages = config('translatable.models.language')::get();
+        if ($onlyActive) {
+            $languages = config('translatable.models.language')::active()->get();
+        } else {
+            $languages = config('translatable.models.language')::get();
+        }
+
         $translations = config('translatable.models.translation')
             ::select('key', 'group', DB::raw('count(DISTINCT id) as total'))
             ->groupBy(['key', 'group'])
