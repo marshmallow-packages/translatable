@@ -391,7 +391,9 @@ trait Translatable
      */
     public static function getByTranslatedSlug($slug, $slug_column = 'slug')
     {
-        $translation = config('translatable.models.translatable')::where('translated_value', $slug)
+        $translation = config('translatable.models.translatable')::query()
+            ->where('source_field', $slug_column)
+            ->where('translated_value', $slug)
             ->where('translatable_type', self::class)
             ->first();
 
