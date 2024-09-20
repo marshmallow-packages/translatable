@@ -44,12 +44,16 @@ class Scanner
             '(?<!->)' . // Must not start with ->
             '(' . implode('|', $this->translationMethods) . ')' . // Must start with one of the functions
             "\(" . // Match opening parentheses
+            "\s*" . // Match any whitespace
             "[\'\"]" . // Match " or '
+            // "\s*" . // Match any whitespace
             '(' . // Start a new group to match:
-            '.+' . // Must start with group
+            '[^\'"\)]+' . // Must start with group
             ')' . // Close group
             "[\'\"]" . // Closing quote
+            "\s*" . // Match any whitespace
             "[\),]";  // Close parentheses or new parameter
+
         foreach ($this->disk->allFiles($this->scanPaths) as $file) {
             if (preg_match_all("/$matchingPattern/siU", $file->getContents(), $matches)) {
                 foreach ($matches[2] as $key) {
