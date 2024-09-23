@@ -84,4 +84,8 @@ return [
         'api_path' => env('TRANSLATABLE_DEEPL_API_PATH', 'https://api-free.deepl.com'),
         'api_key' => env('TRANSLATABLE_DEEPL_API_KEY'),
     ],
+
+    'auto_translator' => [
+        'active' => env('TRANSLATABLE_AUTO_TRANSLATOR_ACTIVE', false),
+    ],
 ];

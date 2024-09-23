@@ -5,7 +5,7 @@
         :show-help-text="showHelpText"
     >
         <template #field>
-            <div class="languages-overview">
+            <div id="mm-translation-language-toggle" class="languages-overview" v-bind:data-translating="field.translating" v-bind:data-source="field.source" v-bind:data-target="field.target">
                 <span
                     v-for="language in field.languages"
                     :key="language.language"

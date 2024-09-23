@@ -16,16 +16,28 @@ class TranslateUsingDeeplAction implements CopyableActionInterface
     {
         $auto_translator_source_language = Translatable::getAutoTranslatorSourceLanguage();
 
+        $response = $this->raw(
+            source: $auto_translator_source_language->language,
+            target: $model->language->language,
+            text: $model->key,
+        );
+
+        return $response ?? $model->key;
+    }
+
+    public function raw($source, $target, $text)
+    {
         $response = Http::withHeaders([
             'Authorization' => 'DeepL-Auth-Key ' . config('translatable.deepl.api_key'),
         ])->post(config('translatable.deepl.api_path') . '/v2/translate', [
             'text' => [
-                $model->key,
+                $text,
             ],
-            'target_lang' => (string) Str::of($model->language->language)->upper(),
-            'source_lang' => (string) Str::of($auto_translator_source_language->language)->upper(),
+            'target_lang' => (string) Str::of($target)->upper(),
+            'source_lang' => (string) Str::of($source)->upper(),
+            'tag_handling' => 'html',
         ]);
 
-        return Arr::get($response->json(), 'translations.0.text') ?? $model->key;
+        return Arr::get($response->json(), 'translations.0.text');
     }
 }

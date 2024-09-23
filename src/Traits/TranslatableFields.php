@@ -23,11 +23,12 @@ trait TranslatableFields
             return $this->translatableFields($request);
         }
 
+
         if (method_exists($this, 'translatableFieldsEnabled') && !$this->translatableFieldsEnabled()) {
             return $this->translatableFields($request);
         }
 
-        if ($this->weAreNotTranslating() || $request->editMode == 'create') {
+        if ($this->weAreNotTranslating() || $request->editMode === 'create') {
             return $this->addTranslationToggleField(
                 $this->translatableFields($request),
                 $request
@@ -35,6 +36,7 @@ trait TranslatableFields
         }
 
         $fields = $this->translatableFields($request);
+
         foreach ($fields as $key => $field) {
             if (is_object($field) && get_class($field) == 'Eminiarts\Tabs\Tabs') {
                 continue;
@@ -43,6 +45,7 @@ trait TranslatableFields
                 unset($fields[$key]);
             }
         }
+
 
         return $this->addTranslationToggleField(
             $fields,
