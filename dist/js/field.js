@@ -2625,28 +2625,40 @@ var AutoTranslator = {
                   _i = 0, _Object$entries = Object.entries(fields.fields);
                 case 4:
                   if (!(_i < _Object$entries.length)) {
-                    _context2.next = 19;
+                    _context2.next = 21;
                     break;
                   }
                   _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), field_name = _Object$entries$_i[0], field_type = _Object$entries$_i[1];
                   _context2.t0 = field_type;
-                  _context2.next = _context2.t0 === 'Laravel\\Nova\\Fields\\Text' ? 9 : _context2.t0 === 'Marshmallow\\Nova\\TinyMCE\\TinyMCE' ? 12 : 15;
+                  _context2.next = _context2.t0 === 'Laravel\\Nova\\Fields\\Text' ? 9 : _context2.t0 === 'Laravel\\Nova\\Fields\\Textarea' ? 9 : _context2.t0 === 'Marshmallow\\Nova\\TinyMCE\\TinyMCE' ? 11 : _context2.t0 === 'Marshmallow\\Nova\\Flexible\\Flexible' ? 13 : 17;
                   break;
                 case 9:
-                  input = document.querySelector("[dusk=\"".concat(field_name, "\"]"));
-                  input.closest('div[index]').querySelectorAll('div')[1].append(self.getTextButton(input, source, target));
-                  return _context2.abrupt("break", 16);
-                case 12:
-                  input = document.querySelector("[id=\"tiny_".concat(field_name, "\"]"));
-                  input.closest('div').append(self.getTinyMceButton(field_name, source, target));
-                  return _context2.abrupt("break", 16);
-                case 15:
+                  self.initAutoTranslatorForInput(field_name, source, target);
+                  return _context2.abrupt("break", 18);
+                case 11:
+                  self.initAutoTranslatorForTinyMce(field_name, source, target);
+                  return _context2.abrupt("break", 18);
+                case 13:
+                  flexible_wrapper = document.querySelector("[dusk=\"".concat(field_name, "\"]"));
+                  flexible_wrapper.querySelectorAll('input').forEach(function (input) {
+                    self.initAutoTranslatorForInput(input.getAttribute('dusk'), source, target, input.closest('div'));
+                  });
+                  flexible_wrapper.querySelectorAll('textarea').forEach(function (input) {
+                    var field_id = input.getAttribute('id');
+                    if (field_id.startsWith('tiny_')) {
+                      self.initAutoTranslatorForTinyMce(field_id.substring(5), source, target, input.closest('div'));
+                    } else {
+                      self.initAutoTranslatorForInput(input.getAttribute('dusk'), source, target, input.closest('div'));
+                    }
+                  });
+                  return _context2.abrupt("break", 18);
+                case 17:
                   console.error("Sorry, ".concat(field_type, " is not implemented yet."));
-                case 16:
+                case 18:
                   _i++;
                   _context2.next = 4;
                   break;
-                case 19:
+                case 21:
                 case "end":
                   return _context2.stop();
               }
@@ -2655,6 +2667,18 @@ var AutoTranslator = {
         }, 200);
       }
     });
+  },
+  initAutoTranslatorForInput: function initAutoTranslatorForInput(field_name, source, target) {
+    var wrapper = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    input = document.querySelector("[dusk=\"".concat(field_name, "\"]"));
+    wrapper = wrapper ? wrapper : input.closest('div[index]').querySelectorAll('div')[1];
+    wrapper.append(this.getTextButton(input, source, target));
+  },
+  initAutoTranslatorForTinyMce: function initAutoTranslatorForTinyMce(field_name, source, target) {
+    var wrapper = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    input = document.querySelector("[id=\"tiny_".concat(field_name, "\"]"));
+    wrapper = wrapper ? wrapper : input.closest('div');
+    wrapper.append(this.getTinyMceButton(field_name, source, target));
   },
   getDefaultButton: function getDefaultButton(clickEvent) {
     var text_button = document.createElement('button');

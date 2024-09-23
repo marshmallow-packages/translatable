@@ -37,17 +37,43 @@ let AutoTranslator = {
                         for (const [field_name, field_type] of Object.entries(fields.fields)) {
                             switch (field_type) {
                                 case 'Laravel\\Nova\\Fields\\Text':
-                                    input = document.querySelector(`[dusk="${field_name}"]`);
-                                    input.closest('div[index]').querySelectorAll('div')[1].append(
-                                        self.getTextButton(input, source, target)
-                                    );
+                                case 'Laravel\\Nova\\Fields\\Textarea':
+                                    self.initAutoTranslatorForInput(field_name, source, target);
                                     break;
 
                                 case 'Marshmallow\\Nova\\TinyMCE\\TinyMCE':
-                                    input = document.querySelector(`[id="tiny_${field_name}"]`);
-                                    input.closest('div').append(
-                                        self.getTinyMceButton(field_name, source, target)
-                                    );
+                                    self.initAutoTranslatorForTinyMce(field_name, source, target);
+                                    break;
+
+                                case 'Marshmallow\\Nova\\Flexible\\Flexible':
+                                    flexible_wrapper = document.querySelector(`[dusk="${field_name}"]`);
+                                    flexible_wrapper.querySelectorAll('input').forEach(input => {
+                                        self.initAutoTranslatorForInput(
+                                            input.getAttribute('dusk'),
+                                            source,
+                                            target,
+                                            input.closest('div')
+                                        );
+                                    });
+                                    flexible_wrapper.querySelectorAll('textarea').forEach(input => {
+
+                                        let field_id = input.getAttribute('id');
+                                        if (field_id.startsWith('tiny_')) {
+                                            self.initAutoTranslatorForTinyMce(
+                                                field_id.substring(5),
+                                                source,
+                                                target,
+                                                input.closest('div')
+                                            );
+                                        } else {
+                                            self.initAutoTranslatorForInput(
+                                                input.getAttribute('dusk'),
+                                                source,
+                                                target,
+                                                input.closest('div')
+                                            );
+                                        }
+                                    });
                                     break;
 
                                 default:
@@ -58,6 +84,20 @@ let AutoTranslator = {
                 }, 200);
             }
         });
+    },
+    initAutoTranslatorForInput: function (field_name, source, target, wrapper = null) {
+        input = document.querySelector(`[dusk="${field_name}"]`);
+        wrapper = wrapper ? wrapper : input.closest('div[index]').querySelectorAll('div')[1];
+        wrapper.append(
+            this.getTextButton(input, source, target)
+        );
+    },
+    initAutoTranslatorForTinyMce: function (field_name, source, target, wrapper = null) {
+        input = document.querySelector(`[id="tiny_${field_name}"]`);
+        wrapper = wrapper ? wrapper : input.closest('div');
+        wrapper.append(
+            this.getTinyMceButton(field_name, source, target)
+        );
     },
     getDefaultButton: function (clickEvent) {
         let text_button = document.createElement('button');
