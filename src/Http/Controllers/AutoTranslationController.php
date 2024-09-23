@@ -16,6 +16,7 @@ class AutoTranslationController extends Controller
         return response()->json([
             'active' => config('translatable.auto_translator.active'),
             'button_text' => __('Translate with DeepL'),
+            'loading_text' => __('Translating...'),
         ]);
     }
 
@@ -41,37 +42,5 @@ class AutoTranslationController extends Controller
         return response()->json([
             'text' => $translation,
         ]);
-    }
-
-    public function fields(NovaRequest $request)
-    {
-        $resource_class = Nova::resourceForKey($request->resourceName);
-
-        try {
-            /** Set the edit mode to true so the package will populate the translatable fields. */
-            $request->merge([
-                'editMode' => true,
-            ]);
-
-            /** Get the translatable fields based on the model and nova resouces */
-            $model = (new $resource_class)::$model;
-            $fields = (new $resource_class(new $model))->fields($request, true);
-
-            /** Filter out the language toggler. */
-            $fields = collect($fields)
-                ->reject(fn($field) => $field instanceof LanguageToggler)
-                ->mapWithKeys(function ($field) {
-                    return [
-                        $field->name => get_class($field),
-                    ];
-                });
-
-            /** Return the fields to the JS tool */
-            return response()->json([
-                'fields' => $fields,
-            ]);
-        } catch (Exception $e) {
-            return response()->json([]);
-        }
     }
 }
