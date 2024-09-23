@@ -11,4 +11,8 @@ Nova.booting((Vue, router, store) => {
         "form-language-toggle-field",
         require("./components/FormField").default
     );
+
+    let AutoTranslator = require('./mixins/auto-translator');
+    AutoTranslator.init(Nova);
+
 });

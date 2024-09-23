@@ -29,16 +29,22 @@ class LanguageToggler extends Field
      */
     public function meta()
     {
+        $languages = LanguageTogglerResource::collection(config('translatable.models.language')::get());
+
+        $source_language = config('app.locale');
+        $target_language = request()->getTranslatableLocale();
+
         return array_merge([
-            'languages' => LanguageTogglerResource::collection(config('translatable.models.language')::get()),
+            'languages' => $languages,
             'toggler_clickable' => $this->getToggleClickableStatus(),
             'toggler_notification' => $this->getToggleNotification(),
+            'translating' => $source_language != $target_language,
+            'source' => $source_language,
+            'target' => $target_language,
         ], parent::meta());
     }
 
-    protected function fillAttribute(NovaRequest $request, $requestAttribute, $model, $attribute)
-    {
-    }
+    protected function fillAttribute(NovaRequest $request, $requestAttribute, $model, $attribute) {}
 
     protected function getToggleClickableStatus()
     {

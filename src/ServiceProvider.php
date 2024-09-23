@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Models\Language;
@@ -81,6 +82,10 @@ class ServiceProvider extends BaseServiceProvider
             Nova::script('language-toggle-field', __DIR__ . '/../dist/js/field.js');
             Nova::style('language-toggle-field', __DIR__ . '/../dist/css/field.css');
         });
+
+        Route::middleware(['nova'])
+            ->prefix('nova-vendor/auto-translator')
+            ->group(__DIR__ . '/../routes/auto-translator.php');
 
         $this->loadMigrations();
 
