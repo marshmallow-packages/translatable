@@ -66,6 +66,7 @@ return [
         'language' => \Marshmallow\Translatable\Models\Language::class,
         'translation' => \Marshmallow\Translatable\Models\Translation::class,
         'translatable' => \Marshmallow\Translatable\Models\Translatable::class,
+        'missingTranslation' => \Marshmallow\Translatable\Models\MissingTranslation::class,
     ],
 
     /*
@@ -87,5 +88,9 @@ return [
 
     'auto_translator' => [
         'active' => env('TRANSLATABLE_AUTO_TRANSLATOR_ACTIVE', false),
+    ],
+
+    'missing_translations' => [
+        'active' => env('MISSING_TRANSLATIONS_ACTIVE', false),
     ],
 ];

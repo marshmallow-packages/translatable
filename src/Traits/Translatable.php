@@ -2,11 +2,17 @@
 
 namespace Marshmallow\Translatable\Traits;
 
-use App\Nova\Resource;
+use Error;
+use Laravel\Nova\Nova;
+use Laravel\Nova\Resource;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Marshmallow\HelperFunctions\Facades\URL;
+use Marshmallow\Translatable\Fields\LanguageToggler;
+use Marshmallow\Translatable\Events\TranslatableCreated;
 use Marshmallow\Translatable\Facades\Translatable as TranslatableFacade;
 
 trait Translatable
@@ -30,6 +36,10 @@ trait Translatable
              * will need to create the resource in the app.locale
              * first.
              */
+        });
+
+        static::created(function (Model $resource) {
+            $resource->updateMissingTranslations();
         });
 
         static::updating(function (Model $resource) {
@@ -57,11 +67,19 @@ trait Translatable
             }
         });
 
+        static::updated(function (Model $resource) {
+            $resource->updateMissingTranslations();
+        });
+
         static::deleting(function (Model $resource) {
             /*
              * Delete the existing translations.
              */
             $resource->translatable()->delete();
+        });
+
+        static::deleted(function (Model $resource) {
+            $resource->missingTranslatable()->delete();
         });
     }
 
@@ -84,6 +102,10 @@ trait Translatable
 
     public function weAreTranslating()
     {
+        if ($this->force_translating_status) {
+            return true;
+        }
+
         if (method_exists($this, 'translatableFieldsEnabled') && !$this->translatableFieldsEnabled()) {
             return false;
         }
@@ -133,6 +155,8 @@ trait Translatable
                     ]);
 
                     $new_translatable->saveQuietly();
+
+                    event(new TranslatableCreated($new_translatable));
                 });
             }
         }
@@ -172,12 +196,155 @@ trait Translatable
         return parent::getAttributeValue($source_field);
     }
 
+    public static function getTranslatableResources(string $path = null, array $ignore = []): array
+    {
+        $path = $path ?? app_path('Nova');
+        return self::getTranslatableClasses(
+            path: $path,
+            ignore: $ignore,
+            uses: TranslatableFields::class,
+        );
+    }
+
+    public static function getTranslatableResourcesWithModels(string $path = null, array $ignore = []): array
+    {
+        $path = $path ?? app_path('Nova');
+        return self::getTranslatableClasses(
+            path: $path,
+            ignore: $ignore,
+            uses: TranslatableFields::class,
+            add_callback: function ($filename) {
+                return [$filename, $filename::$model];
+            }
+        );
+    }
+
+    public static function getTranslatableModelsWithResources()
+    {
+        return array_flip(self::getTranslatableResourcesWithModels());
+    }
+
+    public static function getTranslatableModels(string $path = null, array $ignore = []): array
+    {
+        $path = $path ?? app_path('Models');
+        return self::getTranslatableClasses(
+            path: $path,
+            ignore: $ignore,
+            uses: Translatable::class,
+        );
+    }
+
+    public static function getTranslatableClasses(string $path = null, array $ignore = [], ?string $uses = null, ?callable $add_callback = null): array
+    {
+        $run_again_method = Arr::get(debug_backtrace(), '1.function');
+
+        $models = [];
+        foreach (glob($path . '/*') as $file_path) {
+            if (is_dir($file_path)) {
+                $models = array_merge($models, self::{$run_again_method}($file_path, $ignore, $uses, $add_callback));
+            } else {
+                $filename = Str::of($file_path)
+                    ->remove(app_path())
+                    ->remove('.php')
+                    ->prepend('App')
+                    ->replace('/', '\\')
+                    ->toString();
+
+                if (!$uses) {
+                    $models[] = $filename;
+                } else {
+                    if (in_array($uses, class_uses_recursive($filename))) {
+                        if ($add_callback) {
+                            [$key, $value] = $add_callback($filename);
+                            $models[$key] = $value;
+                        } else {
+                            $models[] = $filename;
+                        }
+                    }
+                }
+            }
+        }
+
+        return collect($models)
+            ->reject(fn($model) => in_array($model, $ignore))
+            ->toArray();
+    }
+
+    public function updateMissingTranslations()
+    {
+        $this->missingTranslatable()->delete();
+
+        $models = self::getTranslatableModelsWithResources();
+        $nova_resources = Arr::get($models, get_class($this));
+        $nova_request = resolve(NovaRequest::class);
+        $nova_request->merge([
+            'editMode' => 'update',
+        ]);
+
+        request()->merge([
+            'editMode' => 'update',
+        ]);
+
+        try {
+            $fields = (new $nova_resources($this))
+                ->forceTranslating()
+                ->fields($nova_request);
+        } catch (Error) {
+            dd($nova_resources);
+        }
+
+
+        $translatable_columns = [];
+        collect($fields)
+            ->reject(fn($field) => $field instanceof LanguageToggler)
+            ->each(function ($field) use (&$translatable_columns) {
+                if (get_class($field) == 'Eminiarts\Tabs\Tabs') {
+                    foreach ($field->data as $tab_field) {
+                        $translatable_columns[] = $tab_field->attribute;
+                    }
+                } else {
+                    $translatable_columns[] = $field->attribute;
+                }
+            });
+
+        $languages = config('translatable.models.language')::query()
+            ->active()
+            ->ignoreDefault()
+            ->get();
+
+        $languages->each(function ($language) use ($translatable_columns) {
+            $missing_data = [];
+            collect($translatable_columns)
+                ->each(function ($column) use (&$missing_data, $language) {
+                    $translated = $this->translatable
+                        ->where('source_field', $column)
+                        ->where('language_id', $language->id)
+                        ->first();
+
+                    if (!$translated) {
+                        $missing_data[] = $column;
+                    }
+                });
+
+
+            $this->missingTranslatable()->create([
+                'missing' => $missing_data,
+                'language_id' => $language->id,
+            ]);
+        });
+    }
+
     /**
      * Set up the relationship.
      */
     public function translatable()
     {
         return $this->morphMany(config('translatable.models.translatable'), 'translatable');
+    }
+
+    public function missingTranslatable()
+    {
+        return $this->morphMany(config('translatable.models.missingTranslation'), 'missing_translatable');
     }
 
     /**
@@ -238,8 +405,9 @@ trait Translatable
     public function getNotTranslateColumns()
     {
         if (class_exists(Resource::class) && $this instanceof Resource) {
-            $resource = new $this::$model();
-
+            /** @var Resource $nova_resource */
+            $nova_resource = $this;
+            $resource = $nova_resource::newModel();
             return $resource->notTranslateColumns();
         }
 
@@ -253,8 +421,9 @@ trait Translatable
     public function getTranslatableColumns()
     {
         if (class_exists(Resource::class) && $this instanceof Resource) {
-            $resource = new $this::$model();
-
+            /** @var Resource $nova_resource */
+            $nova_resource = $this;
+            $resource = $nova_resource::newModel();
             return $resource->translatableColumns();
         }
 

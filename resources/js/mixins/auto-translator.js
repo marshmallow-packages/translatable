@@ -136,6 +136,7 @@ let AutoTranslator = {
                 input.value
             );
             input.value = translation;
+            input.dispatchEvent(new Event('input', { 'bubbles': true }));
         });
     },
     getTinyMceButton: function (field_name, source, target) {

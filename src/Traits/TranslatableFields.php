@@ -10,6 +10,14 @@ trait TranslatableFields
 {
     use Translatable;
 
+    protected bool $force_translating_status = false;
+
+    public function forceTranslating()
+    {
+        $this->force_translating_status = true;
+        return $this;
+    }
+
     public function fields(NovaRequest $request)
     {
         if (!$request->has('editMode')) {
