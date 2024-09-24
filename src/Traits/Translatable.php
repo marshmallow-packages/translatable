@@ -290,7 +290,7 @@ trait Translatable
                 ->forceTranslating()
                 ->fields($nova_request);
         } catch (Error) {
-            dd($nova_resources);
+            return;
         }
 
 
