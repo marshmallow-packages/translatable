@@ -2,17 +2,18 @@
 
 namespace Marshmallow\Translatable;
 
-use Request;
 use Laravel\Nova\Nova;
 use Illuminate\Support\Facades\App;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Session;
 use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Scanner\Scanner;
+use Marshmallow\Translatable\EventServiceProvider;
 use Marshmallow\Translatable\Events\UserLocaleChanged;
 use Marshmallow\Translatable\Scanner\TranslationManager;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
@@ -23,6 +24,7 @@ use Marshmallow\Translatable\Console\Commands\AddLanguageCommand;
 use Marshmallow\Translatable\Console\Commands\ListLanguagesCommand;
 use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
 use Marshmallow\Translatable\Console\Commands\AddTranslationKeyCommand;
+use Marshmallow\Translatable\Console\Commands\IndexMissingTranslatables;
 use Marshmallow\Translatable\Console\Commands\ListMissingTranslationKeys;
 use Marshmallow\Translatable\Console\Commands\DuplicateTranslationsCommand;
 use Marshmallow\Translatable\Console\Commands\SynchroniseTranslationsCommand;
@@ -112,6 +114,8 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerContainerBindings();
 
         $this->registerMiddleware();
+
+        $this->app->register(EventServiceProvider::class);
     }
 
     /**
@@ -216,6 +220,7 @@ class ServiceProvider extends BaseServiceProvider
                 GeneratePresetCommand::class,
                 InstallCommand::class,
                 DuplicateTranslationsCommand::class,
+                IndexMissingTranslatables::class,
             ]);
         }
     }

@@ -55,10 +55,15 @@ class Language extends Model
         $builder->where('active', 1);
     }
 
+    public function scopeIgnoreDefault(Builder $builder)
+    {
+        $builder->where('language', '!=', config('app.locale'));
+    }
+
     public function translationCount(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->translations->count(),
+            get: fn() => $this->translations->count(),
         );
     }
 
