@@ -327,10 +327,12 @@ trait Translatable
                 });
 
 
-            $this->missingTranslatable()->create([
-                'missing' => $missing_data,
-                'language_id' => $language->id,
-            ]);
+            if (!empty($missing_data)) {
+                $this->missingTranslatable()->create([
+                    'missing' => $missing_data,
+                    'language_id' => $language->id,
+                ]);
+            }
         });
     }
 
