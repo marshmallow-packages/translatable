@@ -22,7 +22,7 @@ class CreateMissingTranslationsTable extends Migration
         });
 
         if (Schema::hasTable('languages')) {
-            Schema::create('missing_translations', function (Blueprint $table) {
+            Schema::table('missing_translations', function (Blueprint $table) {
                 $table->foreign('language_id')->references('id')->on('languages')->onDelete('CASCADE');
             });
         }
