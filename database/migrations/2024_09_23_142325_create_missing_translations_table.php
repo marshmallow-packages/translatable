@@ -19,9 +19,13 @@ class CreateMissingTranslationsTable extends Migration
             $table->json('missing');
             $table->integer('language_id')->unsigned();
             $table->timestamps();
-
-            $table->foreign('language_id')->references('id')->on('languages')->onDelete('CASCADE');
         });
+
+        if (Schema::hasTable('languages')) {
+            Schema::create('missing_translations', function (Blueprint $table) {
+                $table->foreign('language_id')->references('id')->on('languages')->onDelete('CASCADE');
+            });
+        }
     }
 
     /**
