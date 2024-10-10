@@ -57,7 +57,6 @@ class MissingTranslation extends Resource
         'id',
         'missing_translatable_id',
         'missing_translatable_type',
-        'source_field',
     ];
 
     /**
@@ -71,10 +70,10 @@ class MissingTranslation extends Resource
     {
         return [
             ID::make(),
-            MorphTo::make('Missing Translatable', 'missingTranslatable')->types(
+            MorphTo::make(__('Missing Translatable'), 'missingTranslatable')->types(
                 Language::getTranslatableResources(),
             ),
-            BelongsTo::make('Language', 'language', Language::class),
+            BelongsTo::make(__('Language'), 'language', Language::class),
             Text::make(__('Missing'), 'missing')->displayUsing(function ($value) {
                 return Arr::join($value, ', ', ' and ');
             }),
