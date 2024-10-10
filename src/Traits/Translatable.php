@@ -272,6 +272,10 @@ trait Translatable
 
     public function updateMissingTranslations()
     {
+        if (!config('translatable.missing_translations.active')) {
+            return;
+        }
+
         $this->missingTranslatable()->delete();
 
         $models = self::getTranslatableModelsWithResources();
