@@ -9,6 +9,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Nova\Contracts\RelatableField;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Fields\LanguageToggler;
@@ -297,15 +298,17 @@ trait Translatable
             return;
         }
 
-
         $translatable_columns = [];
         collect($fields)
             ->reject(fn($field) => $field instanceof LanguageToggler)
+            ->reject(fn($field) => in_array(RelatableField::class, class_implements($field)))
             ->each(function ($field) use (&$translatable_columns) {
                 if (get_class($field) == 'Eminiarts\Tabs\Tabs') {
-                    foreach ($field->data as $tab_field) {
-                        $translatable_columns[] = $tab_field->attribute;
-                    }
+                    collect($field->data)
+                        ->reject(fn($field) => in_array(RelatableField::class, class_implements($field)))
+                        ->each(function ($tab_field) use (&$translatable_columns) {
+                            $translatable_columns[] = $tab_field->attribute;
+                        });
                 } else {
                     $translatable_columns[] = $field->attribute;
                 }
