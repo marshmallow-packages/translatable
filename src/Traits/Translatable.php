@@ -8,6 +8,7 @@ use Laravel\Nova\Resource;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Nova\Contracts\RelatableField;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -40,7 +41,11 @@ trait Translatable
         });
 
         static::created(function (Model $resource) {
-            $resource->updateMissingTranslations();
+            DB::afterCommit(
+                function () use ($resource) {
+                    $resource->updateMissingTranslations();
+                }
+            );
         });
 
         static::updating(function (Model $resource) {
