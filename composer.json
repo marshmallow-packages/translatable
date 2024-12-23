@@ -17,7 +17,7 @@
     ],
     "require": {
         "php": "^8.0",
-        "laravel/nova": "^4.0",
+        "laravel/nova": "^4.0|^5.0",
         "marshmallow/commands": "^v1.2.1",
         "marshmallow/helpers": "^v2.11.1",
         "marshmallow/live-update": "^v2.0",
