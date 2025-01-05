@@ -3,7 +3,6 @@
 namespace Marshmallow\Translatable\Traits;
 
 use Error;
-use Laravel\Nova\Nova;
 use Laravel\Nova\Resource;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;

@@ -31,7 +31,6 @@ trait TranslatableFields
             return $this->translatableFields($request);
         }
 
-
         if (method_exists($this, 'translatableFieldsEnabled') && !$this->translatableFieldsEnabled()) {
             return $this->translatableFields($request);
         }
@@ -49,6 +48,20 @@ trait TranslatableFields
             if (is_object($field) && get_class($field) == 'Eminiarts\Tabs\Tabs') {
                 continue;
             }
+
+            if (is_object($field) && get_class($field) == 'Laravel\Nova\Tabs\TabsGroup') {
+                $translatable_data_fields = [];
+                foreach ($field->data as $data_field) {
+                    if (isset($data_field->attribute) && $this->isTranslatableAttribute($data_field->attribute)) {
+                        $translatable_data_fields[] = $data_field;
+                    }
+                }
+
+                $field->data = $translatable_data_fields;
+                $fields[$key] = $field;
+                continue;
+            }
+
             if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
                 unset($fields[$key]);
             }
