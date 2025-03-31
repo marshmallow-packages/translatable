@@ -25,7 +25,7 @@ Publish configuration and assets
 
 ## Usage
 
-Please reference the official documentation at [Marshmallow Documentation](https://docs.marshmallow.nl/docs/translatable/installation)
+Please reference the official documentation at [Marshmallow Documentation](https://mrmallow.notion.site/Translatable-1c76ed0c3dbf8079b010fff1afc71986)
 
 ### Use Deepl integration
 This package contains an integration with Deepl. This integration will add a button to the translations index view, that will automaticly translate your text via Deepl. Just add the following ENV variable to use this awesome feature.
