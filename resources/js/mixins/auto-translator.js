@@ -171,6 +171,8 @@ let AutoTranslator = {
                 tiny.getContent()
             );
             tiny.setContent(translation);
+            tiny.setDirty(true);
+            tiny.focus();
         });
     },
     runTranslator: async function (source, target, text) {
