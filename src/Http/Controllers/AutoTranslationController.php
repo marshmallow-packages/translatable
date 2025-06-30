@@ -37,6 +37,7 @@ class AutoTranslationController extends Controller
             source: $request->source,
             target: $request->target,
             text: $request->text,
+            html_handling: $request->html_handling ?? true
         );
 
         return response()->json([

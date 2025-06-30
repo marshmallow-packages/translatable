@@ -175,11 +175,12 @@ let AutoTranslator = {
             tiny.focus();
         });
     },
-    runTranslator: async function (source, target, text) {
+    runTranslator: async function (source, target, text, html_handling = true) {
         let response = await this.apiRequest("translate", "POST", {
             source: source,
             target: target,
             text: text,
+            html_handling: html_handling,
         });
         return response.text;
     },
