@@ -157,7 +157,12 @@ let AutoTranslator = {
     },
     getTextButton: function (input, source, target) {
         return this.getDefaultButton(async () => {
-            translation = await this.runTranslator(source, target, input.value);
+            translation = await this.runTranslator(
+                source,
+                target,
+                input.value,
+                false
+            );
             input.value = translation;
             input.dispatchEvent(new Event("input", { bubbles: true }));
         });
@@ -168,18 +173,20 @@ let AutoTranslator = {
             translation = await this.runTranslator(
                 source,
                 target,
-                tiny.getContent()
+                tiny.getContent(),
+                true
             );
             tiny.setContent(translation);
             tiny.setDirty(true);
             tiny.focus();
         });
     },
-    runTranslator: async function (source, target, text) {
+    runTranslator: async function (source, target, text, html_handling = true) {
         let response = await this.apiRequest("translate", "POST", {
             source: source,
             target: target,
             text: text,
+            html_handling: html_handling,
         });
         return response.text;
     },
