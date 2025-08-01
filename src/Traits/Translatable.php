@@ -201,7 +201,7 @@ trait Translatable
         return parent::getAttributeValue($source_field);
     }
 
-    public static function getTranslatableResources(string $path = null, array $ignore = []): array
+    public static function getTranslatableResources(?string $path = null, array $ignore = []): array
     {
         $path = $path ?? app_path('Nova');
         return self::getTranslatableClasses(
@@ -211,7 +211,7 @@ trait Translatable
         );
     }
 
-    public static function getTranslatableResourcesWithModels(string $path = null, array $ignore = []): array
+    public static function getTranslatableResourcesWithModels(?string $path = null, array $ignore = []): array
     {
         $path = $path ?? app_path('Nova');
         return self::getTranslatableClasses(
@@ -229,7 +229,7 @@ trait Translatable
         return array_flip(self::getTranslatableResourcesWithModels());
     }
 
-    public static function getTranslatableModels(string $path = null, array $ignore = []): array
+    public static function getTranslatableModels(?string $path = null, array $ignore = []): array
     {
         $path = $path ?? app_path('Models');
         return self::getTranslatableClasses(
@@ -239,7 +239,7 @@ trait Translatable
         );
     }
 
-    public static function getTranslatableClasses(string $path = null, array $ignore = [], ?string $uses = null, ?callable $add_callback = null): array
+    public static function getTranslatableClasses(?string $path = null, array $ignore = [], ?string $uses = null, ?callable $add_callback = null): array
     {
         $run_again_method = Arr::get(debug_backtrace(), '1.function');
 
