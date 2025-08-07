@@ -26,8 +26,6 @@ class Language extends Model
      *
      * STEF: I commented this because this loaded 40.000 models
      * instead of the 4.000 available models.
-     *
-     * @var array
      */
     // protected $with = ['translations'];
 
@@ -78,9 +76,10 @@ class Language extends Model
     {
         if ($field == 'language') {
             $languageModel = config('translatable.models.language');
-            $language = $languageModel::where('language', $value)->firstOrFail();
-            return $language;
+            return $languageModel::where('language', $value)->firstOrFail();
         }
+        
+        return null;
     }
 
     public static function resolveRoute($value, $field = null)

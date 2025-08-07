@@ -3,11 +3,6 @@
 namespace Marshmallow\Translatable\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Artisan;
-use Marshmallow\Translatable\Scanner\Scanner;
-use Marshmallow\Translatable\Scanner\Drivers\File;
-use Marshmallow\Translatable\Scanner\Drivers\Database;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
 
 class SynchroniseTranslationsCommand extends Command
@@ -27,13 +22,6 @@ class SynchroniseTranslationsCommand extends Command
     protected $description = 'Synchronise translations from your language files to the database';
 
     /**
-     * File scanner.
-     *
-     * @var Scanner
-     */
-    private $scanner;
-
-    /**
      * Translation.
      *
      * @var Translation
@@ -41,24 +29,13 @@ class SynchroniseTranslationsCommand extends Command
     private $translation;
 
     /**
-     * From driver.
-     */
-    private $fromDriver;
-
-    /**
-     * To driver.
-     */
-    private $toDriver;
-
-    /**
      * Create a new command instance.
      *
      * @return void
      */
-    public function __construct(Scanner $scanner, Translation $translation)
+    public function __construct(Translation $translation)
     {
         parent::__construct();
-        $this->scanner = $scanner;
         $this->translation = $translation;
     }
 
@@ -78,12 +55,6 @@ class SynchroniseTranslationsCommand extends Command
         }
 
         $languages = array_keys($languages->toArray());
-
-        // Create the driver.
-        $this->fromDriver = 'file';
-
-        // Create the driver.
-        $this->toDriver = 'database';
 
         if ($this->argument('language')) {
 

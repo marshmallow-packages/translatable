@@ -418,7 +418,6 @@ trait Translatable
     public function getNotTranslateColumns()
     {
         if (class_exists(Resource::class) && $this instanceof Resource) {
-            /** @var Resource $nova_resource */
             $nova_resource = $this;
             $resource = $nova_resource::newModel();
             return $resource->notTranslateColumns();
@@ -434,7 +433,6 @@ trait Translatable
     public function getTranslatableColumns()
     {
         if (class_exists(Resource::class) && $this instanceof Resource) {
-            /** @var Resource $nova_resource */
             $nova_resource = $this;
             $resource = $nova_resource::newModel();
             return $resource->translatableColumns();
