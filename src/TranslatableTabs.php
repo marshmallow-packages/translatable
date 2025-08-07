@@ -51,9 +51,15 @@ class TranslatableTabs
     protected function createTabGroup(string $name, array $tabs)
     {
         $novaTabs = [];
-        
+
         foreach ($tabs as $tabName => $fields) {
-            $novaTabs[] = Tab::make($tabName, $fields);
+            if (is_array($fields)) {
+                $novaTabs[] = Tab::make($tabName, $fields);
+            } else {
+                $novaTabs[] = Tab::make($fields->name, [
+                    $fields,
+                ]);
+            }
         }
 
         return Tab::group($name, $novaTabs);
