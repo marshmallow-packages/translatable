@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Translation.
- *
- * @mixin Eloquent
  */
 class Translation extends Model
 {

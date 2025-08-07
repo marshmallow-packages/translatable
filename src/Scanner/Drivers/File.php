@@ -296,11 +296,18 @@ class File extends Translation implements DriverInterface
     {
         // here we check if it's a namespaced translation which need saving to a
         // different path
-        $translations = $translations instanceof Collection ? $translations->toArray() : $translations;
+        if (is_array($translations)) {
+            $translations = $translations;
+        } elseif ($translations instanceof Collection) {
+            $translations = $translations->toArray();
+        } else {
+            $translations = (array) $translations;
+        }
         ksort($translations);
         $translations = array_undot($translations);
         if (Str::contains($group, '::')) {
-            return $this->saveNamespacedGroupTranslations($language, $group, $translations);
+            $this->saveNamespacedGroupTranslations($language, $group, $translations);
+            return;
         }
         $this->disk->put("{$this->languageFilesPath}" . DIRECTORY_SEPARATOR . "{$language}" . DIRECTORY_SEPARATOR . "{$group}.php", "<?php\n\nreturn " . var_export($translations, true) . ';' . \PHP_EOL);
     }
@@ -388,7 +395,7 @@ class File extends Translation implements DriverInterface
     public function getVendorGroupFilesFor($language)
     {
         if (!$this->disk->exists("{$this->languageFilesPath}" . DIRECTORY_SEPARATOR . 'vendor')) {
-            return;
+            return new Collection();
         }
 
         $vendorGroups = [];

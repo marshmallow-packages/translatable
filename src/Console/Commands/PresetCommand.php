@@ -18,7 +18,7 @@ class PresetCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'translatable:preset {language} {?--force}';
+    protected $signature = 'translatable:preset {language} {--force}';
 
     /**
      * The console command description.
