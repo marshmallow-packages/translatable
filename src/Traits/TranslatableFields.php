@@ -45,9 +45,6 @@ trait TranslatableFields
         $fields = $this->translatableFields($request);
 
         foreach ($fields as $key => $field) {
-            if (is_object($field) && get_class($field) == 'Eminiarts\Tabs\Tabs') {
-                continue;
-            }
 
             if (is_object($field) && get_class($field) == 'Laravel\Nova\Tabs\TabsGroup') {
                 $translatable_data_fields = [];

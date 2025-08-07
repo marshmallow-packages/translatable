@@ -4,7 +4,7 @@ namespace Marshmallow\Translatable;
 
 use Error;
 use App\Nova\Resource;
-use Eminiarts\Tabs\Tabs;
+use Laravel\Nova\Tabs\Tab;
 
 class TranslatableTabs
 {
@@ -23,10 +23,10 @@ class TranslatableTabs
         return $resource->weAreNotTranslating() || $this->noEditModeAvailable() || $this->createModeActive();
     }
 
-    public function make(Resource $resource, string $name, array $tabs): Tabs
+    public function make(Resource $resource, string $name, array $tabs)
     {
         if ($this->shouldLoadNormalTabs($resource)) {
-            return new Tabs($name, $tabs);
+            return $this->createTabGroup($name, $tabs);
         }
 
         foreach ($tabs as $tab_name => $fields) {
@@ -45,6 +45,17 @@ class TranslatableTabs
             }
         }
 
-        return new Tabs($name, $tabs);
+        return $this->createTabGroup($name, $tabs);
+    }
+
+    protected function createTabGroup(string $name, array $tabs)
+    {
+        $novaTabs = [];
+        
+        foreach ($tabs as $tabName => $fields) {
+            $novaTabs[] = Tab::make($tabName, $fields);
+        }
+
+        return Tab::group($name, $novaTabs);
     }
 }

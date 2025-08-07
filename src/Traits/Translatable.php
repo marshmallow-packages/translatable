@@ -307,7 +307,7 @@ trait Translatable
             ->reject(fn($field) => $field instanceof LanguageToggler)
             ->reject(fn($field) => in_array(RelatableField::class, class_implements($field)))
             ->each(function ($field) use (&$translatable_columns) {
-                if (get_class($field) == 'Eminiarts\Tabs\Tabs') {
+                if (get_class($field) == 'Laravel\Nova\Tabs\TabsGroup') {
                     collect($field->data)
                         ->reject(fn($field) => in_array(RelatableField::class, class_implements($field)))
                         ->each(function ($tab_field) use (&$translatable_columns) {
