@@ -575,6 +575,7 @@ trait Translatable
             ->where('source_field', $slug_column)
             ->where('translated_value', $slug)
             ->where('translatable_type', self::class)
+            ->with('translatable')
             ->first();
 
         if ($translation) {
