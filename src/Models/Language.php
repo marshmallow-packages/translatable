@@ -21,6 +21,15 @@ class Language extends Model
 
     protected $guarded = [];
 
+    protected $fillable = [
+        'name',
+        'language',
+        'active',
+        'country_flag_class',
+        'icon',
+        'translatable_sequence',
+    ];
+
     /**
      * The relationships that should always be loaded.
      *

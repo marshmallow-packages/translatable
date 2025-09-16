@@ -29,7 +29,7 @@ class LanguageToggler extends Field
      */
     public function meta()
     {
-        $languages = LanguageTogglerResource::collection(config('translatable.models.language')::get());
+        $languages = LanguageTogglerResource::collection(config('translatable.models.language')::orderBy('translatable_sequence')->get());
 
         $source_language = config('app.locale');
         $target_language = request()->getTranslatableLocale();

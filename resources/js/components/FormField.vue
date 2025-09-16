@@ -115,6 +115,7 @@
         width: 14px;
         height: 14px;
         background-color: rgb(228, 194, 4);
+        border-radius: 100%;
         font-size: 1.2rem;
         font-size: 10px;
         color: rgb(255, 246, 192);

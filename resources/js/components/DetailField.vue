@@ -84,6 +84,7 @@
         background-color: rgb(228, 194, 4);
         font-size: 1.2rem;
         font-size: 10px;
+        border-radius: 100%;
         color: rgb(255, 246, 192);
     }
 </style>
