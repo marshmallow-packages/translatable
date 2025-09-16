@@ -12,7 +12,6 @@ Nova.booting((Vue, router, store) => {
         require("./components/FormField").default
     );
 
-    let AutoTranslator = require('./mixins/auto-translator');
+    let AutoTranslator = require("./mixins/auto-translator");
     AutoTranslator.init(Nova);
-
 });
