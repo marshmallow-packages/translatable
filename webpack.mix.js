@@ -6,4 +6,5 @@ mix.setPublicPath("dist")
     .js("resources/js/field.js", "js")
     .sass("resources/sass/field.scss", "css")
     .vue({ version: 3 })
-    .nova("marshmallow/nova-translatable");
+    .nova("marshmallow/nova-translatable")
+    .version();

@@ -71,7 +71,7 @@ let AutoTranslator = {
                             }
 
                             let field_id = input.getAttribute("id");
-                            if (field_id.startsWith("tiny_")) {
+                            if (field_id && field_id.startsWith("tiny_")) {
                                 self.initAutoTranslatorForTinyMce(
                                     field_id.substring(5),
                                     source,
@@ -87,6 +87,24 @@ let AutoTranslator = {
                                 );
                             }
                         });
+
+                    form_wrapper
+                        .querySelectorAll(".tiptap.ProseMirror")
+                        .forEach((tiptapEditor) => {
+                            if (
+                                tiptapEditor.getAttribute(
+                                    "auto-translator-loaded"
+                                )
+                            ) {
+                                return;
+                            }
+
+                            self.initAutoTranslatorForTipTap(
+                                tiptapEditor,
+                                source,
+                                target
+                            );
+                        });
                 }, 200);
             }
         });
@@ -98,6 +116,9 @@ let AutoTranslator = {
         wrapper = null
     ) {
         input = document.querySelector(`[dusk="${field_name}"]`);
+        if (!input) {
+            return;
+        }
         input.setAttribute("auto-translator-loaded", true);
         wrapper = wrapper
             ? wrapper
@@ -111,10 +132,25 @@ let AutoTranslator = {
         wrapper = null
     ) {
         input = document.querySelector(`[id="tiny_${field_name}"]`);
+        if (!input) {
+            return;
+        }
         input.setAttribute("auto-translator-loaded", true);
 
         wrapper = wrapper ? wrapper : input.closest("div");
         wrapper.append(this.getTinyMceButton(field_name, source, target));
+    },
+    initAutoTranslatorForTipTap: function (tiptapEditor, source, target) {
+        tiptapEditor.setAttribute("auto-translator-loaded", true);
+
+        let editorWrapper = tiptapEditor.closest(".nova-tiptap-editor");
+        if (editorWrapper) {
+            let buttonContainer = document.createElement("div");
+            buttonContainer.classList.add("mt-2");
+            buttonContainer.append(this.getTipTapButton(tiptapEditor, source, target));
+            
+            editorWrapper.parentElement.insertBefore(buttonContainer, editorWrapper.nextSibling);
+        }
     },
 
     getDefaultButtonIconAndLabel: function () {
@@ -179,6 +215,20 @@ let AutoTranslator = {
             tiny.setContent(translation);
             tiny.setDirty(true);
             tiny.focus();
+        });
+    },
+    getTipTapButton: function (tiptapEditor, source, target) {
+        return this.getDefaultButton(async () => {
+            translation = await this.runTranslator(
+                source,
+                target,
+                tiptapEditor.innerHTML,
+                true
+            );
+            tiptapEditor.innerHTML = translation;
+
+            tiptapEditor.dispatchEvent(new Event("input", { bubbles: true }));
+            tiptapEditor.focus();
         });
     },
     runTranslator: async function (source, target, text, html_handling = true) {
