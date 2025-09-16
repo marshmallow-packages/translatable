@@ -3,9 +3,10 @@
 namespace Marshmallow\Translatable\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Marshmallow\Translatable\Traits\Translatable;
-use Illuminate\Database\Eloquent\Builder;
+use Marshmallow\Translatable\Facades\Translatable as TranslatableFacade;
 
 /*
  * @mixin \Eloquent
@@ -65,7 +66,7 @@ class Language extends Model
 
     public function scopeIgnoreDefault(Builder $builder)
     {
-        $builder->where('language', '!=', config('app.locale'));
+        $builder->where('language', '!=', TranslatableFacade::appDefaultLanguage());
     }
 
     public function translationCount(): Attribute
@@ -88,7 +89,7 @@ class Language extends Model
             $languageModel = config('translatable.models.language');
             return $languageModel::where('language', $value)->firstOrFail();
         }
-        
+
         return null;
     }
 
@@ -109,7 +110,7 @@ class Language extends Model
 
     public function isDefault()
     {
-        return $this->language === config('app.locale');
+        return $this->language === TranslatableFacade::appDefaultLanguage();
     }
 
     public function currentlySelected()
@@ -138,7 +139,7 @@ class Language extends Model
 
     public static function currentTranslatableIsDefault()
     {
-        return request()->getTranslatableLocale() === config('app.locale');
+        return request()->getTranslatableLocale() === TranslatableFacade::appDefaultLanguage();
     }
 
     protected function getBase64StringFromImage(string $image_location): string

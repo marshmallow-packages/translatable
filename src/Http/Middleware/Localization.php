@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 use Marshmallow\Translatable\Models\Language;
+use Marshmallow\Translatable\Facades\Translatable;
 
 class Localization
 {
@@ -45,7 +46,7 @@ class Localization
         } else if (Cache::has($locale_key)) {
             $locale = Cache::get($locale_key);
         } else {
-            $locale = config('app.locale');
+            $locale = Translatable::appDefaultLanguage();
         }
 
         App::setLocale($locale);

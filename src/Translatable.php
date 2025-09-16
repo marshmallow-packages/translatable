@@ -9,6 +9,11 @@ class Translatable
 {
     protected $languages = [];
 
+    public function appDefaultLanguage(): string
+    {
+        return config('app.default_locale') ?? config('app.locale') ?? 'en';
+    }
+
     public function deeplTranslaterIsActive(): bool
     {
         return config('translatable.deepl.api_path') &&
@@ -20,7 +25,8 @@ class Translatable
         if ($language_id = Cache::get('auto-translator-source-language')) {
             return Language::find($language_id);
         }
-        $language = Language::where('language', config('app.locale'))->first();
+        $default = $this->appDefaultLanguage();
+        $language = Language::where('language', $default)->first();
         if ($language) {
             return $language;
         }

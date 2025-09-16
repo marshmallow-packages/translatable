@@ -4,6 +4,7 @@ namespace Marshmallow\Translatable\Fields;
 
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Marshmallow\Translatable\Facades\Translatable;
 use Marshmallow\Translatable\Http\Resources\LanguageTogglerResource;
 
 class LanguageToggler extends Field
@@ -31,7 +32,7 @@ class LanguageToggler extends Field
     {
         $languages = LanguageTogglerResource::collection(config('translatable.models.language')::where('active_for_translation', true)->orderBy('translatable_sequence')->get());
 
-        $source_language = config('app.locale');
+        $source_language = Translatable::appDefaultLanguage();
         $target_language = request()->getTranslatableLocale();
 
         return array_merge([
@@ -64,7 +65,7 @@ class LanguageToggler extends Field
         return __('
     		<strong>Please note:</strong> You have currently selected a different language in your translation settings. However, you are now creating a new resource. This needs to be done in the default language which is :language. So please keep this in mind while you fill in the field below.
     	', [
-            'language' => config('app.locale'),
+            'language' => Translatable::appDefaultLanguage(),
         ]);
     }
 }
