@@ -93,6 +93,15 @@ class Language extends Resource
                     'max:2',
                 ]),
 
+            Number::make(__('Sequence'), 'translatable_sequence')
+                ->sortable()
+                ->rules([
+                    'required',
+                    'integer',
+                    'min:1',
+                ])
+                ->help(__('Order in which languages appear in the language toggle')),
+
             AdvancedImage::make(__('Icon'), 'icon')
                 ->croppable(
                     config('translatable.flag_icon.height') / config('translatable.flag_icon.width')
