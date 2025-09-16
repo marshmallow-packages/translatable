@@ -23,6 +23,46 @@ Publish configuration and assets
 
 `php artisan vendor:publish --provider="Marshmallow\Translatable\ServiceProvider"`
 
+Run the install command
+
+`php artisan translatable:install`
+
+## Manual Installation
+
+If you prefer to install manually or the automatic installation doesn't work for your setup, follow these steps:
+
+### 1. Add Default Locale Configuration
+
+Add the following line to your `config/app.php` file, right after the `'locale'` configuration:
+
+```php
+'locale' => env('APP_LOCALE', 'en'),
+
+'default_locale' => env('APP_LOCALE'),
+```
+
+### 2. Set Environment Variable
+
+Make sure you have the `APP_LOCALE` environment variable set in your `.env` file:
+
+```env
+APP_LOCALE=en
+```
+
+### 3. Run Migration and Synchronization Commands
+
+```bash
+# Sync existing translation files to database
+php artisan translatable:sync-file-to-database
+
+# Sync missing translations
+php artisan translatable:sync-missing
+
+# Generate Nova resources (if using Laravel Nova)
+php artisan marshmallow:resource Language Translatable --force
+php artisan marshmallow:resource Translation Translatable --force
+```
+
 ## Usage
 
 Please reference the official documentation at [Marshmallow Documentation](https://mrmallow.notion.site/Translatable-1c76ed0c3dbf8079b010fff1afc71986)
