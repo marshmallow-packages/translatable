@@ -25,6 +25,7 @@ class Language extends Model
         'name',
         'language',
         'active',
+        'active_for_translation',
         'country_flag_class',
         'icon',
         'translatable_sequence',

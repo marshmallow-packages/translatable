@@ -93,6 +93,12 @@ class Language extends Resource
                     'max:2',
                 ]),
 
+            \Laravel\Nova\Fields\Boolean::make(__('Active'), 'active')
+                ->help(__('Whether this language is active for frontend use')),
+
+            \Laravel\Nova\Fields\Boolean::make(__('Active for Translation'), 'active_for_translation')
+                ->help(__('Whether this language appears in the translation toggle')),
+
             Number::make(__('Sequence'), 'translatable_sequence')
                 ->sortable()
                 ->rules([
