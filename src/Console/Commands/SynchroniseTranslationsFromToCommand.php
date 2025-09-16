@@ -5,6 +5,7 @@ namespace Marshmallow\Translatable\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Marshmallow\Translatable\Scanner\Scanner;
+use Marshmallow\Translatable\Facades\Translatable;
 use Marshmallow\Translatable\Scanner\Drivers\File;
 use Marshmallow\Translatable\Scanner\Drivers\Database;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
@@ -162,10 +163,10 @@ class SynchroniseTranslationsFromToCommand extends Command
     private function createDriver($driver)
     {
         if ($driver === 'file') {
-            return new File(new Filesystem(), app('path.lang'), config('app.locale'), $this->scanner);
+            return new File(new Filesystem(), app('path.lang'), Translatable::appDefaultLanguage(), $this->scanner);
         }
 
-        return new Database(config('app.locale'), $this->scanner);
+        return new Database(Translatable::appDefaultLanguage(), $this->scanner);
     }
 
     private function mergeLanguages($driver, $languages)

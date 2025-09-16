@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\Paginator;
+use Marshmallow\Translatable\Facades\Translatable;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
 use Marshmallow\Translatable\Http\Requests\TranslationRequest;
 
@@ -22,7 +23,7 @@ class LanguageTranslationController extends Controller
     public function index(Request $request, $language)
     {
         $languages = $this->translation->allLanguages();
-        $groups = $this->translation->getGroupsFor(config('app.locale'))->prepend('single');
+        $groups = $this->translation->getGroupsFor(Translatable::appDefaultLanguage())->prepend('single');
         $translations = $this->translation->filterTranslationsFor($language, $request->get('search'));
 
         if ($request->has('group') && $request->get('group')) {
@@ -43,7 +44,7 @@ class LanguageTranslationController extends Controller
         $offset = $currentPage - 1;
 
         return response()->json([
-            'source_language' => config('app.locale'),
+            'source_language' => Translatable::appDefaultLanguage(),
             'groups' => $groups,
             'languages' => $languages,
             'translations' => new Paginator(array_slice($this->formatTranslations($translations, $language), $offset * $perPage), $perPage, $currentPage),
@@ -81,16 +82,16 @@ class LanguageTranslationController extends Controller
                 foreach ($translations as $key => $translation) {
                     // if the translation is an array, ignore it. This isn't
                     // supported by the UI at present
-                    if (is_array($translation[config('app.locale')])) {
+                    if (is_array($translation[Translatable::appDefaultLanguage()])) {
                         continue;
                     }
                     $formattedTranslations[] = [
-                            'id' => Str::random(20),
-                            'type' => $type,
-                            'group' => $group,
-                            'key' => $key,
-                            'translations' => $translation,
-                        ];
+                        'id' => Str::random(20),
+                        'type' => $type,
+                        'group' => $group,
+                        'key' => $key,
+                        'translations' => $translation,
+                    ];
                 }
             }
         }
