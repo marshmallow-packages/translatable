@@ -1,4 +1,5 @@
 let mix = require("laravel-mix");
+
 let NovaExtension = require("laravel-nova-devtool");
 mix.extend("nova", new NovaExtension());
 
