@@ -116,7 +116,8 @@ trait Translatable
         }
 
         if (Request::hasMacro('getTranslatableLocale')) {
-            return Request::getTranslatableLocale() !== config('app.default_locale', config('app.locale'));
+            $default_locale = config('app.default_locale') ?? config('app.locale');
+            return Request::getTranslatableLocale() !== $default_locale;
         }
 
         return false;

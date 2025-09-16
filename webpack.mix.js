@@ -1,6 +1,6 @@
 let mix = require("laravel-mix");
-
-require("./mix");
+let NovaExtension = require("laravel-nova-devtool");
+mix.extend("nova", new NovaExtension());
 
 mix.setPublicPath("dist")
     .js("resources/js/field.js", "js")
