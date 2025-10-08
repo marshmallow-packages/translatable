@@ -179,7 +179,6 @@ class Database extends Translation implements DriverInterface
                 'group' => $vendor,
                 'key' => $key,
             ], [
-                'key' => $key,
                 'value' => $value,
             ]);
     }
