@@ -123,7 +123,7 @@ class Database extends Translation implements DriverInterface
      * @param  string  $value
      * @return void
      */
-    public function addGroupTranslation($language, $group, $key, $value = '')
+    public function addGroupTranslation($language, $group, $key, $value = null)
     {
         if (!$this->languageExists($language)) {
             $this->addLanguage($language);
@@ -142,7 +142,7 @@ class Database extends Translation implements DriverInterface
      * @param  string  $value
      * @return void
      */
-    public function addSingleTranslation($language, $vendor, $key, $value = '')
+    public function addSingleTranslation($language, $vendor, $key, $value = null)
     {
         if (!$this->languageExists($language)) {
             $this->addLanguage($language);
@@ -161,7 +161,7 @@ class Database extends Translation implements DriverInterface
      * @param  string  $value
      * @return void
      */
-    public function createNewTranslation($language, $vendor, $key, $value = '')
+    public function createNewTranslation($language, $vendor, $key, $value = null)
     {
         // TEMP KEEP THIS FOR BACKWARDS COMPATIBILITY
         // $language = config('translatable.models.language')::where('language', $language)->first();

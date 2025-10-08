@@ -54,9 +54,9 @@ class LanguageTranslationController extends Controller
     public function update(Request $request, $language)
     {
         if (! Str::contains($request->get('group'), 'single')) {
-            $this->translation->addGroupTranslation($language, $request->get('group'), $request->get('key'), $request->get('value') ?: '');
+            $this->translation->addGroupTranslation($language, $request->get('group'), $request->get('key'), $request->get('value') ?: null);
         } else {
-            $this->translation->addSingleTranslation($language, $request->get('group'), $request->get('key'), $request->get('value') ?: '');
+            $this->translation->addSingleTranslation($language, $request->get('group'), $request->get('key'), $request->get('value') ?: null);
         }
 
         return response()->json(['success' => true]);
@@ -66,9 +66,9 @@ class LanguageTranslationController extends Controller
     {
         if ($request->has('group') && $request->get('group')) {
             $namespace = $request->has('namespace') && $request->get('namespace') ? "{$request->get('namespace')}::" : '';
-            $this->translation->addGroupTranslation($language, "{$namespace}{$request->get('group')}", $request->get('key'), $request->get('value') ?: '');
+            $this->translation->addGroupTranslation($language, "{$namespace}{$request->get('group')}", $request->get('key'), $request->get('value') ?: null);
         } else {
-            $this->translation->addSingleTranslation($language, $request->get('key'), $request->get('value') ?: '');
+            $this->translation->addSingleTranslation($language, $request->get('key'), $request->get('value') ?: null);
         }
 
         return response()->json(['success' => true]);
