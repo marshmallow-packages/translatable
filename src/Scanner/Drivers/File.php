@@ -129,7 +129,7 @@ class File extends Translation implements DriverInterface
      * @param  string  $value
      * @return void
      */
-    public function addGroupTranslation($language, $group, $key, $value = '')
+    public function addGroupTranslation($language, $group, $key, $value = null)
     {
         if (!$this->languageExists($language)) {
             $this->addLanguage($language);
@@ -157,7 +157,7 @@ class File extends Translation implements DriverInterface
      * @param  string  $value
      * @return void
      */
-    public function addSingleTranslation($language, $vendor, $key, $value = '')
+    public function addSingleTranslation($language, $vendor, $key, $value = null)
     {
         if (!$this->languageExists($language)) {
             $this->addLanguage($language);
