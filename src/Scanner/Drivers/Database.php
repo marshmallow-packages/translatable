@@ -172,15 +172,29 @@ class Database extends Translation implements DriverInterface
         //     'value' => $value,
         // ]);
 
-        $language = config('translatable.models.language')::where('language', $language)
-            ->first()
-            ->translations()
-            ->updateOrCreate([
+        $languageModel = config('translatable.models.language')::where('language', $language)->first();
+
+        // Check if translation already exists
+        $existingTranslation = $languageModel->translations()
+            ->where('group', $vendor)
+            ->where('key', $key)
+            ->first();
+
+        // If it exists and has a value, preserve it. Otherwise use the new value.
+        if ($existingTranslation) {
+            // Only update if the existing value is null/empty and we have a new value
+            if (($existingTranslation->value === null || $existingTranslation->value === '') && $value !== null) {
+                $existingTranslation->update(['value' => $value]);
+            }
+            // Otherwise keep the existing value (do nothing)
+        } else {
+            // Create new translation
+            $languageModel->translations()->create([
                 'group' => $vendor,
                 'key' => $key,
-            ], [
                 'value' => $value,
             ]);
+        }
     }
 
     /**
