@@ -3,15 +3,19 @@
 namespace Marshmallow\Translatable\Scanner;
 
 use Illuminate\Contracts\Translation\Loader;
+use Illuminate\Translation\FileLoader;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
 
 class ContractDatabaseLoader implements Loader
 {
     private $translation;
+    private $fileLoader;
+    private $hints = [];
 
     public function __construct(Translation $translation)
     {
         $this->translation = $translation;
+        $this->fileLoader = new FileLoader(app('files'), []);
     }
 
     /**
@@ -31,12 +35,25 @@ class ContractDatabaseLoader implements Loader
         if (is_null($namespace) || $namespace == '*') {
             return $this->translation->getGroupTranslationsFor($locale)->filter(function ($value, $key) use ($group) {
                 return $key === $group;
-            })->first();
+            })->first() ?? [];
         }
 
-        return $this->translation->getGroupTranslationsFor($locale)->filter(function ($value, $key) use ($group, $namespace) {
+        // Try database first
+        $result = $this->translation->getGroupTranslationsFor($locale)->filter(function ($value, $key) use ($group, $namespace) {
             return $key === "{$namespace}::{$group}";
         })->first();
+
+        // If found in database, return it
+        if ($result !== null) {
+            return $result;
+        }
+
+        // Fall back to file-based loading for registered namespaces
+        if (isset($this->hints[$namespace])) {
+            return $this->fileLoader->load($locale, $group, $namespace) ?? [];
+        }
+
+        return [];
     }
 
     /**
@@ -48,7 +65,8 @@ class ContractDatabaseLoader implements Loader
      */
     public function addNamespace($namespace, $hint)
     {
-        //
+        $this->hints[$namespace] = $hint;
+        $this->fileLoader->addNamespace($namespace, $hint);
     }
 
     /**
@@ -59,7 +77,7 @@ class ContractDatabaseLoader implements Loader
      */
     public function addJsonPath($path)
     {
-        //
+        $this->fileLoader->addJsonPath($path);
     }
 
     /**
@@ -69,6 +87,6 @@ class ContractDatabaseLoader implements Loader
      */
     public function namespaces()
     {
-        return [];
+        return array_keys($this->hints);
     }
 }
