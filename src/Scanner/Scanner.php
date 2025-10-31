@@ -57,8 +57,11 @@ class Scanner
         foreach ($this->disk->allFiles($this->scanPaths) as $file) {
             if (preg_match_all("/$matchingPattern/siU", $file->getContents(), $matches)) {
                 foreach ($matches[2] as $key) {
-                    if (preg_match("/(^[a-zA-Z0-9:_-]+([.][^\1)\ ]+)+$)/siU", $key, $arrayMatches)) {
-                        [$file, $k] = explode('.', $arrayMatches[0], 2);
+                    // Check if this is a valid group.key pattern
+                    // Valid: 'validation.required', 'messages.welcome', 'auth.failed'
+                    // Invalid: 'Uploading...', 'file.txt', 'Wait..', 'Hello. World'
+                    if ($this->isValidGroupTranslation($key)) {
+                        [$file, $k] = explode('.', $key, 2);
                         $results['group'][$file][$k] = '';
 
                         continue;
@@ -90,7 +93,8 @@ class Scanner
         foreach ($this->disk->allFiles($scan_paths) as $file) {
             if (preg_match_all("/(name|wire:model)=\"(.+?)\"/", $file->getContents(), $matches)) {
                 foreach ($matches[2] as $key) {
-                    if (preg_match("/(^[a-zA-Z0-9:_-]+([.][^\1)\ ]+)+$)/siU", $key, $arrayMatches)) {
+                    // Skip if this looks like a valid group translation (nested attributes)
+                    if ($this->isValidGroupTranslation($key)) {
                         continue;
                     } else {
                         $results['single']['validation']["attributes.{$key}"] = '';
@@ -100,5 +104,93 @@ class Scanner
         }
 
         return $results;
+    }
+
+    /**
+     * Determine if a translation key is a valid group.key pattern
+     *
+     * Valid patterns:
+     * - validation.required (alphanumeric group, alphanumeric key with underscores/dashes)
+     * - messages.welcome_user (underscores allowed)
+     * - auth.failed (simple group.key)
+     * - vendor::package.group.key (vendor namespaced)
+     *
+     * Invalid patterns:
+     * - Uploading... (dots at the end)
+     * - file.txt (file extension)
+     * - Wait.. (double dots)
+     * - Hello. World (space after dot)
+     * - .hidden (starts with dot)
+     * - trailing. (ends with dot)
+     *
+     * @param string $key
+     * @return bool
+     */
+    protected function isValidGroupTranslation($key)
+    {
+        // Must contain at least one dot
+        if (strpos($key, '.') === false) {
+            return false;
+        }
+
+        // Cannot start or end with a dot
+        if (substr($key, 0, 1) === '.' || substr($key, -1) === '.') {
+            return false;
+        }
+
+        // Cannot have consecutive dots (like .. or ...)
+        if (strpos($key, '..') !== false) {
+            return false;
+        }
+
+        // Cannot have spaces around dots (like "Hello. World" or "test .key")
+        if (preg_match('/\s*\.\s+|\s+\.\s*/', $key)) {
+            return false;
+        }
+
+        // Split by dot and validate each part
+        $parts = explode('.', $key);
+
+        // Need at least 2 parts (group.key)
+        if (count($parts) < 2) {
+            return false;
+        }
+
+        foreach ($parts as $part) {
+            // Each part must be non-empty
+            if (empty($part)) {
+                return false;
+            }
+
+            // Handle vendor namespace (package::group.key)
+            if (strpos($part, '::') !== false) {
+                $namespaceParts = explode('::', $part);
+                foreach ($namespaceParts as $nsPart) {
+                    if (!$this->isValidTranslationPart($nsPart)) {
+                        return false;
+                    }
+                }
+            } else {
+                // Regular validation: alphanumeric, underscores, hyphens, asterisks (for wildcards)
+                if (!$this->isValidTranslationPart($part)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if a translation part (group or key segment) is valid
+     *
+     * @param string $part
+     * @return bool
+     */
+    protected function isValidTranslationPart($part)
+    {
+        // Allow alphanumeric characters, underscores, hyphens, and asterisks
+        // Must not be only special characters or numbers
+        return preg_match('/^[a-zA-Z0-9_\-\*]+$/', $part) && preg_match('/[a-zA-Z]/', $part);
     }
 }
