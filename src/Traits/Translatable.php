@@ -54,12 +54,37 @@ trait Translatable
         	 * translations.
         	 */
             if ($resource->translatorActive() && $resource->weAreTranslating()) {
+
+                /*
+                * Get the fields to translate. We check both getDirty() and the actual
+                * request input to handle cases where fields may not appear dirty due to
+                * the retrieved event setting translated values as the original values.
+                */
+                $fieldsToTranslate = $resource->getDirty();
+
+                if (request()->isMethod('PUT') || request()->isMethod('POST')) {
+                    $translatableAttributes = $resource->getTranslatableAttributes();
+                    $requestData = request()->all();
+
+                    foreach ($translatableAttributes as $attribute) {
+                        if (array_key_exists($attribute, $requestData)) {
+                            // Check if the value is different from the current translation
+                            $currentTranslation = $resource->getTranslation($attribute, Request::getTranslatableLocale());
+                            $requestValue = $requestData[$attribute];
+
+                            if ($currentTranslation != $requestValue) {
+                                $fieldsToTranslate[$attribute] = $requestValue;
+                            }
+                        }
+                    }
+                }
+
                 /*
                 * Create the translations.
                 */
                 $resource->setTranslation(
                     Request::getTranslatableLocale(),
-                    $resource->getDirty()
+                    $fieldsToTranslate
                 );
 
                 /*
