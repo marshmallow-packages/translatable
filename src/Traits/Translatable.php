@@ -172,15 +172,19 @@ trait Translatable
             if (!$this->isTranslatableAttribute($source_field)) {
                 continue;
             }
+
+            // JSON encode array values to prevent "Array to string conversion" errors
+            $value_to_store = is_array($translated_value) ? json_encode($translated_value) : $translated_value;
+
             if ($translatable = $this->getExistingTranslation($source_field, $language)) {
                 $translatable->updateQuietly([
-                    'translated_value' => $translated_value,
+                    'translated_value' => $value_to_store,
                 ]);
             } else {
-                $this::withoutEvents(function () use ($source_field, $translated_value, $language) {
+                $this::withoutEvents(function () use ($source_field, $value_to_store, $language) {
                     $new_translatable = $this->translatable()->create([
                         'source_field' => $source_field,
-                        'translated_value' => $translated_value,
+                        'translated_value' => $value_to_store,
                         'language_id' => $language->id,
                     ]);
 
@@ -216,6 +220,12 @@ trait Translatable
         $language = $this->getLanguageByTranslationParameter($language);
         if ($translation = $this->getExistingTranslation($source_field, $language)) {
             $translation = $translation->translated_value;
+
+            // Check if the source field is cast as array/json and decode if needed
+            $casts = $this->getCasts();
+            if (isset($casts[$source_field]) && in_array($casts[$source_field], ['array', 'json', 'object', 'collection'])) {
+                $translation = json_decode($translation, true);
+            }
 
             /*
              * Make sure we apply casts and mutators.
