@@ -221,14 +221,10 @@ trait Translatable
         if ($translation = $this->getExistingTranslation($source_field, $language)) {
             $translation = $translation->translated_value;
 
-            // Check if the source field is cast as array/json and decode if needed
-            $casts = $this->getCasts();
-            if (isset($casts[$source_field]) && in_array($casts[$source_field], ['array', 'json', 'object', 'collection'])) {
-                $translation = json_decode($translation, true);
-            }
-
             /*
              * Make sure we apply casts and mutators.
+             * transformModelValue expects the raw database value and will
+             * handle all casting (including JSON/array casts) internally.
              */
             return $this->transformModelValue($source_field, $translation);
         }
