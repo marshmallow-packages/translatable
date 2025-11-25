@@ -31,6 +31,10 @@ use Marshmallow\Translatable\Console\Commands\SynchroniseTranslationsCommand;
 use Marshmallow\Translatable\Console\Commands\SynchroniseMissingTranslationKeys;
 use Marshmallow\Translatable\Console\Commands\SynchroniseTranslationsFromToCommand;
 use Marshmallow\Translatable\Console\Commands\FixTranslatedPlaceholdersCommand;
+use Marshmallow\Translatable\Console\Commands\TranslatableCacheCommand;
+use Marshmallow\Translatable\Console\Commands\TranslatableClearCommand;
+use Marshmallow\Translatable\Console\Commands\TranslationCacheCommand;
+use Marshmallow\Translatable\Console\Commands\TranslationClearCommand;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -223,6 +227,10 @@ class ServiceProvider extends BaseServiceProvider
                 DuplicateTranslationsCommand::class,
                 IndexMissingTranslatables::class,
                 FixTranslatedPlaceholdersCommand::class,
+                TranslatableCacheCommand::class,
+                TranslatableClearCommand::class,
+                TranslationCacheCommand::class,
+                TranslationClearCommand::class,
             ]);
         }
     }

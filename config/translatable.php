@@ -93,4 +93,17 @@ return [
     'missing_translations' => [
         'active' => env('MISSING_TRANSLATIONS_ACTIVE', false),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Translation Cache
+    |--------------------------------------------------------------------------
+    |
+    | Enable file-based caching for translations. See README.md for details.
+    |
+    */
+    'cache' => [
+        'enabled' => env('TRANSLATABLE_CACHE_ENABLED', false),
+        'auto_clear' => env('TRANSLATABLE_CACHE_AUTO_CLEAR', true),
+    ],
 ];

@@ -13,6 +13,7 @@ use Laravel\Nova\Contracts\RelatableField;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Fields\LanguageToggler;
+use Marshmallow\Translatable\Cache\TranslatableCache;
 use Marshmallow\Translatable\Events\TranslatableCreated;
 use Marshmallow\Translatable\Facades\Translatable as TranslatableFacade;
 
@@ -106,6 +107,7 @@ trait Translatable
              * Delete the existing translations.
              */
             $resource->translatable()->delete();
+            $resource->invalidateTranslatableCache();
         });
 
         static::deleted(function (Model $resource) {
@@ -169,7 +171,7 @@ trait Translatable
         $source_fields = $this->convertTranslationInputToArray($source_field, $translated_value);
 
         foreach ($source_fields as $source_field => $translated_value) {
-            if (!$this->isTranslatableAttribute($source_field)) {
+            if (! $this->isTranslatableAttribute($source_field)) {
                 continue;
             }
 
@@ -194,6 +196,24 @@ trait Translatable
                 });
             }
         }
+
+        $this->invalidateTranslatableCache();
+    }
+
+    /**
+     * Invalidate the translatable cache for this model.
+     */
+    protected function invalidateTranslatableCache(): void
+    {
+        if (! config('translatable.cache.enabled', false)) {
+            return;
+        }
+
+        if (! config('translatable.cache.auto_clear', true)) {
+            return;
+        }
+
+        TranslatableCache::clearModel(get_class($this));
     }
 
     /**
@@ -406,8 +426,14 @@ trait Translatable
      */
     protected function getExistingTranslation($source_field, $language): ?Model
     {
-        if (!isset($this->getAttributes()[$this->primaryKey])) {
+        if (! isset($this->getAttributes()[$this->primaryKey])) {
             return null;
+        }
+
+        $modelId = $this->getAttributes()[$this->primaryKey];
+
+        if ($cachedValue = $this->getTranslationFromCache($source_field, $language->id, $modelId)) {
+            return $cachedValue;
         }
 
         if ($this->translatable) {
@@ -418,10 +444,36 @@ trait Translatable
         }
 
         return config('translatable.models.translatable')::where('translatable_type', get_class($this))
-            ->where('translatable_id', $this->getAttributes()[$this->primaryKey])
+            ->where('translatable_id', $modelId)
             ->where('source_field', $source_field)
             ->where('language_id', $language->id)
             ->first();
+    }
+
+    /**
+     * Get translation from file cache if available.
+     */
+    protected function getTranslationFromCache(string $source_field, int $languageId, int|string $modelId): ?Model
+    {
+        if (! config('translatable.cache.enabled', false)) {
+            return null;
+        }
+
+        if (! TranslatableCache::has(get_class($this), $modelId, $source_field, $languageId)) {
+            return null;
+        }
+
+        $value = TranslatableCache::get(get_class($this), $modelId, $source_field, $languageId);
+
+        $translatableModel = config('translatable.models.translatable');
+
+        return new $translatableModel([
+            'translatable_type' => get_class($this),
+            'translatable_id' => $modelId,
+            'source_field' => $source_field,
+            'translated_value' => $value,
+            'language_id' => $languageId,
+        ]);
     }
 
     /**

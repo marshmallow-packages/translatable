@@ -78,6 +78,88 @@ This will use the free version of the Deepl API. If you have a paid subscription
 TRANSLATABLE_DEEPL_API_PATH=https://api.deepl.com
 ```
 
+## Caching
+
+This package supports file-based caching for translations, similar to Laravel's `route:cache`. This can significantly improve performance by eliminating database queries for translations.
+
+### Enable Caching
+
+Add to your `.env` file:
+
+```env
+TRANSLATABLE_CACHE_ENABLED=true
+TRANSLATABLE_CACHE_AUTO_CLEAR=true
+```
+
+### Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `php artisan translatable:cache` | Cache model translations (translatables table) |
+| `php artisan translatable:clear` | Clear model translation cache |
+| `php artisan translation:cache` | Cache code string translations (translations table) |
+| `php artisan translation:clear` | Clear code string translation cache |
+
+### Command Options
+
+```bash
+# Cache all model translations
+php artisan translatable:cache
+
+# Clear existing cache before regenerating
+php artisan translatable:cache --clear
+
+# Cache only a specific model
+php artisan translatable:cache --model="App\Models\Product"
+
+# Clear cache for a specific model only
+php artisan translatable:clear --model="App\Models\Product"
+```
+
+### Cache Location
+
+Cache files are stored in `bootstrap/cache/`:
+
+```
+bootstrap/cache/
+├── translatables/              # Per-model cache files
+│   ├── App_Models_Product.php
+│   ├── App_Models_Page.php
+│   └── ...
+└── translations.php            # Code string translations
+```
+
+### Auto-Invalidation
+
+When `TRANSLATABLE_CACHE_AUTO_CLEAR=true`, the model translation cache is automatically cleared when:
+- `setTranslation()` is called on a model
+- A model using the `Translatable` trait is deleted
+
+Code string translations (`translations.php`) must be manually regenerated after database changes.
+
+### Deployment
+
+Add the cache commands to your deployment script:
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan translatable:cache
+php artisan translation:cache
+```
+
+### Performance Impact
+
+For a website with 50,000+ model translations and 20,000+ code strings:
+
+| Scenario | Without Cache | With Cache |
+|----------|--------------|------------|
+| Model translations | N queries per page | 1 file read |
+| Code strings | Multiple queries | 1 file read |
+
+A typical product page that previously made 20+ translation queries will make **0 database queries** for translations when cached.
+
 ## Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.

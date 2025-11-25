@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Marshmallow\Translatable\Cache\TranslationCache;
 use Marshmallow\Translatable\Exceptions\LanguageExistsException;
 
 class Database extends Translation implements DriverInterface
@@ -226,8 +227,15 @@ class Database extends Translation implements DriverInterface
         if (isset($this->singleTranslationCache[$language])) {
             return $this->singleTranslationCache[$language];
         }
+
+        if ($cached = $this->getSingleTranslationsFromFileCache($language)) {
+            $this->singleTranslationCache[$language] = $cached;
+
+            return $cached;
+        }
+
         $languageModel = $this->getLanguage($language);
-        if (!$languageModel) {
+        if (! $languageModel) {
             return collect();
         }
         $translations = $languageModel
@@ -258,6 +266,26 @@ class Database extends Translation implements DriverInterface
     }
 
     /**
+     * Get single translations from file cache if available.
+     */
+    protected function getSingleTranslationsFromFileCache(string $language): ?Collection
+    {
+        if (! config('translatable.cache.enabled', false)) {
+            return null;
+        }
+
+        $cached = TranslationCache::getSingleTranslationsFor($language);
+
+        if ($cached === null) {
+            return null;
+        }
+
+        return collect($cached)->map(function ($translations) {
+            return collect($translations);
+        });
+    }
+
+    /**
      * Get all of the group translations for a given language.
      *
      * @param  string  $language
@@ -267,6 +295,12 @@ class Database extends Translation implements DriverInterface
     {
         if (isset($this->groupTranslationCache[$language])) {
             return $this->groupTranslationCache[$language];
+        }
+
+        if ($cached = $this->getGroupTranslationsFromFileCache($language)) {
+            $this->groupTranslationCache[$language] = $cached;
+
+            return $cached;
         }
 
         $languageModel = $this->getLanguage($language);
@@ -291,6 +325,26 @@ class Database extends Translation implements DriverInterface
         $this->groupTranslationCache[$language] = $result;
 
         return $result;
+    }
+
+    /**
+     * Get group translations from file cache if available.
+     */
+    protected function getGroupTranslationsFromFileCache(string $language): ?Collection
+    {
+        if (! config('translatable.cache.enabled', false)) {
+            return null;
+        }
+
+        $cached = TranslationCache::getGroupTranslationsFor($language);
+
+        if ($cached === null) {
+            return null;
+        }
+
+        return collect($cached)->map(function ($translations) {
+            return collect($translations)->sortBy('key');
+        });
     }
 
     /**
