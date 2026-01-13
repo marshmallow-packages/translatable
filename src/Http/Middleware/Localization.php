@@ -43,8 +43,6 @@ class Localization
             );
         } elseif (Session::has($locale_key)) {
             $locale = Session::get($locale_key);
-        } else if (Cache::has($locale_key)) {
-            $locale = Cache::get($locale_key);
         } else {
             $locale = Translatable::appDefaultLanguage();
         }
