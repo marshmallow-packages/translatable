@@ -13,6 +13,7 @@ use Laravel\Nova\Contracts\RelatableField;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Fields\LanguageToggler;
+use Marshmallow\Translatable\Cache\TranslatableCache;
 use Marshmallow\Translatable\Events\TranslatableCreated;
 use Marshmallow\Translatable\Facades\Translatable as TranslatableFacade;
 
@@ -27,9 +28,13 @@ trait Translatable
         'deleted_at',
     ];
 
-    public static function bootTranslatable()
+    protected static ?bool $cachedWeAreTranslating = null;
+
+    protected ?array $cachedTranslatableAttributes = null;
+
+    public static function bootTranslatable(): void
     {
-        static::creating(function (Model $resource) {
+        static::creating(function (Model $resource): void {
             /*
              * Creating should always be done in the original
              * language and our nova package will not make it
@@ -39,15 +44,15 @@ trait Translatable
              */
         });
 
-        static::created(function (Model $resource) {
+        static::created(function (Model $resource): void {
             DB::afterCommit(
-                function () use ($resource) {
+                function () use ($resource): void {
                     $resource->updateMissingTranslations();
                 }
             );
         });
 
-        static::updating(function (Model $resource) {
+        static::updating(function (Model $resource): void {
             /*
         	 * If the current translatable locale is different
         	 * from the original, then we are creating or updating
@@ -67,13 +72,6 @@ trait Translatable
                     $requestData = request()->all();
 
                     foreach ($translatableAttributes as $attribute) {
-                        // Skip attributes already captured by getDirty() — those values
-                        // have been properly serialized through the model's casts and
-                        // attribute setters, preserving the correct format.
-                        if (array_key_exists($attribute, $fieldsToTranslate)) {
-                            continue;
-                        }
-
                         if (array_key_exists($attribute, $requestData)) {
                             // Check if the value is different from the current translation
                             $currentTranslation = $resource->getTranslation($attribute, Request::getTranslatableLocale());
@@ -86,9 +84,7 @@ trait Translatable
                     }
                 }
 
-                /*
-                * Create the translations.
-                */
+                // Create the translations.
                 $resource->setTranslation(
                     Request::getTranslatableLocale(),
                     $fieldsToTranslate
@@ -104,18 +100,17 @@ trait Translatable
             }
         });
 
-        static::updated(function (Model $resource) {
+        static::updated(function (Model $resource): void {
             $resource->updateMissingTranslations();
         });
 
-        static::deleting(function (Model $resource) {
-            /*
-             * Delete the existing translations.
-             */
+        static::deleting(function (Model $resource): void {
+            // Delete the existing translations.
             $resource->translatable()->delete();
+            $resource->invalidateTranslatableCache();
         });
 
-        static::deleted(function (Model $resource) {
+        static::deleted(function (Model $resource): void {
             $resource->missingTranslatable()->delete();
         });
     }
@@ -123,12 +118,14 @@ trait Translatable
     public function dontTranslate()
     {
         $this->use_translator = false;
+
         return $this;
     }
 
     public function doTranslate()
     {
         $this->use_translator = true;
+
         return $this;
     }
 
@@ -147,9 +144,17 @@ trait Translatable
             return false;
         }
 
-        if (Request::hasMacro('getTranslatableLocale')) {
-            return Request::getTranslatableLocale() !== TranslatableFacade::appDefaultLanguage();
+        if (static::$cachedWeAreTranslating !== null) {
+            return static::$cachedWeAreTranslating;
         }
+
+        if (Request::hasMacro('getTranslatableLocale')) {
+            static::$cachedWeAreTranslating = Request::getTranslatableLocale() !== TranslatableFacade::appDefaultLanguage();
+
+            return static::$cachedWeAreTranslating;
+        }
+
+        static::$cachedWeAreTranslating = false;
 
         return false;
     }
@@ -164,13 +169,14 @@ trait Translatable
         foreach ($this->getDirty() as $field => $value) {
             $this->{$field} = $this->getOriginal($field);
         }
+
         return $this;
     }
 
     /**
      * Store the translation in the database.
      */
-    public function setTranslation($language, $source_field, $translated_value = null)
+    public function setTranslation($language, $source_field, $translated_value = null): void
     {
         $language = $this->getLanguageByTranslationParameter($language);
         $source_fields = $this->convertTranslationInputToArray($source_field, $translated_value);
@@ -188,7 +194,7 @@ trait Translatable
                     'translated_value' => $value_to_store,
                 ]);
             } else {
-                $this::withoutEvents(function () use ($source_field, $value_to_store, $language) {
+                $this::withoutEvents(function () use ($source_field, $value_to_store, $language): void {
                     $new_translatable = $this->translatable()->create([
                         'source_field' => $source_field,
                         'translated_value' => $value_to_store,
@@ -201,6 +207,24 @@ trait Translatable
                 });
             }
         }
+
+        $this->invalidateTranslatableCache();
+    }
+
+    /**
+     * Invalidate the translatable cache for this model.
+     */
+    protected function invalidateTranslatableCache(): void
+    {
+        if (!config('translatable.cache.enabled', false)) {
+            return;
+        }
+
+        if (!config('translatable.cache.auto_clear', true)) {
+            return;
+        }
+
+        TranslatableCache::clearModel(get_class($this));
     }
 
     /**
@@ -241,7 +265,8 @@ trait Translatable
 
     public static function getTranslatableResources(?string $path = null, array $ignore = []): array
     {
-        $path = $path ?? app_path('Nova');
+        $path ??= app_path('Nova');
+
         return self::getTranslatableClasses(
             path: $path,
             ignore: $ignore,
@@ -251,7 +276,8 @@ trait Translatable
 
     public static function getTranslatableResourcesWithModels(?string $path = null, array $ignore = []): array
     {
-        $path = $path ?? app_path('Nova');
+        $path ??= app_path('Nova');
+
         return self::getTranslatableClasses(
             path: $path,
             ignore: $ignore,
@@ -269,7 +295,8 @@ trait Translatable
 
     public static function getTranslatableModels(?string $path = null, array $ignore = []): array
     {
-        $path = $path ?? app_path('Models');
+        $path ??= app_path('Models');
+
         return self::getTranslatableClasses(
             path: $path,
             ignore: $ignore,
@@ -309,11 +336,11 @@ trait Translatable
         }
 
         return collect($models)
-            ->reject(fn($model) => in_array($model, $ignore))
+            ->reject(fn ($model) => in_array($model, $ignore))
             ->toArray();
     }
 
-    public function updateMissingTranslations()
+    public function updateMissingTranslations(): void
     {
         if (!config('translatable.missing_translations.active')) {
             return;
@@ -342,13 +369,13 @@ trait Translatable
 
         $translatable_columns = [];
         collect($fields)
-            ->reject(fn($field) => $field instanceof LanguageToggler)
-            ->reject(fn($field) => in_array(RelatableField::class, class_implements($field)))
-            ->each(function ($field) use (&$translatable_columns) {
-                if (get_class($field) == 'Laravel\Nova\Tabs\TabsGroup') {
+            ->reject(fn ($field) => $field instanceof LanguageToggler)
+            ->reject(fn ($field) => in_array(RelatableField::class, class_implements($field)))
+            ->each(function ($field) use (&$translatable_columns): void {
+                if ($field::class == 'Laravel\Nova\Tabs\TabsGroup') {
                     collect($field->data)
-                        ->reject(fn($field) => in_array(RelatableField::class, class_implements($field)))
-                        ->each(function ($tab_field) use (&$translatable_columns) {
+                        ->reject(fn ($field) => in_array(RelatableField::class, class_implements($field)))
+                        ->each(function ($tab_field) use (&$translatable_columns): void {
                             $translatable_columns[] = $tab_field->attribute;
                         });
                 } else {
@@ -361,10 +388,10 @@ trait Translatable
             ->ignoreDefault()
             ->get();
 
-        $languages->each(function ($language) use ($translatable_columns) {
+        $languages->each(function ($language) use ($translatable_columns): void {
             $missing_data = [];
             collect($translatable_columns)
-                ->each(function ($column) use (&$missing_data, $language) {
+                ->each(function ($column) use (&$missing_data, $language): void {
                     $translated = $this->translatable
                         ->where('source_field', $column)
                         ->where('language_id', $language->id)
@@ -374,7 +401,6 @@ trait Translatable
                         $missing_data[] = $column;
                     }
                 });
-
 
             if (!empty($missing_data)) {
                 $this->missingTranslatable()->create([
@@ -417,6 +443,12 @@ trait Translatable
             return null;
         }
 
+        $modelId = $this->getAttributes()[$this->primaryKey];
+
+        if ($cachedValue = $this->getTranslationFromCache($source_field, $language->id, $modelId)) {
+            return $cachedValue;
+        }
+
         if ($this->translatable) {
             return $this->translatable
                 ->where('source_field', $source_field)
@@ -425,10 +457,46 @@ trait Translatable
         }
 
         return config('translatable.models.translatable')::where('translatable_type', get_class($this))
-            ->where('translatable_id', $this->getAttributes()[$this->primaryKey])
+            ->where('translatable_id', $modelId)
             ->where('source_field', $source_field)
             ->where('language_id', $language->id)
             ->first();
+    }
+
+    /**
+     * Get translation from file cache if available.
+     */
+    protected static ?bool $cachedCacheEnabled = null;
+
+    protected static ?string $cachedTranslatableModel = null;
+
+    protected function getTranslationFromCache(string $source_field, int $languageId, int|string $modelId): ?Model
+    {
+        if (static::$cachedCacheEnabled === null) {
+            static::$cachedCacheEnabled = config('translatable.cache.enabled', false);
+        }
+
+        if (!static::$cachedCacheEnabled) {
+            return null;
+        }
+
+        if (!TranslatableCache::has(get_class($this), $modelId, $source_field, $languageId)) {
+            return null;
+        }
+
+        $value = TranslatableCache::get(get_class($this), $modelId, $source_field, $languageId);
+
+        if (static::$cachedTranslatableModel === null) {
+            static::$cachedTranslatableModel = config('translatable.models.translatable');
+        }
+
+        return new (static::$cachedTranslatableModel)([
+            'translatable_type' => get_class($this),
+            'translatable_id' => $modelId,
+            'source_field' => $source_field,
+            'translated_value' => $value,
+            'language_id' => $languageId,
+        ]);
     }
 
     /**
@@ -458,6 +526,7 @@ trait Translatable
         if (class_exists(Resource::class) && $this instanceof Resource) {
             $nova_resource = $this;
             $resource = $nova_resource::newModel();
+
             return $resource->notTranslateColumns();
         }
 
@@ -473,6 +542,7 @@ trait Translatable
         if (class_exists(Resource::class) && $this instanceof Resource) {
             $nova_resource = $this;
             $resource = $nova_resource::newModel();
+
             return $resource->translatableColumns();
         }
 
@@ -484,6 +554,10 @@ trait Translatable
      */
     public function getTranslatableAttributes(): array
     {
+        if ($this->cachedTranslatableAttributes !== null) {
+            return $this->cachedTranslatableAttributes;
+        }
+
         $translatable_columns = array_keys($this->getAttributes());
         if (!empty($this->getTranslatableColumns())) {
             $translatable_columns = $this->getTranslatableColumns();
@@ -505,6 +579,8 @@ trait Translatable
                 unset($translatable_columns[$key]);
             }
         }
+
+        $this->cachedTranslatableAttributes = $translatable_columns;
 
         return $translatable_columns;
     }

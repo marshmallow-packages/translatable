@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Session;
 use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Translatable\Models\Language;
 use Marshmallow\Translatable\Scanner\Scanner;
-use Marshmallow\Translatable\EventServiceProvider;
 use Marshmallow\Translatable\Events\UserLocaleChanged;
 use Marshmallow\Translatable\Scanner\TranslationManager;
 use Marshmallow\Translatable\Scanner\Drivers\Translation;
@@ -23,62 +22,82 @@ use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Marshmallow\Translatable\Console\Commands\AddLanguageCommand;
 use Marshmallow\Translatable\Console\Commands\ListLanguagesCommand;
 use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
+use Marshmallow\Translatable\Console\Commands\TranslationCacheCommand;
+use Marshmallow\Translatable\Console\Commands\TranslationClearCommand;
 use Marshmallow\Translatable\Console\Commands\AddTranslationKeyCommand;
+use Marshmallow\Translatable\Console\Commands\TranslatableCacheCommand;
+use Marshmallow\Translatable\Console\Commands\TranslatableClearCommand;
 use Marshmallow\Translatable\Console\Commands\IndexMissingTranslatables;
 use Marshmallow\Translatable\Console\Commands\ListMissingTranslationKeys;
 use Marshmallow\Translatable\Console\Commands\DuplicateTranslationsCommand;
 use Marshmallow\Translatable\Console\Commands\SynchroniseTranslationsCommand;
+use Marshmallow\Translatable\Console\Commands\FixTranslatedPlaceholdersCommand;
 use Marshmallow\Translatable\Console\Commands\SynchroniseMissingTranslationKeys;
 use Marshmallow\Translatable\Console\Commands\SynchroniseTranslationsFromToCommand;
-use Marshmallow\Translatable\Console\Commands\FixTranslatedPlaceholdersCommand;
 
 class ServiceProvider extends BaseServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
-        Request::macro('setTranslatableLocale', function ($language) {
+        Request::macro('setTranslatableLocale', function ($language): void {
             Session::put('translatable-locale', $language->language);
             Cache::put('translatable-locale', $language->language);
         });
 
         Request::macro('getTranslatableLocale', function () {
+            static $cachedLocale = null;
+
+            if ($cachedLocale !== null) {
+                return $cachedLocale;
+            }
+
             $session_key = (URL::isNova(request())) ? 'translatable-locale' : 'user-locale';
             $app_locale = App::currentLocale();
 
             if (Session::has($session_key)) {
-                return Session::get($session_key);
-            } else {
-                Session::put($session_key, $app_locale);
+                $cachedLocale = Session::get($session_key);
+
+                return $cachedLocale;
             }
+            Session::put($session_key, $app_locale);
 
             if (Cache::has($session_key)) {
-                return Cache::get($session_key);
-            } else {
-                Cache::put($session_key, $app_locale);
-            }
+                $cachedLocale = Cache::get($session_key);
 
-            return $app_locale;
+                return $cachedLocale;
+            }
+            Cache::put($session_key, $app_locale);
+
+            $cachedLocale = $app_locale;
+
+            return $cachedLocale;
         });
 
-        Request::macro('setUserLocale', function (Language $language) {
+        Request::macro('setUserLocale', function (Language $language): void {
             Session::put('user-locale', $language->language);
             App::setLocale($language->language);
             event(new UserLocaleChanged($language));
         });
 
         Request::macro('getUserLocale', function () {
+            static $cachedUserLocale = null;
+
+            if ($cachedUserLocale !== null) {
+                return $cachedUserLocale;
+            }
+
             $locale_key = 'user-locale';
 
             if (Session::has($locale_key)) {
-                $locale = Session::get($locale_key);
+                $cachedUserLocale = Session::get($locale_key);
             } else {
-                $locale = App::currentLocale();
+                $cachedUserLocale = App::currentLocale();
             }
 
-            return $locale;
+            return $cachedUserLocale;
         });
 
-        Nova::serving(function () {
+        Nova::serving(function (): void {
             Nova::script('language-toggle-field', __DIR__ . '/../dist/js/field.js');
             Nova::style('language-toggle-field', __DIR__ . '/../dist/css/field.css');
         });
@@ -103,7 +122,7 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->mergeConfiguration();
 
@@ -119,9 +138,9 @@ class ServiceProvider extends BaseServiceProvider
     /**
      * Register the middleware
      *
-     * @param  string $middleware
+     * @param string $middleware
      */
-    protected function registerMiddleware()
+    protected function registerMiddleware(): void
     {
         $middleware = \Marshmallow\Translatable\Http\Middleware\Localization::class;
         $kernel = $this->app[Kernel::class];
@@ -133,7 +152,7 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @return void
      */
-    private function registerRoutes()
+    private function registerRoutes(): void
     {
         $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');
     }
@@ -143,7 +162,7 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @return void
      */
-    private function publishConfiguration()
+    private function publishConfiguration(): void
     {
         $this->publishes([
             __DIR__ . '/../config/translatable.php' => config_path('translatable.php'),
@@ -155,7 +174,7 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @return void
      */
-    private function mergeConfiguration()
+    private function mergeConfiguration(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/translatable.php', 'translatable');
     }
@@ -165,7 +184,7 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @return void
      */
-    private function loadMigrations()
+    private function loadMigrations(): void
     {
         if (config('translatable.driver') !== 'database') {
             return;
@@ -179,7 +198,7 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @return void
      */
-    private function loadTranslations()
+    private function loadTranslations(): void
     {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'translatable');
 
@@ -193,7 +212,7 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @return void
      */
-    private function registerHelpers()
+    private function registerHelpers(): void
     {
         require __DIR__ . '/../resources/helpers.php';
     }
@@ -203,7 +222,7 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @return void
      */
-    private function registerCommands()
+    private function registerCommands(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -220,6 +239,10 @@ class ServiceProvider extends BaseServiceProvider
                 DuplicateTranslationsCommand::class,
                 IndexMissingTranslatables::class,
                 FixTranslatedPlaceholdersCommand::class,
+                TranslatableCacheCommand::class,
+                TranslatableClearCommand::class,
+                TranslationCacheCommand::class,
+                TranslationClearCommand::class,
             ]);
         }
     }
@@ -229,12 +252,12 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @return void
      */
-    private function registerContainerBindings()
+    private function registerContainerBindings(): void
     {
         $this->app->singleton(Scanner::class, function () {
             $config = $this->app['config']['translatable'];
 
-            return new Scanner(new Filesystem(), $config['scan_paths'], $config['translation_methods']);
+            return new Scanner(new Filesystem, $config['scan_paths'], $config['translation_methods']);
         });
 
         $this->app->singleton(Translation::class, function ($app) {

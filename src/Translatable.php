@@ -9,9 +9,17 @@ class Translatable
 {
     protected $languages = [];
 
+    protected ?string $cachedDefaultLanguage = null;
+
     public function appDefaultLanguage(): string
     {
-        return config('app.default_locale') ?? config('app.locale') ?? 'en';
+        if ($this->cachedDefaultLanguage !== null) {
+            return $this->cachedDefaultLanguage;
+        }
+
+        $this->cachedDefaultLanguage = config('app.default_locale') ?? config('app.locale') ?? 'en';
+
+        return $this->cachedDefaultLanguage;
     }
 
     public function deeplTranslaterIsActive(): bool
