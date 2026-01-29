@@ -66,7 +66,6 @@ class ServiceProvider extends BaseServiceProvider
 
         Request::macro('setUserLocale', function (Language $language) {
             Session::put('user-locale', $language->language);
-            Cache::put('user-locale', $language->language);
             App::setLocale($language->language);
             event(new UserLocaleChanged($language));
         });
@@ -76,8 +75,6 @@ class ServiceProvider extends BaseServiceProvider
 
             if (Session::has($locale_key)) {
                 $locale = Session::get($locale_key);
-            } else if (Cache::has($locale_key)) {
-                $locale = Cache::get($locale_key);
             } else {
                 $locale = App::currentLocale();
             }
