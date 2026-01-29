@@ -40,10 +40,10 @@ class TranslateUsingDeeplAction implements CopyableActionInterface
 
         if ($html_handling) {
             $post_data['tag_handling'] = 'html';
+            // Tell DeepL to ignore content within <keep> tags
+            // ignore_tags requires tag_handling to be set
+            $post_data['ignore_tags'] = 'keep';
         }
-
-        // Tell DeepL to ignore content within <keep> tags
-        $post_data['ignore_tags'] = 'keep';
 
         $response = Http::withHeaders([
             'Authorization' => 'DeepL-Auth-Key ' . config('translatable.deepl.api_key'),
