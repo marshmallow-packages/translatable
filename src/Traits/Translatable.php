@@ -72,6 +72,12 @@ trait Translatable
                     $requestData = request()->all();
 
                     foreach ($translatableAttributes as $attribute) {
+                        // Skip attributes already captured by getDirty() — those values
+                        // have been properly serialized through the model's casts and
+                        // attribute setters, preserving the correct format.
+                        if (array_key_exists($attribute, $fieldsToTranslate)) {
+                            continue;
+                        }
                         if (array_key_exists($attribute, $requestData)) {
                             // Check if the value is different from the current translation
                             $currentTranslation = $resource->getTranslation($attribute, Request::getTranslatableLocale());
@@ -336,7 +342,7 @@ trait Translatable
         }
 
         return collect($models)
-            ->reject(fn ($model) => in_array($model, $ignore))
+            ->reject(fn($model) => in_array($model, $ignore))
             ->toArray();
     }
 
@@ -369,12 +375,12 @@ trait Translatable
 
         $translatable_columns = [];
         collect($fields)
-            ->reject(fn ($field) => $field instanceof LanguageToggler)
-            ->reject(fn ($field) => in_array(RelatableField::class, class_implements($field)))
+            ->reject(fn($field) => $field instanceof LanguageToggler)
+            ->reject(fn($field) => in_array(RelatableField::class, class_implements($field)))
             ->each(function ($field) use (&$translatable_columns): void {
                 if ($field::class == 'Laravel\Nova\Tabs\TabsGroup') {
                     collect($field->data)
-                        ->reject(fn ($field) => in_array(RelatableField::class, class_implements($field)))
+                        ->reject(fn($field) => in_array(RelatableField::class, class_implements($field)))
                         ->each(function ($tab_field) use (&$translatable_columns): void {
                             $translatable_columns[] = $tab_field->attribute;
                         });
