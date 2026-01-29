@@ -19,7 +19,7 @@ let AutoTranslator = {
             if (data.mode == "update") {
                 setTimeout(() => {
                     const translator = document.getElementById(
-                        "mm-translation-language-toggle"
+                        "mm-translation-language-toggle",
                     );
                     if (!translator) {
                         return;
@@ -40,8 +40,8 @@ let AutoTranslator = {
                         return;
                     }
 
-                    form_wrapper = document.querySelector(
-                        `[data-form-unique-id]`
+                    let form_wrapper = document.querySelector(
+                        `[data-form-unique-id]`,
                     );
                     form_wrapper.querySelectorAll("input").forEach((input) => {
                         if (input.getAttribute("auto-translator-loaded")) {
@@ -60,7 +60,7 @@ let AutoTranslator = {
                             input.getAttribute("dusk"),
                             source,
                             target,
-                            input.closest("div")
+                            input.closest("div"),
                         );
                     });
                     form_wrapper
@@ -76,14 +76,14 @@ let AutoTranslator = {
                                     field_id.substring(5),
                                     source,
                                     target,
-                                    input.closest("div")
+                                    input.closest("div"),
                                 );
                             } else {
                                 self.initAutoTranslatorForInput(
                                     input.getAttribute("dusk"),
                                     source,
                                     target,
-                                    input.closest("div")
+                                    input.closest("div"),
                                 );
                             }
                         });
@@ -93,7 +93,7 @@ let AutoTranslator = {
                         .forEach((tiptapEditor) => {
                             if (
                                 tiptapEditor.getAttribute(
-                                    "auto-translator-loaded"
+                                    "auto-translator-loaded",
                                 )
                             ) {
                                 return;
@@ -102,7 +102,7 @@ let AutoTranslator = {
                             self.initAutoTranslatorForTipTap(
                                 tiptapEditor,
                                 source,
-                                target
+                                target,
                             );
                         });
                 }, 200);
@@ -113,7 +113,7 @@ let AutoTranslator = {
         field_name,
         source,
         target,
-        wrapper = null
+        wrapper = null,
     ) {
         input = document.querySelector(`[dusk="${field_name}"]`);
         if (!input) {
@@ -129,7 +129,7 @@ let AutoTranslator = {
         field_name,
         source,
         target,
-        wrapper = null
+        wrapper = null,
     ) {
         input = document.querySelector(`[id="tiny_${field_name}"]`);
         if (!input) {
@@ -147,9 +147,14 @@ let AutoTranslator = {
         if (editorWrapper) {
             let buttonContainer = document.createElement("div");
             buttonContainer.classList.add("mt-2");
-            buttonContainer.append(this.getTipTapButton(tiptapEditor, source, target));
-            
-            editorWrapper.parentElement.insertBefore(buttonContainer, editorWrapper.nextSibling);
+            buttonContainer.append(
+                this.getTipTapButton(tiptapEditor, source, target),
+            );
+
+            editorWrapper.parentElement.insertBefore(
+                buttonContainer,
+                editorWrapper.nextSibling,
+            );
         }
     },
 
@@ -175,60 +180,73 @@ let AutoTranslator = {
         text_button.type = "button";
 
         text_button.addEventListener("click", async function (event) {
-            /** Mark the clicked button as loading. */
-            event.target.classList.add("link-default");
-            event.target.disabled = true;
-            event.target.innerHTML = self.getLoadingButtonIconAndLabel();
+            let button = event.currentTarget;
 
-            /** Run the translator. */
-            await clickEvent();
+            /** Mark the clicked button as loading. */
+            button.classList.add("link-default");
+            button.disabled = true;
+            button.innerHTML = self.getLoadingButtonIconAndLabel();
+
+            try {
+                /** Run the translator. */
+                await clickEvent();
+            } catch (error) {
+                console.error("Auto-translator error:", error);
+            }
 
             /** Mark the clicked button as normal. */
-            event.target.classList.remove("link-default");
-            event.target.disabled = false;
-            event.target.innerHTML = self.getDefaultButtonIconAndLabel();
+            button.classList.remove("link-default");
+            button.disabled = false;
+            button.innerHTML = self.getDefaultButtonIconAndLabel();
         });
 
         return text_button;
     },
     getTextButton: function (input, source, target) {
         return this.getDefaultButton(async () => {
-            translation = await this.runTranslator(
+            let translation = await this.runTranslator(
                 source,
                 target,
                 input.value,
-                false
+                false,
             );
-            input.value = translation;
-            input.dispatchEvent(new Event("input", { bubbles: true }));
+            if (translation !== null && translation !== undefined) {
+                input.value = translation;
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+            }
         });
     },
     getTinyMceButton: function (field_name, source, target) {
         return this.getDefaultButton(async () => {
             let tiny = tinymce.get(`tiny_${field_name}`);
-            translation = await this.runTranslator(
+            let translation = await this.runTranslator(
                 source,
                 target,
                 tiny.getContent(),
-                true
+                true,
             );
-            tiny.setContent(translation);
-            tiny.setDirty(true);
-            tiny.focus();
+            if (translation !== null && translation !== undefined) {
+                tiny.setContent(translation);
+                tiny.setDirty(true);
+                tiny.focus();
+            }
         });
     },
     getTipTapButton: function (tiptapEditor, source, target) {
         return this.getDefaultButton(async () => {
-            translation = await this.runTranslator(
+            let translation = await this.runTranslator(
                 source,
                 target,
                 tiptapEditor.innerHTML,
-                true
+                true,
             );
-            tiptapEditor.innerHTML = translation;
-
-            tiptapEditor.dispatchEvent(new Event("input", { bubbles: true }));
-            tiptapEditor.focus();
+            if (translation !== null && translation !== undefined) {
+                tiptapEditor.innerHTML = translation;
+                tiptapEditor.dispatchEvent(
+                    new Event("input", { bubbles: true }),
+                );
+                tiptapEditor.focus();
+            }
         });
     },
     runTranslator: async function (source, target, text, html_handling = true) {
@@ -238,24 +256,39 @@ let AutoTranslator = {
             text: text,
             html_handling: html_handling,
         });
-        return response.text;
+        return response ? response.text : null;
     },
-    apiRequest: async function (path, mehod, body) {
-        const rawResponse = await fetch(
-            `/nova-vendor/auto-translator/${path}`,
-            {
-                method: mehod,
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": document
-                        .querySelector('meta[name="csrf-token"]')
-                        .getAttribute("content"),
+    apiRequest: async function (path, method, body) {
+        try {
+            const rawResponse = await fetch(
+                "/nova-vendor/auto-translator/" + path,
+                {
+                    method: method,
+                    headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document
+                            .querySelector('meta[name="csrf-token"]')
+                            .getAttribute("content"),
+                    },
+                    body: body ? JSON.stringify(body) : null,
                 },
-                body: body ? JSON.stringify(body) : null,
+            );
+
+            if (!rawResponse.ok) {
+                console.error(
+                    "Auto-translator API error:",
+                    rawResponse.status,
+                    rawResponse.statusText,
+                );
+                return null;
             }
-        );
-        return await rawResponse.json();
+
+            return await rawResponse.json();
+        } catch (error) {
+            console.error("Auto-translator fetch error:", error);
+            return null;
+        }
     },
 };
 
