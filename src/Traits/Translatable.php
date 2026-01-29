@@ -67,6 +67,13 @@ trait Translatable
                     $requestData = request()->all();
 
                     foreach ($translatableAttributes as $attribute) {
+                        // Skip attributes already captured by getDirty() — those values
+                        // have been properly serialized through the model's casts and
+                        // attribute setters, preserving the correct format.
+                        if (array_key_exists($attribute, $fieldsToTranslate)) {
+                            continue;
+                        }
+
                         if (array_key_exists($attribute, $requestData)) {
                             // Check if the value is different from the current translation
                             $currentTranslation = $resource->getTranslation($attribute, Request::getTranslatableLocale());
