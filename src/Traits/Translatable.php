@@ -417,15 +417,12 @@ trait Translatable
             return null;
         }
 
-        if ($this->translatable) {
-            return $this->translatable
-                ->where('source_field', $source_field)
-                ->where('language_id', $language->id)
-                ->first();
+        // Eager load the translatable relation if not already loaded to prevent N+1
+        if (!$this->relationLoaded('translatable')) {
+            $this->load('translatable');
         }
 
-        return config('translatable.models.translatable')::where('translatable_type', get_class($this))
-            ->where('translatable_id', $this->getAttributes()[$this->primaryKey])
+        return $this->translatable
             ->where('source_field', $source_field)
             ->where('language_id', $language->id)
             ->first();
