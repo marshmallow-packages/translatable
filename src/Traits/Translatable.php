@@ -20,6 +20,18 @@ trait Translatable
 {
     protected $use_translator = true;
 
+    /**
+     * Initialize the Translatable trait for an instance.
+     * Automatically eager loads the translatable relationship to prevent N+1 queries
+     * when accessing translated attributes on collections of models.
+     */
+    public function initializeTranslatable(): void
+    {
+        if (!in_array('translatable', $this->with)) {
+            $this->with[] = 'translatable';
+        }
+    }
+
     protected $protected_from_translations = [
         'id',
         'created_at',
