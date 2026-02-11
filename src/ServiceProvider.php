@@ -2,243 +2,134 @@
 
 namespace Marshmallow\Translatable;
 
-use Laravel\Nova\Nova;
+use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Support\Facades\App;
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
-use Marshmallow\HelperFunctions\Facades\URL;
-use Marshmallow\Translatable\Models\Language;
-use Marshmallow\Translatable\Scanner\Scanner;
-use Marshmallow\Translatable\EventServiceProvider;
-use Marshmallow\Translatable\Events\UserLocaleChanged;
-use Marshmallow\Translatable\Scanner\TranslationManager;
-use Marshmallow\Translatable\Scanner\Drivers\Translation;
-use Marshmallow\Translatable\Console\Commands\PresetCommand;
-use Marshmallow\Translatable\Console\Commands\InstallCommand;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-use Marshmallow\Translatable\Console\Commands\AddLanguageCommand;
-use Marshmallow\Translatable\Console\Commands\ListLanguagesCommand;
-use Marshmallow\Translatable\Console\Commands\GeneratePresetCommand;
-use Marshmallow\Translatable\Console\Commands\AddTranslationKeyCommand;
-use Marshmallow\Translatable\Console\Commands\IndexMissingTranslatables;
-use Marshmallow\Translatable\Console\Commands\ListMissingTranslationKeys;
-use Marshmallow\Translatable\Console\Commands\DuplicateTranslationsCommand;
-use Marshmallow\Translatable\Console\Commands\SynchroniseTranslationsCommand;
-use Marshmallow\Translatable\Console\Commands\SynchroniseMissingTranslationKeys;
-use Marshmallow\Translatable\Console\Commands\SynchroniseTranslationsFromToCommand;
-use Marshmallow\Translatable\Console\Commands\FixTranslatedPlaceholdersCommand;
+use Laravel\Nova\Nova;
+use Marshmallow\Translatable\Models\Language;
+use Marshmallow\Translatable\Translators\TranslatorManager;
 
 class ServiceProvider extends BaseServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
-        Request::macro('setTranslatableLocale', function ($language) {
-            Session::put('translatable-locale', $language->language);
-            Cache::put('translatable-locale', $language->language);
-        });
-
-        Request::macro('getTranslatableLocale', function () {
-            $session_key = (URL::isNova(request())) ? 'translatable-locale' : 'user-locale';
-            $app_locale = App::currentLocale();
-
-            if (Session::has($session_key)) {
-                return Session::get($session_key);
-            } else {
-                Session::put($session_key, $app_locale);
-            }
-
-            if (Cache::has($session_key)) {
-                return Cache::get($session_key);
-            } else {
-                Cache::put($session_key, $app_locale);
-            }
-
-            return $app_locale;
-        });
-
-        Request::macro('setUserLocale', function (Language $language) {
-            Session::put('user-locale', $language->language);
-            App::setLocale($language->language);
-            event(new UserLocaleChanged($language));
-        });
-
-        Request::macro('getUserLocale', function () {
-            $locale_key = 'user-locale';
-
-            if (Session::has($locale_key)) {
-                $locale = Session::get($locale_key);
-            } else {
-                $locale = App::currentLocale();
-            }
-
-            return $locale;
-        });
-
-        Nova::serving(function () {
-            Nova::script('language-toggle-field', __DIR__ . '/../dist/js/field.js');
-            Nova::style('language-toggle-field', __DIR__ . '/../dist/css/field.css');
-        });
-
-        Route::middleware(['nova'])
-            ->prefix('nova-vendor/auto-translator')
-            ->group(__DIR__ . '/../routes/auto-translator.php');
+        $this->registerRequestMacros();
 
         $this->loadMigrations();
 
-        $this->registerRoutes();
-
         $this->publishConfiguration();
 
-        $this->loadTranslations();
+        $this->registerOptimizeHook();
 
-        $this->registerHelpers();
+        if (class_exists(Nova::class)) {
+            $this->bootNova();
+        }
     }
 
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->mergeConfiguration();
-
-        $this->registerCommands();
-
-        $this->registerContainerBindings();
-
-        $this->registerMiddleware();
-
-        $this->app->register(EventServiceProvider::class);
-    }
-
-    /**
-     * Register the middleware
-     *
-     * @param  string $middleware
-     */
-    protected function registerMiddleware()
-    {
-        $middleware = \Marshmallow\Translatable\Http\Middleware\Localization::class;
-        $kernel = $this->app[Kernel::class];
-        $kernel->appendMiddlewareToGroup('web', $middleware);
-    }
-
-    /**
-     * Register package routes.
-     *
-     * @return void
-     */
-    private function registerRoutes()
-    {
-        $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');
-    }
-
-    /**
-     * Publish package configuration.
-     *
-     * @return void
-     */
-    private function publishConfiguration()
-    {
-        $this->publishes([
-            __DIR__ . '/../config/translatable.php' => config_path('translatable.php'),
-        ], 'config');
-    }
-
-    /**
-     * Merge package configuration.
-     *
-     * @return void
-     */
-    private function mergeConfiguration()
+    public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/translatable.php', 'translatable');
+
+        $this->registerTranslationLoader();
+
+        $this->registerTranslatorManager();
+
+        $this->registerCommands();
     }
 
-    /**
-     * Load package migrations.
-     *
-     * @return void
-     */
-    private function loadMigrations()
+    protected function registerTranslationLoader(): void
     {
-        if (config('translatable.driver') !== 'database') {
-            return;
-        }
+        $this->app->singleton('translation.loader', function ($app) {
+            return new TranslationLoader();
+        });
+    }
 
+    protected function registerTranslatorManager(): void
+    {
+        $this->app->singleton(TranslatorManager::class, function ($app) {
+            return new TranslatorManager($app);
+        });
+
+        $this->app->alias(TranslatorManager::class, 'translatable.translator');
+    }
+
+    protected function registerRequestMacros(): void
+    {
+        Request::macro('setTranslatableLocale', function (Language $language) {
+            Session::put('translatable-locale', $language->code);
+        });
+
+        Request::macro('getTranslatableLocale', function () {
+            return Session::get('translatable-locale', App::currentLocale());
+        });
+
+        Request::macro('setUserLocale', function (Language $language) {
+            Session::put('user-locale', $language->code);
+            App::setLocale($language->code);
+        });
+
+        Request::macro('getUserLocale', function () {
+            return Session::get('user-locale', App::currentLocale());
+        });
+    }
+
+    protected function loadMigrations(): void
+    {
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
     }
 
-    /**
-     * Load package translations.
-     *
-     * @return void
-     */
-    private function loadTranslations()
+    protected function publishConfiguration(): void
     {
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'translatable');
-
         $this->publishes([
-            __DIR__ . '/../resources/lang' => resource_path('lang/vendor/translatable'),
-        ]);
+            __DIR__ . '/../config/translatable.php' => config_path('translatable.php'),
+        ], 'translatable-config');
     }
 
-    /**
-     * Register package helper functions.
-     *
-     * @return void
-     */
-    private function registerHelpers()
+    protected function registerOptimizeHook(): void
     {
-        require __DIR__ . '/../resources/helpers.php';
-    }
-
-    /**
-     * Register package commands.
-     *
-     * @return void
-     */
-    private function registerCommands()
-    {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                AddLanguageCommand::class,
-                AddTranslationKeyCommand::class,
-                SynchroniseTranslationsFromToCommand::class,
-                ListLanguagesCommand::class,
-                ListMissingTranslationKeys::class,
-                SynchroniseMissingTranslationKeys::class,
-                SynchroniseTranslationsCommand::class,
-                PresetCommand::class,
-                GeneratePresetCommand::class,
-                InstallCommand::class,
-                DuplicateTranslationsCommand::class,
-                IndexMissingTranslatables::class,
-                FixTranslatedPlaceholdersCommand::class,
-            ]);
+        if (! $this->app->runningInConsole()) {
+            return;
         }
+
+        Event::listen(CommandFinished::class, function (CommandFinished $event) {
+            if ($event->command !== 'optimize' || ! config('translatable.cache.enabled')) {
+                return;
+            }
+
+            Artisan::call('translatable:cache');
+        });
     }
 
-    /**
-     * Register package bindings in the container.
-     *
-     * @return void
-     */
-    private function registerContainerBindings()
+    protected function bootNova(): void
     {
-        $this->app->singleton(Scanner::class, function () {
-            $config = $this->app['config']['translatable'];
-
-            return new Scanner(new Filesystem(), $config['scan_paths'], $config['translation_methods']);
+        Nova::serving(function () {
+            Nova::script('translatable-field', __DIR__ . '/../dist/js/field.js');
+            Nova::script('translatable-tool', __DIR__ . '/../dist/js/tool.js');
+            Nova::style('translatable-field', __DIR__ . '/../dist/css/field.css');
         });
 
-        $this->app->singleton(Translation::class, function ($app) {
-            return (new TranslationManager($app, $app['config']['translatable'], $app->make(Scanner::class)))->resolve();
-        });
+        Route::middleware(['nova'])
+            ->prefix('nova-vendor/translatable')
+            ->group(__DIR__ . '/../routes/nova.php');
+    }
+
+    protected function registerCommands(): void
+    {
+        if (! $this->app->runningInConsole()) {
+            return;
+        }
+
+        $this->commands([
+            Console\Commands\CacheCommand::class,
+            Console\Commands\ClearCacheCommand::class,
+            Console\Commands\ScanCommand::class,
+            Console\Commands\ImportLaravelLangCommand::class,
+            Console\Commands\ImportVendorCommand::class,
+        ]);
     }
 }

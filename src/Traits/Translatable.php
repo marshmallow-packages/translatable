@@ -2,641 +2,252 @@
 
 namespace Marshmallow\Translatable\Traits;
 
-use Error;
-use Laravel\Nova\Resource;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Nova\Contracts\RelatableField;
-use Laravel\Nova\Http\Requests\NovaRequest;
-use Marshmallow\HelperFunctions\Facades\URL;
-use Marshmallow\Translatable\Fields\LanguageToggler;
-use Marshmallow\Translatable\Events\TranslatableCreated;
-use Marshmallow\Translatable\Facades\Translatable as TranslatableFacade;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\App;
+use Marshmallow\Translatable\Cache\TranslatableCache;
+use Marshmallow\Translatable\Models\Language;
+use Marshmallow\Translatable\Models\Translatable;
+use Marshmallow\Translatable\TranslatableConfig;
 
 trait Translatable
 {
-    protected $use_translator = true;
+    protected ?array $loadedTranslations = null;
 
-    protected $protected_from_translations = [
-        'id',
-        'created_at',
-        'updated_at',
-        'deleted_at',
-    ];
-
-    public static function bootTranslatable()
+    public static function bootTranslatable(): void
     {
-        static::creating(function (Model $resource) {
-            /*
-             * Creating should always be done in the original
-             * language and our nova package will not make it
-             * possible to insert translations directly. You
-             * will need to create the resource in the app.locale
-             * first.
-             */
-        });
+        if (TranslatableConfig::shouldAutoLoad()) {
+            static::addGlobalScope('translations', function ($query) {
+                $query->with('translations');
+            });
+        }
 
-        static::created(function (Model $resource) {
-            DB::afterCommit(
-                function () use ($resource) {
-                    $resource->updateMissingTranslations();
-                }
-            );
-        });
+        static::deleting(function (Model $model) {
+            $model->translations()->delete();
 
-        static::updating(function (Model $resource) {
-            /*
-        	 * If the current translatable locale is different
-        	 * from the original, then we are creating or updating
-        	 * translations.
-        	 */
-            if ($resource->translatorActive() && $resource->weAreTranslating()) {
-
-                /*
-                * Get the fields to translate. We check both getDirty() and the actual
-                * request input to handle cases where fields may not appear dirty due to
-                * the retrieved event setting translated values as the original values.
-                */
-                $fieldsToTranslate = $resource->getDirty();
-
-                if (request()->isMethod('PUT') || request()->isMethod('POST')) {
-                    $translatableAttributes = $resource->getTranslatableAttributes();
-                    $requestData = request()->all();
-
-                    foreach ($translatableAttributes as $attribute) {
-                        // Skip attributes already captured by getDirty() — those values
-                        // have been properly serialized through the model's casts and
-                        // attribute setters, preserving the correct format.
-                        if (array_key_exists($attribute, $fieldsToTranslate)) {
-                            continue;
-                        }
-
-                        if (array_key_exists($attribute, $requestData)) {
-                            // Check if the value is different from the current translation
-                            $currentTranslation = $resource->getTranslation($attribute, Request::getTranslatableLocale());
-                            $requestValue = $requestData[$attribute];
-
-                            if ($currentTranslation != $requestValue) {
-                                $fieldsToTranslate[$attribute] = $requestValue;
-                            }
-                        }
-                    }
-                }
-
-                /*
-                * Create the translations.
-                */
-                $resource->setTranslation(
-                    Request::getTranslatableLocale(),
-                    $fieldsToTranslate
-                );
-
-                /*
-        		 * Reset this resource to its original values
-                 * because the should nog be stored in the
-                 * resource itself.
-        		 */
-                $resource->resetToOriginal();
-                $resource->timestamps = false;
+            if (TranslatableConfig::isCacheEnabled()) {
+                TranslatableCache::clearModel(static::class);
             }
         });
-
-        static::updated(function (Model $resource) {
-            $resource->updateMissingTranslations();
-        });
-
-        static::deleting(function (Model $resource) {
-            /*
-             * Delete the existing translations.
-             */
-            $resource->translatable()->delete();
-        });
-
-        static::deleted(function (Model $resource) {
-            $resource->missingTranslatable()->delete();
-        });
     }
 
-    public function dontTranslate()
+    abstract public function translatableColumns(): array;
+
+    public function translations(): MorphMany
     {
-        $this->use_translator = false;
-        return $this;
+        return $this->morphMany(Translatable::class, 'translatable');
     }
 
-    public function doTranslate()
+    public function scopeWithTranslations($query): void
     {
-        $this->use_translator = true;
-        return $this;
+        $query->with('translations');
     }
 
-    public function translatorActive()
+    public function scopeWithoutTranslations($query): void
     {
-        return $this->use_translator === true;
+        $query->withoutGlobalScope('translations');
     }
 
-    public function weAreTranslating()
+    public function isTranslatableAttribute(string $key): bool
     {
-        if ($this->force_translating_status) {
-            return true;
-        }
-
-        if (method_exists($this, 'translatableFieldsEnabled') && !$this->translatableFieldsEnabled()) {
-            return false;
-        }
-
-        if (Request::hasMacro('getTranslatableLocale')) {
-            return Request::getTranslatableLocale() !== TranslatableFacade::appDefaultLanguage();
-        }
-
-        return false;
+        return in_array($key, $this->translatableColumns());
     }
 
-    public function weAreNotTranslating()
+    public function getAttributeValue($key): mixed
     {
-        return !$this->weAreTranslating();
-    }
-
-    public function resetToOriginal(): self
-    {
-        foreach ($this->getDirty() as $field => $value) {
-            $this->{$field} = $this->getOriginal($field);
-        }
-        return $this;
-    }
-
-    /**
-     * Store the translation in the database.
-     */
-    public function setTranslation($language, $source_field, $translated_value = null)
-    {
-        $language = $this->getLanguageByTranslationParameter($language);
-        $source_fields = $this->convertTranslationInputToArray($source_field, $translated_value);
-
-        foreach ($source_fields as $source_field => $translated_value) {
-            if (!$this->isTranslatableAttribute($source_field)) {
-                continue;
-            }
-
-            // JSON encode array values to prevent "Array to string conversion" errors
-            $value_to_store = is_array($translated_value) ? json_encode($translated_value) : $translated_value;
-
-            if ($translatable = $this->getExistingTranslation($source_field, $language)) {
-                $translatable->updateQuietly([
-                    'translated_value' => $value_to_store,
-                ]);
-            } else {
-                $this::withoutEvents(function () use ($source_field, $value_to_store, $language) {
-                    $new_translatable = $this->translatable()->create([
-                        'source_field' => $source_field,
-                        'translated_value' => $value_to_store,
-                        'language_id' => $language->id,
-                    ]);
-
-                    $new_translatable->saveQuietly();
-
-                    event(new TranslatableCreated($new_translatable));
-                });
-            }
-        }
-    }
-
-    /**
-     * Get the attribute value. Only if this column is
-     * indeed translatable.
-     */
-    public function getAttributeValue($key)
-    {
-        if ($this->weAreNotTranslating() || !$this->isTranslatableAttribute($key)) {
+        if (! $this->isTranslatableAttribute($key)) {
             return parent::getAttributeValue($key);
         }
 
-        return $this->getTranslation($key, $this->getLocale());
-    }
-
-    /**
-     * Get the translated value from the database if it exists,
-     * if not, we return the default value from the model in the
-     * original language. We do this so we never return an empty
-     * string (unless the value in the database is empty of course).
-     */
-    public function getTranslation($source_field, $language)
-    {
-        $language = $this->getLanguageByTranslationParameter($language);
-        if ($translation = $this->getExistingTranslation($source_field, $language)) {
-            $translation = $translation->translated_value;
-
-            /*
-             * Make sure we apply casts and mutators.
-             * transformModelValue expects the raw database value and will
-             * handle all casting (including JSON/array casts) internally.
-             */
-            return $this->transformModelValue($source_field, $translation);
+        if ($this->isDefaultLocale()) {
+            return parent::getAttributeValue($key);
         }
 
-        return parent::getAttributeValue($source_field);
-    }
+        $translation = $this->getTranslation($key);
 
-    public static function getTranslatableResources(?string $path = null, array $ignore = []): array
-    {
-        $path = $path ?? app_path('Nova');
-        return self::getTranslatableClasses(
-            path: $path,
-            ignore: $ignore,
-            uses: TranslatableFields::class,
-        );
-    }
-
-    public static function getTranslatableResourcesWithModels(?string $path = null, array $ignore = []): array
-    {
-        $path = $path ?? app_path('Nova');
-        return self::getTranslatableClasses(
-            path: $path,
-            ignore: $ignore,
-            uses: TranslatableFields::class,
-            add_callback: function ($filename) {
-                return [$filename, $filename::$model];
-            }
-        );
-    }
-
-    public static function getTranslatableModelsWithResources()
-    {
-        return array_flip(self::getTranslatableResourcesWithModels());
-    }
-
-    public static function getTranslatableModels(?string $path = null, array $ignore = []): array
-    {
-        $path = $path ?? app_path('Models');
-        return self::getTranslatableClasses(
-            path: $path,
-            ignore: $ignore,
-            uses: Translatable::class,
-        );
-    }
-
-    public static function getTranslatableClasses(?string $path = null, array $ignore = [], ?string $uses = null, ?callable $add_callback = null): array
-    {
-        $run_again_method = Arr::get(debug_backtrace(), '1.function');
-
-        $models = [];
-        foreach (glob($path . '/*') as $file_path) {
-            if (is_dir($file_path)) {
-                $models = array_merge($models, self::{$run_again_method}($file_path, $ignore, $uses, $add_callback));
-            } else {
-                $filename = Str::of($file_path)
-                    ->remove(app_path())
-                    ->remove('.php')
-                    ->prepend('App')
-                    ->replace('/', '\\')
-                    ->toString();
-
-                if (!$uses) {
-                    $models[] = $filename;
-                } else {
-                    if (in_array($uses, class_uses_recursive($filename))) {
-                        if ($add_callback) {
-                            [$key, $value] = $add_callback($filename);
-                            $models[$key] = $value;
-                        } else {
-                            $models[] = $filename;
-                        }
-                    }
-                }
-            }
+        if ($translation !== null) {
+            return $this->transformModelValue($key, $translation);
         }
 
-        return collect($models)
-            ->reject(fn($model) => in_array($model, $ignore))
-            ->toArray();
+        return parent::getAttributeValue($key);
     }
 
-    public function updateMissingTranslations()
+    public function getTranslation(string $field, ?string $locale = null): mixed
     {
-        if (!config('translatable.missing_translations.active')) {
-            return;
-        }
+        $locale = $locale ?? App::getLocale();
+        $language = $this->resolveLanguage($locale);
 
-        $this->missingTranslatable()->delete();
-
-        $models = self::getTranslatableModelsWithResources();
-        $nova_resources = Arr::get($models, get_class($this));
-        $nova_request = resolve(NovaRequest::class);
-        $nova_request->merge([
-            'editMode' => 'update',
-        ]);
-
-        request()->merge([
-            'editMode' => 'update',
-        ]);
-
-        try {
-            $fields = (new $nova_resources($this))
-                ->forceTranslating()
-                ->fields($nova_request);
-        } catch (Error) {
-            return;
-        }
-
-        $translatable_columns = [];
-        collect($fields)
-            ->reject(fn($field) => $field instanceof LanguageToggler)
-            ->reject(fn($field) => in_array(RelatableField::class, class_implements($field)))
-            ->each(function ($field) use (&$translatable_columns) {
-                if (get_class($field) == 'Laravel\Nova\Tabs\TabsGroup') {
-                    collect($field->data)
-                        ->reject(fn($field) => in_array(RelatableField::class, class_implements($field)))
-                        ->each(function ($tab_field) use (&$translatable_columns) {
-                            $translatable_columns[] = $tab_field->attribute;
-                        });
-                } else {
-                    $translatable_columns[] = $field->attribute;
-                }
-            });
-
-        $languages = config('translatable.models.language')::query()
-            ->active()
-            ->ignoreDefault()
-            ->get();
-
-        $languages->each(function ($language) use ($translatable_columns) {
-            $missing_data = [];
-            collect($translatable_columns)
-                ->each(function ($column) use (&$missing_data, $language) {
-                    $translated = $this->translatable
-                        ->where('source_field', $column)
-                        ->where('language_id', $language->id)
-                        ->first();
-
-                    if (!$translated) {
-                        $missing_data[] = $column;
-                    }
-                });
-
-
-            if (!empty($missing_data)) {
-                $this->missingTranslatable()->create([
-                    'missing' => $missing_data,
-                    'language_id' => $language->id,
-                ]);
-            }
-        });
-    }
-
-    /**
-     * Set up the relationship.
-     */
-    public function translatable()
-    {
-        return $this->morphMany(config('translatable.models.translatable'), 'translatable');
-    }
-
-    public function missingTranslatable()
-    {
-        return $this->morphMany(config('translatable.models.missingTranslation'), 'missing_translatable');
-    }
-
-    /**
-     * Get a language model. This method has been created so we
-     * can make it possible to get the language by more than just
-     * the language column.
-     */
-    protected function getLanguageByTranslationParameter($language)
-    {
-        return TranslatableFacade::getLanguageByTranslationParameter($language);
-    }
-
-    /**
-     * Check if this column is already translated.
-     */
-    protected function getExistingTranslation($source_field, $language): ?Model
-    {
-        if (!isset($this->getAttributes()[$this->primaryKey])) {
+        if (! $language) {
             return null;
         }
 
-        // Eager load the translatable relation if not already loaded to prevent N+1
-        if (!$this->relationLoaded('translatable')) {
-            $this->load('translatable');
-        }
-
-        return $this->translatable
-            ->where('source_field', $source_field)
-            ->where('language_id', $language->id)
-            ->first();
-    }
-
-    /**
-     * Check if this column is indeed translatable.
-     */
-    public function isTranslatableAttribute(string $key): bool
-    {
-        return in_array($key, $this->getTranslatableAttributes());
-    }
-
-    public function notTranslateColumns(): array
-    {
-        return [];
-    }
-
-    public function translatableColumns(): array
-    {
-        return [];
-    }
-
-    /**
-     * This is a traits used on Eloquent models and on
-     * Nova resources. We check here which one we have.
-     */
-    public function getNotTranslateColumns()
-    {
-        if (class_exists(Resource::class) && $this instanceof Resource) {
-            $nova_resource = $this;
-            $resource = $nova_resource::newModel();
-            return $resource->notTranslateColumns();
-        }
-
-        return $this->notTranslateColumns();
-    }
-
-    /**
-     * This is a traits used on Eloquent models and on
-     * Nova resources. We check here which one we have.
-     */
-    public function getTranslatableColumns()
-    {
-        if (class_exists(Resource::class) && $this instanceof Resource) {
-            $nova_resource = $this;
-            $resource = $nova_resource::newModel();
-            return $resource->translatableColumns();
-        }
-
-        return $this->translatableColumns();
-    }
-
-    /**
-     * Build an array with all the columns for this model that are translatable.
-     */
-    public function getTranslatableAttributes(): array
-    {
-        $translatable_columns = array_keys($this->getAttributes());
-        if (!empty($this->getTranslatableColumns())) {
-            $translatable_columns = $this->getTranslatableColumns();
-        }
-
-        foreach ($this->getNotTranslateColumns() as $ignore_column) {
-            $key = array_search($ignore_column, $translatable_columns);
-            if (false === $key) {
-                continue;
-            }
-            unset($translatable_columns[$key]);
-        }
-        if (isset($this->protected_from_translations) && is_array($this->protected_from_translations)) {
-            foreach ($this->protected_from_translations as $protected_column) {
-                $key = array_search($protected_column, $translatable_columns);
-                if (false === $key) {
-                    continue;
-                }
-                unset($translatable_columns[$key]);
-            }
-        }
-
-        return $translatable_columns;
-    }
-
-    /**
-     * Convert the input to an array so both methods below are possible
-     * $page->setTranslation('en', 'name', 'Products');.
-     *
-     * $page->setTranslation('en', [
-     *     'name' => 'Products',
-     * ]);
-     */
-    protected function convertTranslationInputToArray($source_field, $translated_value = null): array
-    {
-        if ($source_field instanceof Model) {
-            return $source_field->toArray();
-        }
-
-        if (is_array($source_field)) {
-            return $source_field;
-        }
-
-        return [
-            $source_field => $translated_value,
-        ];
-    }
-
-    /**
-     * Get the fields displayed by the resource.
-     *
-     * @param \Laravel\Nova\Http\Requests\NovaRequest $request NovaRequest
-     *
-     * @return array
-     */
-    public function fields(NovaRequest $request)
-    {
-        if ($this->weAreNotTranslating() || ($request->has('editMode') && 'create' == $request->editMode)) {
-            return $this->addTranslationToggleField(
-                $this->translatableFields($request),
-                $request
+        if (TranslatableConfig::isCacheEnabled()) {
+            $cached = TranslatableCache::get(
+                static::class,
+                $this->getKey(),
+                $field,
+                $language->id
             );
-        }
 
-        $fields = $this->translatableFields($request);
-        foreach ($fields as $key => $field) {
-            if (isset($field->attribute) && !$this->isTranslatableAttribute($field->attribute)) {
-                unset($fields[$key]);
+            if ($cached !== null) {
+                return $this->decodeValue($cached);
             }
         }
 
-        return $this->addTranslationToggleField(
-            $fields,
-            $request
+        $this->loadTranslationsIfNeeded();
+
+        $translation = $this->loadedTranslations[$field][$language->id] ?? null;
+
+        return $translation ? $this->decodeValue($translation) : null;
+    }
+
+    public function setTranslation(string $locale, string|array $field, mixed $value = null): void
+    {
+        $language = $this->resolveLanguage($locale);
+
+        if (! $language) {
+            return;
+        }
+
+        if (is_array($field)) {
+            foreach ($field as $fieldName => $fieldValue) {
+                $this->storeTranslation($language, $fieldName, $fieldValue);
+            }
+        } else {
+            $this->storeTranslation($language, $field, $value);
+        }
+
+        $this->loadedTranslations = null;
+
+        if (TranslatableConfig::isCacheEnabled()) {
+            TranslatableCache::clearModel(static::class);
+        }
+    }
+
+    public function hasTranslation(string $field, ?string $locale = null): bool
+    {
+        return $this->getTranslation($field, $locale) !== null;
+    }
+
+    public function getTranslationsForField(string $field): array
+    {
+        $this->loadTranslationsIfNeeded();
+
+        $translations = [];
+
+        foreach ($this->loadedTranslations[$field] ?? [] as $languageId => $value) {
+            $language = Language::find($languageId);
+
+            if ($language) {
+                $translations[$language->code] = $this->decodeValue($value);
+            }
+        }
+
+        return $translations;
+    }
+
+    public function getAllTranslations(): array
+    {
+        $this->loadTranslationsIfNeeded();
+
+        $translations = [];
+
+        foreach ($this->loadedTranslations as $field => $values) {
+            $translations[$field] = [];
+
+            foreach ($values as $languageId => $value) {
+                $language = Language::find($languageId);
+
+                if ($language) {
+                    $translations[$field][$language->code] = $this->decodeValue($value);
+                }
+            }
+        }
+
+        return $translations;
+    }
+
+    protected function storeTranslation(Language $language, string $field, mixed $value): void
+    {
+        if (! $this->isTranslatableAttribute($field)) {
+            return;
+        }
+
+        $encodedValue = $this->encodeValue($value);
+
+        $this->translations()->updateOrCreate(
+            [
+                'field' => $field,
+                'language_id' => $language->id,
+            ],
+            [
+                'value' => $encodedValue,
+                'source' => 'manual',
+            ]
         );
     }
 
-    /**
-     * LEGACY FROM MULTI-LANGUAGE PACKAGE.
-     */
-    public function localeRoute($language = null)
+    protected function loadTranslationsIfNeeded(): void
     {
-        return URL::buildFromArray(
-            $this->getRouteParts($language)
-        );
-    }
-
-    protected function getRouteParts($language = null)
-    {
-        return array_filter([
-            $this->getLocale($language),
-            $this->routePrefix(),
-            $this->getModelUrl($language),
-        ]);
-    }
-
-    protected function getModelUrlField()
-    {
-        return $this->getRouteKeyName();
-    }
-
-    protected function getModelUrl($language = null)
-    {
-        $url_column = $this->getModelUrlField();
-        if ($language) {
-            return $this->getTranslation($url_column, $language->code);
+        if ($this->loadedTranslations !== null) {
+            return;
         }
 
-        return $this->{$url_column};
-    }
+        $this->loadedTranslations = [];
 
-    protected function routePrefix()
-    {
-        return '';
-    }
-
-    /**
-     * STATICS
-     */
-
-    /**
-     * Get a resource by its translated slug.
-     */
-    public static function getByTranslatedSlug($slug, $slug_column = 'slug')
-    {
-        $translation = config('translatable.models.translatable')::query()
-            ->where('source_field', $slug_column)
-            ->where('translated_value', $slug)
-            ->where('translatable_type', self::class)
-            ->with('translatable')
-            ->first();
-
-        if ($translation) {
-            return $translation->translatable;
+        if ($this->relationLoaded('translations')) {
+            $translations = $this->translations;
+        } else {
+            $translations = $this->translations()->get();
         }
 
-        return self::where($slug_column, $slug)->first();
+        foreach ($translations as $translation) {
+            $field = $translation->field;
+            $languageId = $translation->language_id;
+
+            if (! isset($this->loadedTranslations[$field])) {
+                $this->loadedTranslations[$field] = [];
+            }
+
+            $this->loadedTranslations[$field][$languageId] = $translation->value;
+        }
     }
 
-    /**
-     * LEGACY FROM MULTI-LANGUAGE PACKAGE.
-     */
-
-    /**
-     * Get the current locale.
-     */
-    public function getLocale($language = null): string
+    protected function resolveLanguage(string $locale): ?Language
     {
-        if ($language) {
-            return $language->language;
+        return Language::where('code', $locale)->first();
+    }
+
+    protected function isDefaultLocale(): bool
+    {
+        return App::getLocale() === TranslatableConfig::getDefaultLanguage();
+    }
+
+    protected function encodeValue(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
         }
 
-        if (URL::isNova(request())) {
-            return request()->getTranslatableLocale();
+        if (is_array($value)) {
+            return json_encode($value);
         }
 
-        return request()->getUserLocale();
+        return (string) $value;
+    }
+
+    protected function decodeValue(?string $value): mixed
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $decoded = json_decode($value, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
+        }
+
+        return $value;
     }
 }

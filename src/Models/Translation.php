@@ -2,39 +2,144 @@
 
 namespace Marshmallow\Translatable\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * Translation.
- */
 class Translation extends Model
 {
-    protected $guarded = [];
+    protected $casts = [
+        'is_locked' => 'boolean',
+        'imported_at' => 'datetime',
+    ];
 
-    public function language()
+    public function language(): BelongsTo
     {
-        $language_model = config('translatable.models.language');
-        return $this->belongsTo($language_model);
+        return $this->belongsTo(Language::class);
     }
 
-    public static function getGroupsForLanguage($language)
+    public function scopeForLanguage(Builder $query, string|int $language): void
     {
-        return static::whereHas('language', function ($q) use ($language) {
-            $q->where('language', $language);
-        })->whereNotNull('group')
-            ->where('group', 'not like', '%single')
+        if (is_string($language)) {
+            $query->whereHas('language', fn ($q) => $q->where('code', $language));
+        } else {
+            $query->where('language_id', $language);
+        }
+    }
+
+    public function scopeForGroup(Builder $query, string $group): void
+    {
+        $query->where('group', $group);
+    }
+
+    public function scopeForKey(Builder $query, string $key): void
+    {
+        $query->where('key', $key);
+    }
+
+    public function scopeForContext(Builder $query, ?string $context): void
+    {
+        if ($context === null) {
+            $query->whereNull('context');
+        } else {
+            $query->where('context', $context);
+        }
+    }
+
+    public function scopeGrouped(Builder $query): void
+    {
+        $query->where('group', '!=', 'single')
+            ->whereNotNull('group');
+    }
+
+    public function scopeSingle(Builder $query): void
+    {
+        $query->where('group', 'single');
+    }
+
+    public function scopeLocked(Builder $query): void
+    {
+        $query->where('is_locked', true);
+    }
+
+    public function scopeUnlocked(Builder $query): void
+    {
+        $query->where('is_locked', false);
+    }
+
+    public function scopeFromSource(Builder $query, string $source): void
+    {
+        $query->where('source', $source);
+    }
+
+    public function scopeMissing(Builder $query): void
+    {
+        $query->where(function ($q) {
+            $q->whereNull('value')
+                ->orWhere('value', '');
+        });
+    }
+
+    public function scopeTranslated(Builder $query): void
+    {
+        $query->whereNotNull('value')
+            ->where('value', '!=', '');
+    }
+
+    public static function getGroups(?string $languageCode = null): \Illuminate\Support\Collection
+    {
+        $query = static::query()
+            ->whereNotNull('group')
+            ->where('group', '!=', 'single')
             ->select('group')
-            ->distinct()
-            ->get();
+            ->distinct();
+
+        if ($languageCode) {
+            $query->whereHas('language', fn ($q) => $q->where('code', $languageCode));
+        }
+
+        return $query->pluck('group');
     }
 
-    public function scopeOnlyGrouped($query)
+    public static function getContexts(?string $group = null): \Illuminate\Support\Collection
     {
-        return $query->whereNotNull('group')->whereIn('group', ['single']);
+        $query = static::query()
+            ->whereNotNull('context')
+            ->select('context')
+            ->distinct();
+
+        if ($group) {
+            $query->where('group', $group);
+        }
+
+        return $query->pluck('context');
     }
 
-    public function scopeOnlySingle($query)
+    public function lock(): bool
     {
-        return $query->whereNotNull('group')->whereNotIn('group', ['single']);
+        return $this->update(['is_locked' => true]);
+    }
+
+    public function unlock(): bool
+    {
+        return $this->update(['is_locked' => false]);
+    }
+
+    public function isLocked(): bool
+    {
+        return $this->is_locked === true;
+    }
+
+    public function markAsManual(): bool
+    {
+        return $this->update(['source' => 'manual']);
+    }
+
+    public function markAsImported(string $source): bool
+    {
+        return $this->update([
+            'source' => $source,
+            'imported_at' => now(),
+        ]);
     }
 }

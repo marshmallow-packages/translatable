@@ -1,37 +1,135 @@
 <?php
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Package driver
-    |--------------------------------------------------------------------------
-    |
-    | The package supports different drivers for translation management.
-    |
-    | Supported: "file", "database"
-    |
-    */
-    'driver' => 'database',
 
     /*
     |--------------------------------------------------------------------------
-    | Translate resources in Nova
+    | Default Language
     |--------------------------------------------------------------------------
     |
-    | When this is set to true, you will see the language selector when editing
-    | a resource in Laravel Nova.
+    | The default language code for your application. This is used as the
+    | source language for translations and as fallback when no translation
+    | is available.
     |
     */
-    'nova_translatable_fields' => true,
+
+    'default_language' => env('TRANSLATABLE_DEFAULT_LANGUAGE', 'en'),
 
     /*
     |--------------------------------------------------------------------------
-    | Language flag icons
+    | Cache Configuration
     |--------------------------------------------------------------------------
     |
-    | Update the ratios for the flag uploader here.
+    | Enable file-based caching for translations. When enabled, translations
+    | are stored in PHP files for fast retrieval. The cache is automatically
+    | rebuilt when running `php artisan optimize`.
     |
     */
+
+    'cache' => [
+        'enabled' => env('TRANSLATABLE_CACHE_ENABLED', true),
+        'path' => storage_path('framework/cache/translatable'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | AI Translators
+    |--------------------------------------------------------------------------
+    |
+    | Configure the AI translation providers. You can use DeepL, OpenAI,
+    | or Anthropic for automatic translations.
+    |
+    */
+
+    'translators' => [
+        'default' => env('TRANSLATABLE_TRANSLATOR', 'deepl'),
+
+        'deepl' => [
+            'api_key' => env('DEEPL_API_KEY'),
+            'api_url' => env('DEEPL_API_URL', 'https://api-free.deepl.com'),
+        ],
+
+        'openai' => [
+            'api_key' => env('OPENAI_API_KEY'),
+            'model' => env('OPENAI_MODEL', 'gpt-4'),
+            'system_prompt' => 'You are a professional translator. Translate the text accurately while preserving any placeholders like :name, {variable}, or {{ blade }}. Only return the translated text, nothing else.',
+        ],
+
+        'anthropic' => [
+            'api_key' => env('ANTHROPIC_API_KEY'),
+            'model' => env('ANTHROPIC_MODEL', 'claude-3-sonnet-20240229'),
+            'system_prompt' => 'You are a professional translator. Translate the text accurately while preserving any placeholders like :name, {variable}, or {{ blade }}. Only return the translated text, nothing else.',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Laravel-Lang Presets
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for importing translations from Laravel-Lang packages.
+    | Run `php artisan translatable:import {preset}` to import.
+    |
+    */
+
+    'laravel_lang' => [
+        'presets' => ['laravel', 'nova', 'filament', 'validation'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Import Settings
+    |--------------------------------------------------------------------------
+    |
+    | Settings for importing translations from various sources.
+    |
+    */
+
+    'import' => [
+        'respect_locked' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scanner Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configure paths and patterns for scanning translation keys in your
+    | codebase. Run `php artisan translatable:scan` to find keys.
+    |
+    */
+
+    'scan' => [
+        'paths' => [
+            app_path(),
+            resource_path('views'),
+        ],
+        'patterns' => ['*.php', '*.blade.php', '*.vue'],
+        'methods' => ['trans', '__', 'trans_choice', '@lang'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nova Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Settings for Laravel Nova integration.
+    |
+    */
+
+    'nova' => [
+        'translation_matrix' => env('TRANSLATABLE_NOVA_MATRIX', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Flag Icons
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for language flag icons in Nova.
+    |
+    */
+
     'flag_icon' => [
         'height' => 40,
         'width' => 40,
@@ -39,58 +137,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Translation methods
+    | Force Locale Query String
     |--------------------------------------------------------------------------
     |
-    | Update this array to tell the package which methods it should look for
-    | when finding missing translations.
+    | A query string parameter that forces the locale to be set. Useful for
+    | testing and deep linking to specific locales.
     |
     */
-    'translation_methods' => ['trans', '__'],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Scan paths
-    |--------------------------------------------------------------------------
-    |
-    | Update this array to tell the package which directories to scan when
-    | looking for missing translations.
-    |
-    */
-    'scan_paths' => [
-        app_path(),
-        resource_path(),
-    ],
-
-    'models' => [
-        'language' => \Marshmallow\Translatable\Models\Language::class,
-        'translation' => \Marshmallow\Translatable\Models\Translation::class,
-        'translatable' => \Marshmallow\Translatable\Models\Translatable::class,
-        'missingTranslation' => \Marshmallow\Translatable\Models\MissingTranslation::class,
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Force locale
-    |--------------------------------------------------------------------------
-    |
-    | This is a query string parameter which will force the locale to be set
-    | to the given locale. This is useful for testing purposes and when
-    | you want to deep link to a specific locale.
-    |
-    */
     'force_locale_query_string' => 'force_locale',
-
-    'deepl' => [
-        'api_path' => env('TRANSLATABLE_DEEPL_API_PATH', 'https://api-free.deepl.com'),
-        'api_key' => env('TRANSLATABLE_DEEPL_API_KEY'),
-    ],
-
-    'auto_translator' => [
-        'active' => env('TRANSLATABLE_AUTO_TRANSLATOR_ACTIVE', false),
-    ],
-
-    'missing_translations' => [
-        'active' => env('MISSING_TRANSLATIONS_ACTIVE', false),
-    ],
 ];

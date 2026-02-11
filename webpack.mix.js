@@ -5,6 +5,7 @@ mix.extend("nova", new NovaExtension());
 
 mix.setPublicPath("dist")
     .js("resources/js/field.js", "js")
+    .js("resources/js/tool.js", "js")
     .sass("resources/sass/field.scss", "css")
     .vue({ version: 3 })
     .nova("marshmallow/nova-translatable")
